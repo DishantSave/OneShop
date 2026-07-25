@@ -1,0 +1,20 @@
+<Solution>
+  <Folder Name="/Build/" />
+  <Folder Name="/Database/">
+    <Project Path="Database/Database/Database.sqlproj" Id="b8e333d1-758a-403e-958a-edbe0dd85acf">
+      <Build />
+      <Deploy />
+    </Project>
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Src/">
+    <Project Path="Src/Application/Application.csproj" />
+    <Project Path="Src/Domain/Domain.csproj" />
+    <Project Path="Src/Infrastructure/Infrastructure.csproj" />
+    <Project Path="Src/WebAPI/WebAPI.csproj" />
+  </Folder>
+  <Folder Name="/Tests/" />
+</Solution>

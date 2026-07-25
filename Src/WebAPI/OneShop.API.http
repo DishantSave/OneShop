@@ -1,0 +1,6 @@
+@OneShop.API_HostAddress = http://localhost:5052
+
+GET {{OneShop.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

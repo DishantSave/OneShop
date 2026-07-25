@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>Database</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{b8e333d1-758a-403e-958a-edbe0dd85acf}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql170DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>OneShop.Database</RootNamespace>
+    <AssemblyName>OneShop.Database</AssemblyName>
+    <ModelCollation>1033, CI</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="1.0.0.0" />
+    <Folder Include="1.0.0.0\StoredProcedures" />
+    <Folder Include="1.0.0.0\TableScripts" />
+    <Folder Include="1.0.0.0\Triggers&amp;Functions" />
+    <Folder Include="1.0.0.0\Combined_Script" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="1.0.0.0\TableScripts\01.CreateTable_SchemaVersion.sql" />
+    <None Include="1.0.0.0\TableScripts\02.CreateTable_Users.sql" />
+    <None Include="1.0.0.0\TableScripts\03.CreateTable_AccountCredential.sql" />
+    <None Include="1.0.0.0\TableScripts\04.CreateTable_AccountCredentialAuditTrail.sql" />
+    <None Include="1.0.0.0\TableScripts\05.CreateTable_SubAccountCredential.sql" />
+    <None Include="1.0.0.0\TableScripts\06.CreateTable_SubAccountCredentialAuditTrail.sql" />
+    <None Include="1.0.0.0\TableScripts\07.CreateTable_SubAccountScreenAccess.sql" />
+    <None Include="1.0.0.0\TableScripts\08.CreateTable_SubscriptionTypeScreenAccess.sql" />
+    <None Include="1.0.0.0\TableScripts\09.CreateTable_AccountSubscription.sql" />
+    <None Include="1.0.0.0\TableScripts\10.CreateTable_Settings.sql" />
+    <None Include="1.0.0.0\TableScripts\11.CreateTable_CountryMaster.sql" />
+    <None Include="1.0.0.0\Database_Creation.sql" />
+    <None Include="UpdateDB.ps1" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="1.0.0.0\Combined_Script\Drop_Table.sql" />
+    <None Include="1.0.0.0\Combined_Script\Select_Table.sql" />
+  </ItemGroup>
+</Project>
