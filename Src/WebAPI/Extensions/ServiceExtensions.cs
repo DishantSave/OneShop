@@ -12,6 +12,15 @@ public static class ServiceExtensions
     {
         // Application Level Dependencies starts...
         services.AddHttpContextAccessor();
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAngularClient", policy =>
+            {
+                policy.WithOrigins("http://localhost:4200") // Allow your Angular frontend origin
+                      .AllowAnyHeader()
+                      .AllowAnyMethod();
+            });
+        });
         services.AddScoped<ITenantResolver, TenantResolver>();
         // Application Level Dependencies ends...
 
@@ -29,7 +38,7 @@ public static class ServiceExtensions
         // Data Layer Dependencies starts...
         services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
         services.AddScoped<ISchemaRepository, SchemaRepository>();
-        services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
+        services.AddScoped<ICountryRepository, CountryRepository>();
         // Data Layer Dependencies ends...
 
         /***************************************************************************************************************/

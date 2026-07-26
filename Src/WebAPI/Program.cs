@@ -12,6 +12,7 @@ builder.Services
 var app = builder.Build();
 
 //app.UseCors("AllowLocalhost");
+app.UseCors("AllowAngularClient");
 
 app.UseMiddleware<TenantMiddleware>();
 

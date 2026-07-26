@@ -1,0 +1,218 @@
+<div class="min-h-screen surface-ground flex flex-column justify-content-between p-3 overflow-hidden">
+
+  <!-- PrimeNG Toast for Notifications -->
+  <p-toast position="top-right"></p-toast>
+
+  <!-- Main Content Wrapper -->
+  <div class="flex-grow-1 flex align-items-center justify-content-center">
+    <div class="w-full lg:w-10 xl:w-8">
+      <div class="grid align-items-center">
+
+        <!-- Branding Column -->
+        <div class="col-12 lg:col-6 flex align-items-center">
+          <div class="p-4">
+            <div class="flex align-items-center gap-3 mb-4">
+              <img [src]="schemaInfo?.productLogo || 'images/logo.png'" alt="OneShop Logo" class="w-15rem object-contain" />
+            </div>
+
+            <h1 class="text-5xl font-bold line-height-1 mb-3">
+              Expand your<br />enterprise reach.
+            </h1>
+
+            <p class="text-lg text-color-secondary mb-4">
+              Register as an official OneShop vendor to showcase inventory and manage orders globally.
+            </p>
+
+            <div class="flex flex-column gap-2">
+              <div class="flex align-items-center gap-2">
+                <i class="pi pi-check-circle text-primary text-lg"></i>
+                <span class="text-sm">Dedicated Vendor Storefront Controls</span>
+              </div>
+              <div class="flex align-items-center gap-2">
+                <i class="pi pi-check-circle text-primary text-lg"></i>
+                <span class="text-sm">Advanced B2B & B2C Channel Sales</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vendor Card Column -->
+        <div class="col-12 lg:col-6 flex align-items-center justify-content-center">
+          <p-card styleClass="w-full shadow-4 border-round-3xl">
+            <div class="p-2">
+
+              <div class="text-center mb-4">
+                <h2 class="text-2xl font-bold mb-1">Register as Seller</h2>
+                <p class="text-color-secondary text-sm">Step {{ currentStep }} of 3</p>
+              </div>
+
+              <!-- STEP 1: Basic Identity & Contacts -->
+              <div *ngIf="currentStep === 1" class="flex flex-column gap-3">
+
+                <!-- Username -->
+                <div class="flex flex-column gap-1">
+                  <label for="vUsername" class="text-sm font-semibold text-color">Username *</label>
+                  <input pInputText class="w-full" id="vUsername" [(ngModel)]="userName" (input)="onUsernameInput()" placeholder="Enter username" />
+                  <small *ngIf="isUsernameAvailable === true" class="text-green-500 font-semibold"><i class="pi pi-check"></i> Available</small>
+                  <small *ngIf="isUsernameAvailable === false" class="text-red-500 font-semibold"><i class="pi pi-times"></i> Taken</small>
+                </div>
+
+                <!-- Country Selection -->
+                <div class="flex flex-column gap-1">
+                  <label for="vCountry" class="text-sm font-semibold text-color">Country *</label>
+                  <p-select [options]="countries" [(ngModel)]="country" optionLabel="country" styleClass="w-full" inputId="vCountry" placeholder="Select Country" (onChange)="onCountryChange()">
+                    <ng-template let-c pTemplate="item">
+                      <div class="flex align-items-center gap-2">
+                        <span>{{ c.country }} ({{ c.countryCode }})</span>
+                      </div>
+                    </ng-template>
+                    <ng-template let-c pTemplate="selectedItem">
+                      <div *ngIf="c" class="flex align-items-center gap-2">
+                        <span>{{ c.country }} ({{ c.countryCode }})</span>
+                      </div>
+                    </ng-template>
+                  </p-select>
+                </div>
+
+                <!-- Email Address with Vertically Centered Verify Button -->
+                <div class="flex flex-column gap-1">
+                  <label for="vEmail" class="text-sm font-semibold text-color">Business Email *</label>
+                  <div class="flex align-items-center gap-2">
+                    <input pInputText class="w-full" id="vEmail" [(ngModel)]="email" placeholder="vendor@business.com" [disabled]="isEmailVerified" />
+                    <p-button *ngIf="!isEmailVerified" label="Verify" icon="pi pi-shield" styleClass="p-button-outlined p-button-sm whitespace-nowrap" (onClick)="openEmailOtpModal()"></p-button>
+                    <p-button *ngIf="isEmailVerified" icon="pi pi-check" styleClass="p-button-success p-button-sm" [disabled]="true"></p-button>
+                  </div>
+                </div>
+
+                <!-- Contact Number with ISD Prefix & Vertically Centered Verify Button -->
+                <div class="flex flex-column gap-1">
+                  <label for="vContact" class="text-sm font-semibold text-color">Contact Number *</label>
+                  <div class="flex align-items-center gap-2">
+                    <p-select [options]="countries" [(ngModel)]="selectedIsdCode" optionLabel="isdCode" styleClass="w-7rem flex-shrink-0" (onChange)="onIsdChange()" placeholder="ISD">
+                      <ng-template let-c pTemplate="item">
+                        <span>{{ c.isdCode }} ({{ c.countryCode }})</span>
+                      </ng-template>
+                      <ng-template let-c pTemplate="selectedItem">
+                        <span *ngIf="c">{{ c.isdCode }}</span>
+                      </ng-template>
+                    </p-select>
+
+                    <input pInputText class="flex-grow-1" id="vContact" [(ngModel)]="contact" placeholder="XXXXX XXXXX" [disabled]="isContactVerified" />
+
+                    <p-button *ngIf="!isContactVerified" label="Verify" icon="pi pi-shield" styleClass="p-button-outlined p-button-sm whitespace-nowrap" (onClick)="openContactOtpModal()"></p-button>
+                    <p-button *ngIf="isContactVerified" icon="pi pi-check" styleClass="p-button-success p-button-sm" [disabled]="true"></p-button>
+                  </div>
+                </div>
+
+                <p-button label="Next Step" icon="pi pi-arrow-right" iconPos="right" styleClass="w-full mt-2" (onClick)="nextStep()"></p-button>
+              </div>
+
+              <!-- STEP 2: Company & Target Audience Channels -->
+              <div *ngIf="currentStep === 2" class="flex flex-column gap-3">
+
+                <div class="flex flex-column gap-1">
+                  <label for="company" class="text-sm font-semibold text-color">Company / Store Name *</label>
+                  <input pInputText class="w-full" id="company" [(ngModel)]="company" placeholder="Enter store name" />
+                </div>
+
+                <div class="flex flex-column gap-2 mt-2">
+                  <label class="text-sm font-semibold text-color">Target Audience Channels (Select at least one)</label>
+                  <div class="flex gap-4">
+                    <div class="flex align-items-center gap-2">
+                      <p-checkbox [(ngModel)]="isCustomerB2C" [binary]="true" (onChange)="onVendorTypeChange()" inputId="vB2c"></p-checkbox>
+                      <label for="vB2c" class="text-sm cursor-pointer">B2C</label>
+                    </div>
+                    <div class="flex align-items-center gap-2">
+                      <p-checkbox [(ngModel)]="isCustomerB2B" [binary]="true" (onChange)="onVendorTypeChange()" inputId="vB2b"></p-checkbox>
+                      <label for="vB2b" class="text-sm cursor-pointer">B2B</label>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Fixed Button Layout -->
+                <div class="flex gap-2 mt-4 w-full">
+                  <p-button label="Back" icon="pi pi-arrow-left" styleClass="p-button-outlined w-full" class="flex-1" (onClick)="prevStep()"></p-button>
+                  <p-button label="Next Step" icon="pi pi-arrow-right" iconPos="right" styleClass="w-full" class="flex-1" (onClick)="nextStep()"></p-button>
+                </div>
+              </div>
+
+              <!-- STEP 3: Security & Passwords -->
+              <div *ngIf="currentStep === 3" class="flex flex-column gap-3">
+
+                <div class="flex flex-column gap-1">
+                  <label for="vPassword" class="text-sm font-semibold text-color">Password *</label>
+                  <p-password id="vPassword" [(ngModel)]="password" styleClass="w-full" inputStyleClass="w-full" [toggleMask]="true"></p-password>
+                </div>
+
+                <div class="flex flex-column gap-1">
+                  <label for="vConfirmPassword" class="text-sm font-semibold text-color">Confirm Password *</label>
+                  <p-password id="vConfirmPassword" [(ngModel)]="confirmPassword" styleClass="w-full" inputStyleClass="w-full" [toggleMask]="true" [feedback]="false"></p-password>
+                </div>
+
+                <div class="flex align-items-center gap-2 mt-1">
+                  <p-checkbox [(ngModel)]="isTestAccount" [binary]="true" inputId="vTestAccount"></p-checkbox>
+                  <label for="vTestAccount" class="text-sm cursor-pointer">Mark as Test Account</label>
+                </div>
+
+                <!-- Fixed Button Layout -->
+                <div class="flex gap-2 mt-2 w-full">
+                  <p-button label="Back" icon="pi pi-arrow-left" styleClass="p-button-outlined w-full" class="flex-1" (onClick)="prevStep()"></p-button>
+                  <p-button label="Register Seller" icon="pi pi-check" styleClass="w-full" class="flex-1" (onClick)="onSubmit()"></p-button>
+                </div>
+              </div>
+
+              <div class="text-center mt-3">
+                <div class="text-color-secondary text-sm mb-1">Already selling with us?</div>
+                <div class="flex justify-content-center align-items-center gap-2">
+                  <a routerLink="/login" class="text-primary font-semibold text-sm cursor-pointer">Sign In</a>
+                  <span class="text-color-secondary">|</span>
+                  <a routerLink="/register" class="text-primary font-semibold text-sm cursor-pointer">Customer Register</a>
+                </div>
+              </div>
+
+            </div>
+          </p-card>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Very Thin Black Footer -->
+  <footer class="w-full bg-gray-900 text-gray-300 px-4 py-2 text-xs flex justify-content-between align-items-center border-top-1 surface-border">
+    <div class="font-semibold text-white">
+      {{ schemaInfo?.company || 'AMTERP Solutions' }}
+    </div>
+    <div class="text-center text-color-secondary">
+      {{ schemaInfo?.copyright || '© 2026 AMTERP Solutions. All rights reserved.' }}
+    </div>
+    <div class="font-mono text-primary">
+      {{ schemaInfo?.version || 'v1.0.0' }}
+    </div>
+  </footer>
+
+</div>
+
+<!-- Modal Dialog for Email OTP -->
+<p-dialog [(visible)]="showEmailOtpModal" [modal]="true" [dismissableMask]="false" [style]="{width: '24rem'}" header="Verify Business Email">
+  <div class="flex flex-column gap-3 py-2">
+    <p class="text-sm text-color-secondary m-0">An OTP has been sent to <b>{{ email }}</b>. Please enter it below to unlock your registration.</p>
+    <input pInputText class="w-full" placeholder="Enter 6-digit OTP" [(ngModel)]="emailOtp" />
+    <div class="flex justify-content-end gap-2 mt-2">
+      <p-button label="Cancel" styleClass="p-button-text p-button-sm" (onClick)="showEmailOtpModal = false"></p-button>
+      <p-button label="Verify OTP" styleClass="p-button-sm" (onClick)="verifyEmailOtp()"></p-button>
+    </div>
+  </div>
+</p-dialog>
+
+<!-- Modal Dialog for Contact OTP -->
+<p-dialog [(visible)]="showContactOtpModal" [modal]="true" [dismissableMask]="false" [style]="{width: '24rem'}" header="Verify Contact Number">
+  <div class="flex flex-column gap-3 py-2">
+    <p class="text-sm text-color-secondary m-0">An OTP has been sent to <b>{{ contact }}</b>. Please enter it below to unlock your registration.</p>
+    <input pInputText class="w-full" placeholder="Enter 6-digit OTP" [(ngModel)]="contactOtp" />
+    <div class="flex justify-content-end gap-2 mt-2">
+      <p-button label="Cancel" styleClass="p-button-text p-button-sm" (onClick)="showContactOtpModal = false"></p-button>
+      <p-button label="Verify OTP" styleClass="p-button-sm" (onClick)="verifyContactOtp()"></p-button>
+    </div>
+  </div>
+</p-dialog>

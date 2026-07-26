@@ -1,0 +1,235 @@
+<div class="min-h-screen surface-ground flex align-items-center justify-content-center p-3">
+
+  <div class="w-full lg:w-10 xl:w-8">
+
+    <div class="grid">
+
+      <!-- Branding -->
+      <div class="col-12 lg:col-6 flex align-items-center">
+
+        <div class="p-5">
+
+          <div class="flex align-items-center gap-3 mb-5">
+
+            <img src="images/logo.png"
+                 alt="OneShop Logo"
+                 class="w-20rem object-contain" />
+
+
+            <!--<span class="text-4xl font-bold">
+              OneShop
+            </span>-->
+
+          </div>
+
+
+          <h1 class="text-6xl font-bold line-height-1 mb-4">
+
+            Your commerce.
+            <br />
+
+            Simplified.
+
+          </h1>
+
+
+          <p class="text-xl text-color-secondary">
+
+            Manage products, orders, customers and
+            analytics from one powerful platform.
+
+          </p>
+
+
+          <div class="flex flex-column gap-3 mt-5">
+
+            <div class="flex align-items-center gap-3">
+
+              <i class="pi pi-check-circle text-primary text-xl"></i>
+
+              <span>
+                Multi-channel order management
+              </span>
+
+            </div>
+
+
+            <div class="flex align-items-center gap-3">
+
+              <i class="pi pi-check-circle text-primary text-xl"></i>
+
+              <span>
+                Real-time business insights
+              </span>
+
+            </div>
+
+
+            <div class="flex align-items-center gap-3">
+
+              <i class="pi pi-check-circle text-primary text-xl"></i>
+
+              <span>
+                Secure enterprise authentication
+              </span>
+
+            </div>
+
+          </div>
+
+
+        </div>
+
+      </div>
+
+
+
+      <!-- Login Card -->
+      <div class="col-12 lg:col-6 flex align-items-center justify-content-center">
+
+
+        <p-card styleClass="w-full shadow-4 border-round-3xl">
+
+
+          <div class="p-3">
+
+
+            <div class="text-center mb-5">
+
+              <img src="images/logo.png"
+                   alt="OneShop"
+                   class="w-10rem mb-3" />
+
+              <h2 class="text-3xl font-bold mb-2">
+                Welcome Back
+              </h2>
+
+
+              <p class="text-color-secondary">
+                Sign in to manage your store
+              </p>
+
+            </div>
+
+
+
+            <div class="flex flex-column gap-4">
+
+
+              <span class="p-float-label">
+
+                <input pInputText
+                       class="w-full"
+                       id="username"
+                       [(ngModel)]="username" />
+
+                <label for="username">
+                  Email or Username
+                </label>
+
+              </span>
+
+
+
+              <span class="p-float-label">
+
+                <p-password id="password"
+                            [(ngModel)]="password"
+                            styleClass="w-full"
+                            inputStyleClass="w-full"
+                            [toggleMask]="true"
+                            [feedback]="false">
+                </p-password>
+
+
+                <label for="password">
+                  Password
+                </label>
+
+
+              </span>
+
+
+
+              <div class="flex justify-content-between align-items-center">
+
+
+                <div class="flex align-items-center gap-2">
+
+                  <p-checkbox [(ngModel)]="rememberMe"
+                              [binary]="true">
+                  </p-checkbox>
+
+
+                  <span>
+                    Remember me
+                  </span>
+
+                </div>
+
+
+
+                <a class="text-primary cursor-pointer">
+                  Forgot password?
+                </a>
+
+
+              </div>
+
+
+
+              <p-button label="Sign In"
+                        icon="pi pi-arrow-right"
+                        iconPos="right"
+                        styleClass="w-full">
+              </p-button>
+
+
+            </div>
+
+
+
+            <div class="text-center mt-5">
+
+              <div class="text-color-secondary mb-2">
+                New to OneShop?
+              </div>
+
+
+              <div class="flex justify-content-center align-items-center">
+
+                <a routerLink="/register" class="text-primary font-semibold cursor-pointer text-center w-6rem">
+                  Register
+                </a>
+
+
+                <span class="text-color-secondary">
+                  |
+                </span>
+
+
+                <a routerLink="/register/vendor" class="text-primary font-semibold cursor-pointer text-center w-10rem" href="../vendor-register/vendor-register.html">
+                  Register as Seller
+                </a>
+
+              </div>
+
+            </div>
+
+
+          </div>
+
+
+        </p-card>
+
+
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+</div>
