@@ -6,7 +6,7 @@ public enum Screen
     CompanyMaster,
     DivisionMaster,
     CustomerMaster,
-    ItemMaster,
+    Items,
     Inventory,
     Orders,
     Invoicing,

@@ -1,0 +1,100 @@
+<div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '2.5rem', paddingBottom: '2rem' }">
+
+  <h2 [ngStyle]="{ fontWeight: '700', color: 'var(--heading-primary)', margin: '0' }">Settings</h2>
+
+  <!-- General Section -->
+  <div [ngStyle]="{ display: 'flex', gap: '2rem', alignItems: 'flex-start', flexWrap: 'wrap' }">
+    <div [ngStyle]="{ flex: '1 1 250px', maxWidth: '320px' }">
+      <h5 [ngStyle]="{ color: 'var(--description-heading-color)', fontWeight: '600', marginBottom: '0.5rem' }">General</h5>
+      <p [ngStyle]="{ color: 'var(--description-color)', fontSize: '0.95rem', lineHeight: '1.4', margin: '0' }">
+        Set your company info and email address used for notifications.
+      </p>
+    </div>
+
+    <div [ngStyle]="{ flex: '2 1 400px' }">
+      <p-card [style]="{ background: 'var(--card-bg)', border: '2px solid var(--card-border-primary)', borderRadius: '14px' }">
+        <ng-template pTemplate="header">
+          <div [ngStyle]="{ background: 'var(--card-header-bg)', color: 'var(--card-header-text-color)', fontWeight: '900', fontSize: '1.2rem', padding: '1rem 1.5rem', borderRadius: '12px 12px 0 0' }">
+            General
+          </div>
+        </ng-template>
+
+        <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }">
+          <div>
+            <label [ngStyle]="{ display: 'block', color: 'var(--label-color)', fontWeight: '600', marginBottom: '0.5rem' }">Company Name</label>
+            <input type="text" pInputText [(ngModel)]="companyName" placeholder="Enter your company name" [style]="{ width: '100%' }" />
+          </div>
+          <div>
+            <label [ngStyle]="{ display: 'block', color: 'var(--label-color)', fontWeight: '600', marginBottom: '0.5rem' }">Email</label>
+            <input type="email" pInputText [(ngModel)]="email" placeholder="Enter email address" [style]="{ width: '100%' }" />
+          </div>
+        </div>
+      </p-card>
+    </div>
+  </div>
+
+  <!-- Preferences Section -->
+  <div [ngStyle]="{ display: 'flex', gap: '2rem', alignItems: 'flex-start', flexWrap: 'wrap', borderTop: '1.5px solid var(--card-border-primary)', paddingTop: '2rem' }">
+    <div [ngStyle]="{ flex: '1 1 250px', maxWidth: '320px' }">
+      <h5 [ngStyle]="{ color: 'var(--description-heading-color)', fontWeight: '600', marginBottom: '0.5rem' }">Preferences</h5>
+      <p [ngStyle]="{ color: 'var(--description-color)', fontSize: '0.95rem', lineHeight: '1.4', margin: '0' }">
+        Manage notification settings and choose your preferred theme.
+      </p>
+    </div>
+
+    <div [ngStyle]="{ flex: '2 1 400px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }">
+
+      <!-- Notifications card -->
+      <p-card [style]="{ background: 'var(--card-bg)', border: '2px solid var(--card-border-primary)', borderRadius: '14px' }">
+        <ng-template pTemplate="header">
+          <div [ngStyle]="{ background: 'var(--card-header-bg)', color: 'var(--card-header-text-color)', fontWeight: '900', fontSize: '1.2rem', padding: '1rem 1.5rem', borderRadius: '12px 12px 0 0' }">
+            Notifications
+          </div>
+        </ng-template>
+
+        <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }">
+          <div *ngFor="let opt of notificationOptions" [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.6rem' }">
+            <p-toggleswitch [(ngModel)]="opt.enabled"></p-toggleswitch>
+            <label [ngStyle]="{ color: 'var(--label-color)', fontWeight: '500' }">{{ opt.label }}</label>
+          </div>
+        </div>
+      </p-card>
+
+      <!-- Theme card -->
+      <p-card [style]="{ background: 'var(--card-bg)', border: '2px solid var(--card-border-primary)', borderRadius: '14px' }">
+        <ng-template pTemplate="header">
+          <div [ngStyle]="{ background: 'var(--card-header-bg)', color: 'var(--card-header-text-color)', fontWeight: '900', fontSize: '1.2rem', padding: '1rem 1.5rem', borderRadius: '12px 12px 0 0' }">
+            Appearance
+          </div>
+        </ng-template>
+
+        <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1rem' }">
+          <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem' }">
+            <div *ngFor="let theme of themes" [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.6rem' }">
+              <p-toggleswitch [ngModel]="selectedTheme === theme.key"
+                              (onChange)="changeTheme(theme.key)"></p-toggleswitch>
+              <label [ngStyle]="{ color: 'var(--label-color)', fontWeight: '500' }">{{ theme.label }}</label>
+            </div>
+          </div>
+
+          <div>
+            <label [ngStyle]="{ display: 'block', color: 'var(--label-color)', fontWeight: '600', marginBottom: '0.5rem' }">Theme</label>
+            <p-select [options]="themes"
+                      [(ngModel)]="selectedTheme"
+                      (onChange)="changeTheme($event.value)"
+                      optionLabel="label"
+                      optionValue="key"
+                      [style]="{ width: '100%' }"></p-select>
+          </div>
+        </div>
+      </p-card>
+
+    </div>
+  </div>
+
+  <!-- Save button -->
+  <div [ngStyle]="{ display: 'flex', justifyContent: 'flex-end' }">
+    <p-button label="Save Changes" (onClick)="saveChanges()"></p-button>
+  </div>
+
+</div>

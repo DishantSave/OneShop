@@ -1,0 +1,17 @@
+<div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 1rem', flexShrink: '0', height: '55px', background: 'var(--navbar-bg)', borderBottom: '1px solid var(--border-color)' }">
+  <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '1rem' }">
+    <button (click)="toggleSidebar.emit()" [ngStyle]="{ background: 'transparent', border: 'none', padding: '0.25rem', cursor: 'pointer' }">
+      <i class="pi pi-bars" [ngStyle]="{ fontSize: '1.25rem', color: 'var(--navbar-text)' }"></i>
+    </button>
+
+    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '1rem' }">
+      <a *ngFor="let item of tabItems" [routerLink]="item.route" routerLinkActive="active-tab"
+         [routerLinkActiveOptions]="{ exact: true }"
+         [ngStyle]="{ textDecoration: 'none', fontWeight: '500', padding: '0.4rem 0.5rem', color: 'var(--navbar-text)' }">{{ item.label }}</a>
+    </div>
+  </div>
+
+  <div [ngStyle]="{ display: 'flex', alignItems: 'center', height: '35px', overflow: 'hidden' }">
+    <img [src]="logoUrl || 'images/logo.png'" alt="Logo" [ngStyle]="{ height: '100%', objectFit: 'contain' }" />
+  </div>
+</div>

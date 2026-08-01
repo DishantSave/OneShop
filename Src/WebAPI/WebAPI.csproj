@@ -17,7 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="OneShop.App\src\app\core\layouts\dashboard-layout\" />
+    <Folder Include="OneShop.App\src\app\core\layouts\components\" />
     <Folder Include="OneShop.App\src\app\core\layouts\public-layout\" />
+    <Folder Include="OneShop.App\src\app\core\services\" />
     <Folder Include="OneShop.App\src\app\features\authentication\login\" />
     <Folder Include="OneShop.App\src\app\features\authentication\vendor-register\" />
     <Folder Include="OneShop.App\src\app\features\authentication\register\" />

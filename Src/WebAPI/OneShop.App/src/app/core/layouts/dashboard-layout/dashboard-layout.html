@@ -1,0 +1,21 @@
+<div [ngStyle]="{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: 'var(--bg-color)' }">
+  <app-navbar [tabItems]="tabItems"
+              [logoUrl]="userDetails?.productLogo"
+              (toggleSidebar)="toggleSidebar()"></app-navbar>
+
+  <div [ngStyle]="{ display: 'flex', flex: '1 1 auto', overflow: 'hidden' }">
+    <app-sidebar [collapsed]="!sidebarOpen"
+                 [menuItems]="sidebarItems"
+                 [userAvatar]="userDetails?.profilePicture"
+                 [userName]="userDetails?.userName"
+                 [company]="userDetails?.company"
+                 [tier]="userDetails?.subscriptionType || 'Basic'"
+                 (logout)="logout()"></app-sidebar>
+
+    <div [ngStyle]="{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', overflowY: 'auto', padding: '1.5rem', background: 'var(--bg-color)', color: 'var(--text-color)' }">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+
+  <app-footer></app-footer>
+</div>

@@ -1,235 +1,145 @@
-<div class="min-h-screen surface-ground flex align-items-center justify-content-center p-3">
+<div class="h-screen surface-ground flex flex-column justify-content-between p-3 overflow-hidden">
 
-  <div class="w-full lg:w-10 xl:w-8">
+  <!-- PrimeNG Toast for Notifications -->
+  <p-toast position="top-right"></p-toast>
 
-    <div class="grid">
+  <!-- Main Content Wrapper -->
+  <div class="flex-grow-1 flex align-items-center justify-content-center overflow-y-auto">
+    <div class="w-full lg:w-10 xl:w-8">
+      <div class="grid align-items-center">
 
-      <!-- Branding -->
-      <div class="col-12 lg:col-6 flex align-items-center">
+        <!-- Branding -->
+        <div class="col-12 lg:col-6 flex align-items-center">
+          <div class="p-4">
+            <div class="flex align-items-center gap-3 mb-4">
+              <img [src]="schemaInfo?.productLogo || 'images/logo.png'"
+                   alt="OneShop Logo"
+                   class="w-15rem object-contain" />
+            </div>
 
-        <div class="p-5">
+            <h1 class="text-5xl font-bold line-height-1 mb-3">
+              Your commerce.<br />
+              Simplified.
+            </h1>
 
-          <div class="flex align-items-center gap-3 mb-5">
+            <p class="text-lg text-color-secondary mb-4">
+              Manage products, orders, customers and analytics from one powerful platform.
+            </p>
 
-            <img src="images/logo.png"
-                 alt="OneShop Logo"
-                 class="w-20rem object-contain" />
-
-
-            <!--<span class="text-4xl font-bold">
-              OneShop
-            </span>-->
-
+            <div class="flex flex-column gap-2">
+              <div class="flex align-items-center gap-2">
+                <i class="pi pi-check-circle text-primary text-lg"></i>
+                <span class="text-sm">Multi-channel order management</span>
+              </div>
+              <div class="flex align-items-center gap-2">
+                <i class="pi pi-check-circle text-primary text-lg"></i>
+                <span class="text-sm">Real-time business insights</span>
+              </div>
+              <div class="flex align-items-center gap-2">
+                <i class="pi pi-check-circle text-primary text-lg"></i>
+                <span class="text-sm">Secure enterprise authentication</span>
+              </div>
+            </div>
           </div>
+        </div>
 
+        <!-- Login Card -->
+        <div class="col-12 lg:col-6 flex align-items-center justify-content-center">
+          <p-card styleClass="w-full shadow-4 border-round-3xl">
+            <div class="p-2">
 
-          <h1 class="text-6xl font-bold line-height-1 mb-4">
+              <div class="text-center mb-4">
+                <h2 class="text-2xl font-bold mb-1">
+                  Welcome Back
+                </h2>
+                <p class="text-color-secondary text-sm">
+                  Sign in to manage your store
+                </p>
+              </div>
 
-            Your commerce.
-            <br />
+              <div class="flex flex-column gap-3">
 
-            Simplified.
+                <!-- Username Field -->
+                <div class="flex flex-column gap-1">
+                  <label for="username" class="text-sm font-semibold text-color">Email or Username *</label>
+                  <input pInputText
+                         class="w-full"
+                         id="username"
+                         [(ngModel)]="username"
+                         placeholder="Enter username or email" />
+                </div>
 
-          </h1>
+                <!-- Password Field -->
+                <div class="flex flex-column gap-1">
+                  <label for="password" class="text-sm font-semibold text-color">Password *</label>
+                  <p-password id="password"
+                              [(ngModel)]="password"
+                              styleClass="w-full"
+                              inputStyleClass="w-full"
+                              [toggleMask]="true"
+                              [feedback]="false"
+                              placeholder="Enter password">
+                  </p-password>
+                </div>
 
+                <div class="flex justify-content-between align-items-center mt-1">
+                  <div class="flex align-items-center gap-2">
+                    <p-checkbox [(ngModel)]="rememberMe"
+                                [binary]="true"
+                                inputId="rememberMeCheck">
+                    </p-checkbox>
+                    <label for="rememberMeCheck" class="text-sm cursor-pointer">Remember me</label>
+                  </div>
 
-          <p class="text-xl text-color-secondary">
+                  <a class="text-primary cursor-pointer text-sm font-medium">
+                    Forgot password?
+                  </a>
+                </div>
 
-            Manage products, orders, customers and
-            analytics from one powerful platform.
+                <p-button label="Sign In"
+                          icon="pi pi-arrow-right"
+                          iconPos="right"
+                          styleClass="w-full mt-2"
+                          (onClick)="onLogin()">
+                </p-button>
 
-          </p>
+              </div>
 
+              <div class="text-center mt-4">
+                <div class="text-color-secondary text-sm mb-1">
+                  New to OneShop?
+                </div>
 
-          <div class="flex flex-column gap-3 mt-5">
-
-            <div class="flex align-items-center gap-3">
-
-              <i class="pi pi-check-circle text-primary text-xl"></i>
-
-              <span>
-                Multi-channel order management
-              </span>
+                <div class="flex justify-content-center align-items-center gap-2">
+                  <a routerLink="/register" class="text-primary font-semibold text-sm cursor-pointer">
+                    Register
+                  </a>
+                  <span class="text-color-secondary">|</span>
+                  <a routerLink="/register/vendor" class="text-primary font-semibold text-sm cursor-pointer">
+                    Register as Seller
+                  </a>
+                </div>
+              </div>
 
             </div>
-
-
-            <div class="flex align-items-center gap-3">
-
-              <i class="pi pi-check-circle text-primary text-xl"></i>
-
-              <span>
-                Real-time business insights
-              </span>
-
-            </div>
-
-
-            <div class="flex align-items-center gap-3">
-
-              <i class="pi pi-check-circle text-primary text-xl"></i>
-
-              <span>
-                Secure enterprise authentication
-              </span>
-
-            </div>
-
-          </div>
-
-
+          </p-card>
         </div>
 
       </div>
-
-
-
-      <!-- Login Card -->
-      <div class="col-12 lg:col-6 flex align-items-center justify-content-center">
-
-
-        <p-card styleClass="w-full shadow-4 border-round-3xl">
-
-
-          <div class="p-3">
-
-
-            <div class="text-center mb-5">
-
-              <img src="images/logo.png"
-                   alt="OneShop"
-                   class="w-10rem mb-3" />
-
-              <h2 class="text-3xl font-bold mb-2">
-                Welcome Back
-              </h2>
-
-
-              <p class="text-color-secondary">
-                Sign in to manage your store
-              </p>
-
-            </div>
-
-
-
-            <div class="flex flex-column gap-4">
-
-
-              <span class="p-float-label">
-
-                <input pInputText
-                       class="w-full"
-                       id="username"
-                       [(ngModel)]="username" />
-
-                <label for="username">
-                  Email or Username
-                </label>
-
-              </span>
-
-
-
-              <span class="p-float-label">
-
-                <p-password id="password"
-                            [(ngModel)]="password"
-                            styleClass="w-full"
-                            inputStyleClass="w-full"
-                            [toggleMask]="true"
-                            [feedback]="false">
-                </p-password>
-
-
-                <label for="password">
-                  Password
-                </label>
-
-
-              </span>
-
-
-
-              <div class="flex justify-content-between align-items-center">
-
-
-                <div class="flex align-items-center gap-2">
-
-                  <p-checkbox [(ngModel)]="rememberMe"
-                              [binary]="true">
-                  </p-checkbox>
-
-
-                  <span>
-                    Remember me
-                  </span>
-
-                </div>
-
-
-
-                <a class="text-primary cursor-pointer">
-                  Forgot password?
-                </a>
-
-
-              </div>
-
-
-
-              <p-button label="Sign In"
-                        icon="pi pi-arrow-right"
-                        iconPos="right"
-                        styleClass="w-full">
-              </p-button>
-
-
-            </div>
-
-
-
-            <div class="text-center mt-5">
-
-              <div class="text-color-secondary mb-2">
-                New to OneShop?
-              </div>
-
-
-              <div class="flex justify-content-center align-items-center">
-
-                <a routerLink="/register" class="text-primary font-semibold cursor-pointer text-center w-6rem">
-                  Register
-                </a>
-
-
-                <span class="text-color-secondary">
-                  |
-                </span>
-
-
-                <a routerLink="/register/vendor" class="text-primary font-semibold cursor-pointer text-center w-10rem" href="../vendor-register/vendor-register.html">
-                  Register as Seller
-                </a>
-
-              </div>
-
-            </div>
-
-
-          </div>
-
-
-        </p-card>
-
-
-      </div>
-
-
     </div>
-
-
   </div>
 
+  <!-- Consistent Footer -->
+  <footer class="w-full bg-gray-900 text-gray-300 px-4 py-2 text-xs flex justify-content-between align-items-center border-top-1 surface-border flex-shrink-0">
+    <div class="font-semibold text-white">
+      {{ schemaInfo?.company || 'AMTERP Solutions' }}
+    </div>
+    <div class="text-center text-color-secondary">
+      {{ schemaInfo?.copyright || '© 2026 AMTERP Solutions. All rights reserved.' }}
+    </div>
+    <div class="font-mono text-primary">
+      {{ schemaInfo?.version || 'v1.0.0' }}
+    </div>
+  </footer>
 
 </div>

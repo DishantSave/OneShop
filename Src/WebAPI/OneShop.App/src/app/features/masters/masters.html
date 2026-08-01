@@ -1,0 +1,23 @@
+<div [ngStyle]="{ display: 'flex', height: '100%' }">
+  <aside [ngStyle]="{ width: '200px', flexShrink: '0', padding: '1.25rem 0.75rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', overflowY: 'auto' }">
+    <a *ngFor="let m of menuItems"
+       [routerLink]="m.route"
+       routerLinkActive="pill-active"
+       [routerLinkActiveOptions]="{ exact: true }"
+       class="pill"
+       [ngStyle]="{
+         display: 'flex', alignItems: 'center', gap: '0.75rem',
+         padding: '0.75rem 1.1rem', borderRadius: '8px', cursor: 'pointer',
+         fontSize: '0.95rem', fontWeight: '500', textDecoration: 'none',
+         background: 'var(--card-bg)', border: '1px solid var(--card-border-primary)',
+         color: 'var(--text-color)', transition: 'all 0.25s ease'
+       }">
+      <i [class]="m.icon" [ngStyle]="{ fontSize: '1.1rem', opacity: '0.8' }"></i>
+      <span>{{ m.label }}</span>
+    </a>
+  </aside>
+
+  <section [ngStyle]="{ flex: '1 1 auto', padding: '1.5rem', overflowY: 'auto' }">
+    <router-outlet></router-outlet>
+  </section>
+</div>

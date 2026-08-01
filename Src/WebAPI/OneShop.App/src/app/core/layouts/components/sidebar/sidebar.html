@@ -1,0 +1,47 @@
+<div [ngStyle]="{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', flexShrink: '0', height: '100%', padding: '0.5rem', width: collapsed ? '70px' : '240px', background: 'var(--sidebar-bg)', borderRight: '1px solid var(--border-color)', transition: 'width 0.3s ease' }">
+  <div>
+    <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'flex-start', gap: '0.5rem', padding: collapsed ? '0.75rem 0' : '0.75rem 0.5rem', marginBottom: '0.75rem', borderBottom: '1px solid var(--border-color)' }">
+      <i class="pi pi-th-large" [ngStyle]="{ fontSize: '1.1rem', color: 'var(--sidebar-link-color)', flexShrink: '0' }"></i>
+      <span *ngIf="!collapsed" [ngStyle]="{ fontWeight: '700', whiteSpace: 'nowrap', color: 'var(--sidebar-link-color)' }">OneShop Portal</span>
+    </div>
+
+    <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }">
+      <a *ngFor="let item of menuItems" [routerLink]="item.route" routerLinkActive="active-link"
+         [routerLinkActiveOptions]="{ exact: true }"
+         [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'flex-start', gap: '0.75rem', padding: '0.5rem 0.75rem', textDecoration: 'none', borderRadius: '6px', color: 'var(--sidebar-link-color)' }">
+        <i [class]="item.icon" [ngStyle]="{ fontSize: '1.1rem', flexShrink: '0' }"></i>
+        <span *ngIf="!collapsed" [ngStyle]="{ fontWeight: '500', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }">{{ item.label }}</span>
+      </a>
+    </div>
+  </div>
+
+  <div>
+    <!-- Account card: only shown when expanded -->
+    <div *ngIf="!collapsed" [ngStyle]="{ padding: '0.5rem', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid var(--border-color)', marginBottom: '0.5rem' }">
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem', overflow: 'hidden' }">
+        <p-avatar [image]="userAvatar || 'images/logo.png'" shape="circle" size="normal"></p-avatar>
+        <div [ngStyle]="{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }">
+          <span [ngStyle]="{ fontWeight: '700', fontSize: '0.85rem', color: 'var(--sidebar-link-color)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }">{{ userName || 'User' }}</span>
+          <span [ngStyle]="{ fontSize: '0.75rem', color: 'var(--sidebar-link-color)', opacity: '0.7', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }">{{ company || 'AMTERP Solutions' }}</span>
+        </div>
+      </div>
+
+      <button (click)="logout.emit()" title="Logout"
+              [ngStyle]="{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '0.25rem', flexShrink: '0' }">
+        <i class="pi pi-sign-out" [ngStyle]="{ fontSize: '1rem', color: 'var(--sidebar-link-color)' }"></i>
+      </button>
+    </div>
+
+    <!-- Collapsed mode: logout icon only, no avatar -->
+    <button *ngIf="collapsed" (click)="logout.emit()" title="Logout"
+            [ngStyle]="{ display: 'flex', justifyContent: 'center', width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', padding: '0.4rem 0', marginBottom: '0.5rem' }">
+      <i class="pi pi-sign-out" [ngStyle]="{ fontSize: '1.1rem', color: 'var(--sidebar-link-color)' }"></i>
+    </button>
+
+    <!-- Mini footer: tier -->
+    <div [ngStyle]="{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '0.4rem 0', borderTop: '1px solid var(--border-color)' }">
+      <span *ngIf="!collapsed" [ngStyle]="{ fontSize: '0.75rem', fontFamily: 'monospace', color: 'var(--sidebar-link-color)', opacity: '0.75' }">Tier: {{ tier }}</span>
+      <i *ngIf="collapsed" class="pi pi-verified" title="Tier: {{ tier }}" [ngStyle]="{ fontSize: '1rem', color: 'var(--sidebar-link-color)', opacity: '0.75' }"></i>
+    </div>
+  </div>
+</div>
