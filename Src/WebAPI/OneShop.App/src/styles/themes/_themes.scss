@@ -21,6 +21,7 @@ body.light-theme {
   --badge-text: #1a1a1a;
 
   --card-header-bg: #efefef;
+  --card-header-text-color: #1a1a1a;
   --label-color: #5e5e5e;
   --description-color: #6b6b6b;
   --description-heading-color: #2a2a2a;
@@ -54,6 +55,7 @@ body.dark-theme {
   --badge-text: #f0f0f0;
 
   --card-header-bg: #484848;
+  --card-header-text-color: #efefef;
   --label-color: #ffffff;
   --description-color: #cccccc;
   --description-heading-color: #f0f0f0;
@@ -87,6 +89,7 @@ body.neonocean-theme {
   --badge-text: #ffffff;
 
   --card-header-bg: linear-gradient(135deg, #8aecf7 0%, #67d9eb 50%, #38bdea 100%);
+  --card-header-text-color: #05517e;
   --label-color: #003a63;
   --description-color: #256c8e;
   --description-heading-color: #024e76;
@@ -120,6 +123,7 @@ body.solarflare-theme {
   --badge-text: #1a1a1a;
 
   --card-header-bg: linear-gradient(135deg, #ff8d1b, #fcb110, #ff6228);
+  --card-header-text-color: #efefef;
   --label-color: #ffad66;
   --description-color: #ffdaaa;
   --description-heading-color: #ffb733;
@@ -153,6 +157,7 @@ body.sunsetblush-theme {
   --badge-text: #fdf3f0;
 
   --card-header-bg: #fed4c2;
+  --card-header-text-color: #a16765;
   --label-color: #a36259;
   --description-color: #a96b5c;
   --description-heading-color: #7a3c3a;
