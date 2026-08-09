@@ -1,7 +1,9 @@
 ﻿using Application.Interfaces.DataService;
 using Application.Interfaces.GraphQLService;
 using Application.Services;
+using Application.Services.Masters;
 using Infrastructure.Repositories;
+using Infrastructure.Repositories.Masters;
 using Infrastructure.Tenant;
 
 namespace WebAPI.Extensions;
@@ -31,6 +33,8 @@ public static class ServiceExtensions
         services.AddScoped<ICountryFetchService, CountryFetchService>();
         services.AddScoped<ICredentialsVerificationService, CredentialsVerificationService>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddScoped<ICompanyService, CompanyService>();
+        
         // GraphQL Service Dependencies ends...
 
         /***************************************************************************************************************/
@@ -39,6 +43,7 @@ public static class ServiceExtensions
         services.AddScoped<IAuthenticationRepository, AuthenticationRepository>();
         services.AddScoped<ISchemaRepository, SchemaRepository>();
         services.AddScoped<ICountryRepository, CountryRepository>();
+        services.AddScoped<ICompanyRepository, CompanyRepository>();
         // Data Layer Dependencies ends...
 
         /***************************************************************************************************************/

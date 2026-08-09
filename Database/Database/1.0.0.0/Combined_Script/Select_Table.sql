@@ -22,3 +22,7 @@ SELECT * FROM AccountSubscription;
 SELECT * FROM Settings;
 
 SELECT * FROM CountryMaster;
+
+SELECT * FROM Company;
+
+SELECT * FROM CompanyAuditTrail;

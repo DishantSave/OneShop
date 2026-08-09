@@ -22,3 +22,7 @@ DROP TABLE AccountCredential;
 DROP TABLE Users;
 
 DROP TABLE CountryMaster;
+
+DROP TABLE Company;
+
+DROP TABLE CompanyAuditTrail;

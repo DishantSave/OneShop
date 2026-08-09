@@ -81,4 +81,10 @@
     <None Include="1.0.0.0\Combined_Script\Drop_Table.sql" />
     <None Include="1.0.0.0\Combined_Script\Select_Table.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="1.0.0.0\TableScripts\12.CreateTable_Company.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="1.0.0.0\TableScripts\13.CreateTable_CompanyAuditTrail.sql" />
+  </ItemGroup>
 </Project>

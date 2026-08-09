@@ -1,0 +1,343 @@
+<div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '900px' }">
+
+  <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }">
+    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem' }">
+      <button type="button"
+              (click)="cancel()"
+              [ngStyle]="{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '38px',
+                height: '38px',
+                borderRadius: '8px',
+                flexShrink: '0',
+                background: 'var(--card-bg)',
+                border: '1px solid var(--border-color)',
+                color: 'var(--text-color)',
+                cursor: 'pointer',
+                padding: '0'
+              }">
+        <i class="pi pi-arrow-left"></i>
+      </button>
+      <div>
+        <h2 [ngStyle]="{ margin: '0', fontSize: '1.35rem', fontWeight: '700', color: 'var(--text-color)' }">
+          {{ isEditMode ? 'Edit company' : 'New company' }}
+        </h2>
+        <span *ngIf="isEditMode" [ngStyle]="{ fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.65' }">
+          Code: {{ companyCode }}
+        </span>
+      </div>
+    </div>
+
+    <span *ngIf="isEditMode && !permissions().canEdit" [ngStyle]="{
+        padding: '0.35rem 0.75rem', borderRadius: '999px', fontSize: '0.78rem', fontWeight: '600',
+        border: '1px solid var(--warning-color, #b8860b)', color: 'var(--warning-color, #b8860b)'
+      }">View only</span>
+  </div>
+
+  <form [formGroup]="form" [ngStyle]="{
+      display: 'flex', flexDirection: 'column', gap: '1.75rem',
+      background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+      borderRadius: '12px', padding: '1.5rem'
+    }">
+
+    <!-- Logo Section -->
+    <section>
+      <div [ngStyle]="{ fontSize: '0.78rem', fontWeight: '700', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-color)', opacity: '0.55', marginBottom: '0.75rem' }">Company Logo</div>
+
+      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '1.25rem', alignItems: 'center' }">
+        <!-- Logo Preview Box -->
+        <div [ngStyle]="{
+            width: '120px', height: '120px', borderRadius: '10px',
+            border: '1px solid var(--border-color)', background: 'var(--input-bg)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            overflow: 'hidden', position: 'relative', flexShrink: '0'
+          }">
+          <img *ngIf="logoPreview()" [src]="logoPreview()" alt="Logo preview" [ngStyle]="{ width: '100%', height: '100%', objectFit: 'contain' }" />
+          <i *ngIf="!logoPreview()" class="pi pi-building" [ngStyle]="{ fontSize: '2rem', color: 'var(--text-color)', opacity: '0.3' }"></i>
+        </div>
+
+        <!-- Upload Options (Drag & Drop or URL) -->
+        <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }">
+
+          <!-- Local File / Drag & Drop -->
+          <div (dragover)="$event.preventDefault()" (drop)="onFileDropped($event)" [ngStyle]="{
+              border: '2px dashed var(--border-color)', borderRadius: '8px',
+              padding: '1rem', textAlign: 'center', background: 'var(--input-bg)',
+              cursor: 'pointer', transition: 'all 0.2s ease'
+            }" (click)="fileInput.click()">
+            <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" style="display: none;" />
+            <div [ngStyle]="{ fontSize: '0.85rem', color: 'var(--text-color)' }">
+              <i class="pi pi-cloud-upload" [ngStyle]="{ fontSize: '1.2rem', marginBottom: '0.25rem', display: 'block', color: 'var(--navbar-link-active)' }"></i>
+              <span>Drag & drop logo here, or <span [ngStyle]="{ color: 'var(--navbar-link-active)', fontWeight: '600' }">browse</span></span>
+            </div>
+          </div>
+
+          <!-- Logo URL Option -->
+          <div [ngStyle]="{ display: 'flex', gap: '0.5rem', alignItems: 'center' }">
+            <input formControlName="logoUrl" (input)="onUrlInput($event)" placeholder="Or paste logo image URL (https://...)" [ngStyle]="{
+                width: '100%', boxSizing: 'border-box',
+                background: 'var(--input-bg)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none', fontSize: '0.85rem'
+              }" />
+            <button *ngIf="logoPreview()" type="button" (click)="clearLogo()" [ngStyle]="{
+                padding: '0.6rem 0.8rem', borderRadius: '8px', border: '1px solid var(--border-color)',
+                background: 'transparent', color: 'var(--danger-color, #c62828)', cursor: 'pointer', fontSize: '0.85rem'
+              }" title="Remove logo">
+              <i class="pi pi-trash"></i>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Identity -->
+    <section>
+      <div [ngStyle]="{ fontSize: '0.78rem', fontWeight: '700', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-color)', opacity: '0.55', marginBottom: '0.75rem' }">Identity</div>
+      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '90px 1fr 1fr', gap: '0.9rem' }">
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Code *</label>
+          <input formControlName="code" maxlength="2" placeholder="IN" [ngStyle]="{
+              width: '100%', boxSizing: 'border-box', textTransform: 'uppercase',
+              background: 'var(--input-bg)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
+            }" />
+          <small *ngIf="fieldInvalid('code')" [ngStyle]="{ color: 'var(--danger-color, #c62828)' }">2 characters</small>
+        </div>
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Legal name *</label>
+          <input formControlName="name" placeholder="AMTERP Solutions India Ltd." [ngStyle]="{
+              width: '100%', boxSizing: 'border-box',
+              background: 'var(--input-bg)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
+            }" />
+          <small *ngIf="fieldInvalid('name')" [ngStyle]="{ color: 'var(--danger-color, #c62828)' }">Required</small>
+        </div>
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Display name *</label>
+          <input formControlName="displayName" placeholder="AMTERP India" [ngStyle]="{
+              width: '100%', boxSizing: 'border-box',
+              background: 'var(--input-bg)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
+            }" />
+          <small *ngIf="fieldInvalid('displayName')" [ngStyle]="{ color: 'var(--danger-color, #c62828)' }">Required</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- Address -->
+    <section>
+      <div [ngStyle]="{ fontSize: '0.78rem', fontWeight: '700', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-color)', opacity: '0.55', marginBottom: '0.75rem' }">Address</div>
+      <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }">
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Address line 1 *</label>
+          <input formControlName="addressLine1" [ngStyle]="{
+              width: '100%', boxSizing: 'border-box',
+              background: 'var(--input-bg)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
+            }" />
+          <small *ngIf="fieldInvalid('addressLine1')" [ngStyle]="{ color: 'var(--danger-color, #c62828)' }">Required</small>
+        </div>
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Address line 2</label>
+          <input formControlName="addressLine2" [ngStyle]="{
+              width: '100%', boxSizing: 'border-box',
+              background: 'var(--input-bg)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
+            }" />
+        </div>
+        <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.9rem' }">
+          <div>
+            <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">City *</label>
+            <input formControlName="city" [ngStyle]="{
+                width: '100%', boxSizing: 'border-box',
+                background: 'var(--input-bg)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
+              }" />
+          </div>
+          <div>
+            <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">State *</label>
+            <input formControlName="stateCode" [ngStyle]="{
+                width: '100%', boxSizing: 'border-box',
+                background: 'var(--input-bg)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
+              }" />
+          </div>
+          <div>
+            <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Country *</label>
+            <select formControlName="countryCode" [ngStyle]="{
+                width: '100%', boxSizing: 'border-box',
+                background: 'var(--input-bg)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
+              }">
+              <option value="" disabled>Select</option>
+              <option *ngFor="let c of countryOptions" [value]="c.value">{{ c.label }}</option>
+            </select>
+          </div>
+          <div>
+            <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Postal code *</label>
+            <input formControlName="postalCode" [ngStyle]="{
+                width: '100%', boxSizing: 'border-box',
+                background: 'var(--input-bg)',
+                border: '1px solid var(--border-color)',
+                borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
+              }" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section>
+      <div [ngStyle]="{ fontSize: '0.78rem', fontWeight: '700', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-color)', opacity: '0.55', marginBottom: '0.75rem' }">Contact</div>
+      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.9rem' }">
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Phone *</label>
+          <input formControlName="contact" [ngStyle]="{
+              width: '100%', boxSizing: 'border-box',
+              background: 'var(--input-bg)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
+            }" />
+          <small *ngIf="fieldInvalid('contact')" [ngStyle]="{ color: 'var(--danger-color, #c62828)' }">Min 10 digits</small>
+        </div>
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Email *</label>
+          <input formControlName="email" [ngStyle]="{
+              width: '100%', boxSizing: 'border-box',
+              background: 'var(--input-bg)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
+            }" />
+          <small *ngIf="fieldInvalid('email')" [ngStyle]="{ color: 'var(--danger-color, #c62828)' }">Valid email required</small>
+        </div>
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Website</label>
+          <input formControlName="website" placeholder="https://" [ngStyle]="{
+              width: '100%', boxSizing: 'border-box',
+              background: 'var(--input-bg)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
+            }" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Regional -->
+    <section>
+      <div [ngStyle]="{ fontSize: '0.78rem', fontWeight: '700', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-color)', opacity: '0.55', marginBottom: '0.75rem' }">Regional settings</div>
+      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.9rem' }">
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Currency</label>
+          <select formControlName="currencyCode" [ngStyle]="{
+              width: '100%', boxSizing: 'border-box',
+              background: 'var(--input-bg)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
+            }">
+            <option value="">Select</option>
+            <option *ngFor="let c of currencyOptions" [value]="c.value">{{ c.label }}</option>
+          </select>
+        </div>
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Time zone</label>
+          <select formControlName="timeZone" [ngStyle]="{
+              width: '100%', boxSizing: 'border-box',
+              background: 'var(--input-bg)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
+            }">
+            <option value="">Select</option>
+            <option *ngFor="let t of timeZoneOptions" [value]="t.value">{{ t.label }}</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Flags -->
+    <section [ngStyle]="{ display: 'flex', gap: '2rem' }">
+      <label [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }">
+        <input type="checkbox" formControlName="isActive" [ngStyle]="{ width: '18px', height: '18px', accentColor: 'var(--navbar-link-active)' }" />
+        <span [ngStyle]="{ color: 'var(--text-color)', fontSize: '0.9rem' }">Active</span>
+      </label>
+      <label [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }">
+        <input type="checkbox" formControlName="isTestCompany" [ngStyle]="{ width: '18px', height: '18px', accentColor: 'var(--navbar-link-active)' }" />
+        <span [ngStyle]="{ color: 'var(--text-color)', fontSize: '0.9rem' }">Test company</span>
+      </label>
+    </section>
+
+    <!-- Actions -->
+    <div [ngStyle]="{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem' }">
+      <button type="button" (click)="cancel()" [ngStyle]="{
+              padding: '0.7rem 1.1rem', borderRadius: '8px', cursor: 'pointer',
+              fontSize: '0.9rem', fontWeight: '600',
+              background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-color)'
+            }">
+        {{ canSubmit() ? 'Cancel' : 'Back' }}
+      </button>
+      <button *ngIf="canSubmit()" type="button" (click)="submit()" [disabled]="saving()" [ngStyle]="{
+              display: 'flex', alignItems: 'center', gap: '0.5rem',
+              padding: '0.7rem 1.1rem', borderRadius: '8px', cursor: 'pointer',
+              fontSize: '0.9rem', fontWeight: '600', border: 'none',
+              background: 'var(--card-header-bg)', color: 'var(--card-header-text-color)',
+              opacity: saving() ? '0.7' : '1'
+            }">
+        <i class="pi" [ngClass]="saving() ? 'pi-spin pi-spinner' : 'pi-check'"></i>
+        <span>{{ isEditMode ? 'Save changes' : 'Create company' }}</span>
+      </button>
+    </div>
+  </form>
+
+  <!-- Audit trail — edit mode only -->
+  <div *ngIf="isEditMode" [ngStyle]="{
+      background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+      borderRadius: '12px', overflow: 'hidden'
+    }">
+    <div [ngStyle]="{
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '1rem 1.25rem', borderBottom: '1px solid var(--border-color)'
+      }">
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
+        <i class="pi pi-history" [ngStyle]="{ color: 'var(--text-color)', opacity: '0.6' }"></i>
+        <span [ngStyle]="{ fontWeight: '600', color: 'var(--text-color)' }">Activity for {{ companyCode }}</span>
+      </div>
+      <span [ngStyle]="{ fontSize: '0.8rem', color: 'var(--text-color)', opacity: '0.6' }">Last {{ auditTrail().length }} of 20</span>
+    </div>
+
+    <div *ngIf="auditTrail().length; else noAudit">
+      <div *ngFor="let entry of auditTrail(); let last = last" [ngStyle]="{
+           display: 'flex', gap: '0.9rem', padding: '0.85rem 1.25rem',
+           borderBottom: last ? 'none' : '1px solid var(--border-color)'
+          }">
+        <div [ngStyle]="{
+            width: '32px', height: '32px', borderRadius: '50%', flexShrink: '0',
+            border: '1px solid var(--border-color)', color: 'var(--text-color)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '0.7rem', fontWeight: '700'
+          }"><i class="pi pi-pencil" [ngStyle]="{ fontSize: '0.75rem', opacity: '0.7' }"></i></div>
+        <div [ngStyle]="{ flex: '1 1 auto', minWidth: '0' }">
+          <div [ngStyle]="{ color: 'var(--text-color)', fontSize: '0.9rem' }">{{ entry.description }}</div>
+          <div [ngStyle]="{ fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.6', marginTop: '0.15rem' }">
+            {{ entry.field }} · {{ entry.modifiedBy }} · {{ entry.dateModified | date:'MMM d, y, h:mm a' }}
+          </div>
+        </div>
+      </div>
+    </div>
+    <ng-template #noAudit>
+      <div [ngStyle]="{ padding: '2rem 1rem', textAlign: 'center', color: 'var(--text-color)', opacity: '0.6' }">
+        No activity recorded for this company yet.
+      </div>
+    </ng-template>
+  </div>
+</div>

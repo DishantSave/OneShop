@@ -193,6 +193,60 @@ body.sunsetblush-theme {
   border-color: var(--sidebar-link-active-bg) !important;
 }
 
-  .pill-active i {
-    opacity: 1 !important;
+.pill-active i {
+  opacity: 1 !important;
+}
+
+/* Global PrimeNG Toast Theme Adaptation */
+.p-toast {
+  .p-toast-message {
+    background: var(--card-bg) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-color) !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3) !important;
+
+    .p-toast-message-content {
+      background: transparent !important;
+      color: var(--text-color) !important;
+
+      .p-toast-summary {
+        font-weight: 700 !important;
+        color: var(--text-color) !important;
+      }
+
+      .p-toast-detail {
+        color: var(--text-color) !important;
+        opacity: 0.85 !important;
+      }
+
+      .p-toast-message-icon {
+        color: var(--text-color) !important;
+      }
+    }
+
+    .p-toast-icon-close {
+      color: var(--text-color) !important;
+      opacity: 0.6;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
   }
+  /* Severity specific accents */
+  .p-toast-message-success {
+    border-left: 5px solid var(--success-color, #2e7d32) !important;
+  }
+
+  .p-toast-message-error {
+    border-left: 5px solid #c62828 !important;
+  }
+
+  .p-toast-message-warn {
+    border-left: 5px solid var(--warning-color, #b8860b) !important;
+  }
+
+  .p-toast-message-info {
+    border-left: 5px solid var(--navbar-link-active) !important;
+  }
+}

@@ -17,6 +17,6 @@ public class UserDetailDto
     public required string Country { get; init; }
     public bool IsTestAccount { get; init; }
     public DateTime Created { get; init; }
-    public required List<UserDetailAuditTrailDto> Audit { get; set; }
+    public List<UserDetailAuditTrailDto> Audit { get; set; } = [];
     public SubscriptionType? SubscriptionType { get; init; }
 }

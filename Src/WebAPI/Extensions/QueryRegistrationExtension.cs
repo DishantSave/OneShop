@@ -11,6 +11,7 @@ public static class QueryRegistrationExtension
         builder.AddTypeExtension<SchemaVersionQuery>();
         builder.AddTypeExtension<AuthenticationQuery>();
         builder.AddTypeExtension<MastersQuery>();
+        builder.AddTypeExtension<CompanyQuery>();
 
         return builder;
     }

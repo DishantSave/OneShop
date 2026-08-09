@@ -125,6 +125,10 @@ export class Login implements OnInit {
             localStorage.setItem('userDetails', JSON.stringify(response.userDetails));
           }
 
+          if (response.userDetails.accountId) {
+            localStorage.setItem('accountId', response.userDetails.accountId);
+          }
+
           if (response.accessibleScreens) {
             localStorage.setItem('screenAccess', JSON.stringify(response.accessibleScreens));
           }

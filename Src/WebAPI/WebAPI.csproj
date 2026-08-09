@@ -24,6 +24,8 @@
     <Folder Include="OneShop.App\src\app\features\authentication\login\" />
     <Folder Include="OneShop.App\src\app\features\authentication\vendor-register\" />
     <Folder Include="OneShop.App\src\app\features\authentication\register\" />
+    <Folder Include="OneShop.App\src\app\features\company\models\" />
+    <Folder Include="OneShop.App\src\app\features\company\services\" />
     <Folder Include="OneShop.App\src\app\shared\" />
     <Folder Include="OneShop.App\src\styles\themes\" />
   </ItemGroup>
