@@ -8,7 +8,9 @@
 
   <ItemGroup>
     <PackageReference Include="HotChocolate.AspNetCore" Version="16.5.0" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
+    <PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="16.6.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.11" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,6 +22,7 @@
     <Folder Include="OneShop.App\src\app\core\layouts\dashboard-layout\" />
     <Folder Include="OneShop.App\src\app\core\layouts\components\" />
     <Folder Include="OneShop.App\src\app\core\layouts\public-layout\" />
+    <Folder Include="OneShop.App\src\app\core\graphql\" />
     <Folder Include="OneShop.App\src\app\core\services\" />
     <Folder Include="OneShop.App\src\app\features\authentication\login\" />
     <Folder Include="OneShop.App\src\app\features\authentication\vendor-register\" />

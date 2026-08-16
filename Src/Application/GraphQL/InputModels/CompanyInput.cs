@@ -1,8 +1,6 @@
 ﻿namespace Application.GraphQL.InputModels;
 
 public record CompanyInput(
-    string UserAccountId,
-    string UserName,
     string CompanyCode,
     string CompanyName,
     string CompanyDisplayName,

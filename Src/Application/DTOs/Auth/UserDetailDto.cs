@@ -7,7 +7,7 @@ public class UserDetailDto
     public required string UserName { get; init; }
     public required string UserId { get; init; }
     public required string AccountId { get; init; }
-    public required string ApiToken { get; init; }
+    public required string ApiToken { get; set; }
     public bool IsCustomerAccount { get; init; }
     public bool IsSellerAccount { get; init; }
     public required string Company { get; init; }

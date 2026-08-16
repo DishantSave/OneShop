@@ -2,6 +2,7 @@
 using Application.GraphQL.InputModels;
 using Application.GraphQL.Payloads;
 using Application.Interfaces.GraphQLService;
+using System.Security.Cryptography;
 
 namespace WebAPI.Mutations;
 
@@ -16,10 +17,13 @@ public class AuthenticationMutation
     {
         try
         {
+            var apiTokenKey = Convert.ToBase64String(
+                RandomNumberGenerator.GetBytes(32));
+
             var request = new RegisterRequest(
                 input.UserName.Trim(),
                 input.Password,
-                Guid.NewGuid().ToString(), //Replace with a actual Token Generation Library.
+                apiTokenKey,
                 input.IsCustomerAccount,
                 input.IsSellerAccount,
                 input.Company,

@@ -1,11 +1,11 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
-import { Account } from '../../../core/services/account';
+import { firstValueFrom } from 'rxjs';
 import { Company, CompanyAuditTrail } from '../models/company.model';
 
 const GET_COMPANIES = gql`
-  query GetCompanies($accountId: String!) {
-    companies(accountId: $accountId) {
+  query GetCompanies {
+    companies {
       sequence
       accountId
       code
@@ -45,43 +45,30 @@ const GET_COMPANIES = gql`
 export class CompanyService {
 
   private apollo = inject(Apollo);
-  private accountService = inject(Account);
 
   readonly companies = signal<Company[]>([]);
 
   readonly loading = signal(false);
 
-  getAccountId(): string {
-    const accountId = this.accountService.getAccountId();
-
-    if (!accountId) {
-      throw new Error('Account ID is not available. Please login again.');
-    }
-
-    return accountId;
-  }
-
   async list(): Promise<Company[]> {
-    const accountId = this.getAccountId();
 
     this.loading.set(true);
 
     try {
-      const result = await this.apollo
-        .query<{
+      const result = await firstValueFrom(
+        this.apollo.query<{
           companies: CompanyApiResponse[];
         }>({
           query: GET_COMPANIES,
-          variables: {
-            accountId
-          },
           fetchPolicy: 'network-only'
         })
-        .toPromise();
+      );
 
       const apiCompanies = result?.data?.companies ?? [];
 
-      const companies = apiCompanies.map(company => this.mapCompany(company));
+      const companies = apiCompanies.map(company =>
+        this.mapCompany(company)
+      );
 
       this.companies.set(companies);
 
@@ -99,7 +86,6 @@ export class CompanyService {
   async remove(code: string, name: string): Promise<void> {
     throw new Error('Company delete mutation is not implemented yet.');
   }
-
 
   getByCode(code: string): Company | undefined {
     return this.companies().find(

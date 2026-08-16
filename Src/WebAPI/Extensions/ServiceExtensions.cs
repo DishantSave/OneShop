@@ -5,6 +5,10 @@ using Application.Services.Masters;
 using Infrastructure.Repositories;
 using Infrastructure.Repositories.Masters;
 using Infrastructure.Tenant;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using WebAPI.Authentication;
 
 namespace WebAPI.Extensions;
 
@@ -23,6 +27,8 @@ public static class ServiceExtensions
                       .AllowAnyMethod();
             });
         });
+
+        services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<ITenantResolver, TenantResolver>();
         // Application Level Dependencies ends...
 

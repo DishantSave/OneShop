@@ -10,7 +10,6 @@ public class TenantMiddleware(RequestDelegate next)
     {
         var tenantContext = await tenantResolver.ResolveTenantAsync(context);
 
-        // Store in HttpContext.Items so repositories or services can access it during execution
         context.Items["TenantContext"] = tenantContext;
 
         await _next(context);

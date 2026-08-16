@@ -2,6 +2,7 @@
 using Application.DTOs.Auth;
 using Application.GraphQL.Payloads;
 using Application.Interfaces.DataService;
+using Application.Interfaces.GraphQLService;
 using Dapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -10,9 +11,10 @@ using System.Data;
 
 namespace Infrastructure.Repositories;
 
-public class AuthenticationRepository(IHttpContextAccessor httpContextAccessor) : IAuthenticationRepository
+public class AuthenticationRepository(IHttpContextAccessor httpContextAccessor, IJwtTokenService jwtTokenService) : IAuthenticationRepository
 {
     readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+    private readonly IJwtTokenService _jwtTokenService = jwtTokenService;
 
     private string GetConnectionString()
     {
@@ -261,6 +263,13 @@ public class AuthenticationRepository(IHttpContextAccessor httpContextAccessor) 
                                                  cancellationToken: cancellationToken);
 
         var user = await db.QuerySingleAsync<UserDetailDto>(getUserDetailsCmd);
+
+        var token = _jwtTokenService.GenerateToken(
+            user.AccountId,
+            user.UserId,
+            user.UserName);
+
+        user.ApiToken = token;
 
         string getUserAuditTrailDetails = @"SELECT UserName, Field, Description, DateModified
                                                 FROM dbo.AccountCredentialAuditTrail

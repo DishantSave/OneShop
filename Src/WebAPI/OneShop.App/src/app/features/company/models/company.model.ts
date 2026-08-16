@@ -1,6 +1,6 @@
 export interface Company {
   sequence?: number;
-  accountId: string;
+  accountId?: string;
   code: string;                 // 2 chars, immutable after create
   name: string;
   displayName: string;
@@ -19,7 +19,6 @@ export interface Company {
   isTestCompany: boolean;
   isActive: boolean;
   dateCreated?: string;
-  logoUrl?: string | null;
   audit?: CompanyAuditTrail[];
 }
 
@@ -33,8 +32,8 @@ export interface CompanyAuditTrail {
   modifiedBy: string;
 }
 
-export const emptyCompany = (accountId: string): Company => ({
-  accountId,
+export const emptyCompany = (): Company => ({
+  accountId: '',
   code: '',
   name: '',
   displayName: '',
