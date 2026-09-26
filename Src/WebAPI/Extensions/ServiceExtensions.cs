@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.DataService;
+using Application.Interfaces.DataService;
 using Application.Interfaces.GraphQLService;
 using Application.Services;
 using Application.Services.Masters;
@@ -40,6 +40,7 @@ public static class ServiceExtensions
         services.AddScoped<ICredentialsVerificationService, CredentialsVerificationService>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<ICompanyService, CompanyService>();
+        services.AddScoped<IStoreService, StoreService>();
         
         // GraphQL Service Dependencies ends...
 
@@ -50,6 +51,7 @@ public static class ServiceExtensions
         services.AddScoped<ISchemaRepository, SchemaRepository>();
         services.AddScoped<ICountryRepository, CountryRepository>();
         services.AddScoped<ICompanyRepository, CompanyRepository>();
+        services.AddScoped<IStoreRepository, StoreRepository>();
         // Data Layer Dependencies ends...
 
         /***************************************************************************************************************/

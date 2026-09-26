@@ -1,4 +1,4 @@
-﻿using HotChocolate.Execution.Configuration;
+using HotChocolate.Execution.Configuration;
 using WebAPI.Queries;
 
 namespace WebAPI.Extensions;
@@ -12,6 +12,7 @@ public static class QueryRegistrationExtension
         builder.AddTypeExtension<AuthenticationQuery>();
         builder.AddTypeExtension<MastersQuery>();
         builder.AddTypeExtension<CompanyQuery>();
+        builder.AddTypeExtension<StoreQuery>();
 
         return builder;
     }

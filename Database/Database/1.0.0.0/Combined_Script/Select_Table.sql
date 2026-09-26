@@ -26,3 +26,7 @@ SELECT * FROM CountryMaster;
 SELECT * FROM Company;
 
 SELECT * FROM CompanyAuditTrail;
+
+SELECT * FROM Store;
+
+SELECT * FROM StoreAuditTrail;

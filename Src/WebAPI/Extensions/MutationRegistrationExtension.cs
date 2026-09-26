@@ -1,4 +1,4 @@
-﻿using HotChocolate.Execution.Configuration;
+using HotChocolate.Execution.Configuration;
 using WebAPI.Mutations;
 using WebAPI.Mutations.Masters;
 
@@ -16,6 +16,7 @@ public static class MutationRegistrationExtension
 
         //Masters
         builder.AddTypeExtension<CompanyMutation>();
+        builder.AddTypeExtension<StoreMutation>();
 
         return builder;
     }

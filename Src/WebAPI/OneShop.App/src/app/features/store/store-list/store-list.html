@@ -1,0 +1,385 @@
+<div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '1100px', margin: '0 auto', paddingBottom: '3rem' }">
+
+  <!-- Header & Action Bar -->
+  <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }">
+    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.85rem' }">
+      <div [ngStyle]="{
+          width: '46px', height: '46px', borderRadius: '12px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+          color: 'var(--sidebar-link-active-bg, #05517e)', flexShrink: '0',
+          boxShadow: 'var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.05))'
+        }">
+        <i class="pi pi-shop" [ngStyle]="{ fontSize: '1.35rem' }"></i>
+      </div>
+      <div>
+        <h2 [ngStyle]="{ margin: '0', fontSize: '1.45rem', fontWeight: '700', color: 'var(--text-color)' }">Store Master</h2>
+        <span [ngStyle]="{ fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.65' }">
+          Manage retail stores, sales outlets, web storefronts & distribution branches under your companies
+        </span>
+      </div>
+    </div>
+
+    <!-- Actions, Filters & Search -->
+    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }">
+
+      <!-- Company Filter Dropdown -->
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.4rem' }">
+        <select [ngModel]="selectedCompanyCode()"
+                (ngModelChange)="selectedCompanyCode.set($event)"
+                [ngStyle]="{
+                  background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+                  color: 'var(--input-text)', borderRadius: '8px', padding: '0.55rem 0.85rem',
+                  fontSize: '0.88rem', outline: 'none', cursor: 'pointer'
+                }">
+          <option value="ALL">All Companies</option>
+          <option *ngFor="let c of companies()" [value]="c.code">
+            {{ c.code }} — {{ c.name }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Search Box -->
+      <div [ngStyle]="{
+          display: 'flex', alignItems: 'center', gap: '0.5rem',
+          background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+          borderRadius: '8px', padding: '0.55rem 0.85rem', width: '230px'
+        }">
+        <i class="pi pi-search" [ngStyle]="{ color: 'var(--text-color)', opacity: '0.5', fontSize: '0.85rem' }"></i>
+        <input type="text"
+               placeholder="Search by store name, code, city…"
+               [value]="searchTerm()"
+               (input)="searchTerm.set($any($event.target).value)"
+               [ngStyle]="{
+                 border: 'none', outline: 'none', background: 'transparent',
+                 color: 'var(--input-text)', fontSize: '0.88rem', width: '100%'
+               }" />
+        <button *ngIf="searchTerm()" (click)="searchTerm.set('')" type="button" [ngStyle]="{
+            background: 'transparent', border: 'none', cursor: 'pointer', padding: '0',
+            color: 'var(--text-color)', opacity: '0.5'
+          }">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <!-- Refresh Button -->
+      <button type="button" (click)="refresh()" [disabled]="loading()" [ngStyle]="{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          width: '38px', height: '38px', borderRadius: '8px', cursor: 'pointer',
+          background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+          color: 'var(--text-color)', opacity: loading() ? '0.5' : '1'
+        }" title="Refresh stores list">
+        <i class="pi pi-refresh" [class.pi-spin]="loading()"></i>
+      </button>
+
+      <!-- New Store Button -->
+      <button *ngIf="permissions().canCreate" type="button" (click)="goToNew()" [ngStyle]="{
+          display: 'flex', alignItems: 'center', gap: '0.5rem',
+          padding: '0.65rem 1.15rem', borderRadius: '8px', cursor: 'pointer',
+          fontSize: '0.9rem', fontWeight: '600', border: 'none',
+          background: 'var(--sidebar-link-active-bg, #05517e)', color: '#ffffff',
+          boxShadow: '0 4px 12px rgba(5, 81, 126, 0.25)', transition: 'all 0.2s ease'
+        }">
+        <i class="pi pi-plus" [ngStyle]="{ fontSize: '0.85rem' }"></i>
+        <span>New Store</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Filter Pills & Status Bar -->
+  <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }">
+    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.4rem' }">
+      <button type="button" (click)="filterMode.set('all')" [ngStyle]="{
+          padding: '0.4rem 0.85rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600',
+          border: filterMode() === 'all' ? '1px solid var(--sidebar-link-active-bg)' : '1px solid var(--border-color)',
+          background: filterMode() === 'all' ? 'var(--sidebar-link-active-bg)' : 'var(--card-bg)',
+          color: filterMode() === 'all' ? '#ffffff' : 'var(--text-color)', transition: 'all 0.15s ease'
+        }">
+        All ({{ stats().total }})
+      </button>
+
+      <button type="button" (click)="filterMode.set('active')" [ngStyle]="{
+          padding: '0.4rem 0.85rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600',
+          border: filterMode() === 'active' ? '1px solid var(--success, #22c55e)' : '1px solid var(--border-color)',
+          background: filterMode() === 'active' ? 'var(--success, #22c55e)' : 'var(--card-bg)',
+          color: filterMode() === 'active' ? '#ffffff' : 'var(--text-color)', transition: 'all 0.15s ease'
+        }">
+        Active ({{ stats().active }})
+      </button>
+
+      <button type="button" (click)="filterMode.set('inactive')" [ngStyle]="{
+          padding: '0.4rem 0.85rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600',
+          border: filterMode() === 'inactive' ? '1px solid var(--text-color)' : '1px solid var(--border-color)',
+          background: filterMode() === 'inactive' ? 'var(--text-color)' : 'var(--card-bg)',
+          color: filterMode() === 'inactive' ? 'var(--bg-color)' : 'var(--text-color)', transition: 'all 0.15s ease'
+        }">
+        Inactive ({{ stats().inactive }})
+      </button>
+
+      <button type="button" (click)="filterMode.set('test')" [ngStyle]="{
+          padding: '0.4rem 0.85rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600',
+          border: filterMode() === 'test' ? '1px solid var(--warning, #f59e0b)' : '1px solid var(--border-color)',
+          background: filterMode() === 'test' ? 'var(--warning, #f59e0b)' : 'var(--card-bg)',
+          color: filterMode() === 'test' ? '#ffffff' : 'var(--text-color)', transition: 'all 0.15s ease'
+        }">
+        Sandbox ({{ stats().test }})
+      </button>
+    </div>
+
+    <div [ngStyle]="{ fontSize: '0.82rem', color: 'var(--text-color)', opacity: '0.6' }">
+      Showing {{ filteredStores().length }} of {{ stats().total }} stores
+    </div>
+  </div>
+
+  <!-- Loading Skeleton / Spinner -->
+  <div *ngIf="loading() && filteredStores().length === 0" [ngStyle]="{
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      padding: '4rem 1rem', gap: '1rem', background: 'var(--card-bg)',
+      borderRadius: '12px', border: '1px solid var(--border-color)'
+    }">
+    <i class="pi pi-spin pi-spinner" [ngStyle]="{ fontSize: '2rem', color: 'var(--sidebar-link-active-bg)' }"></i>
+    <span [ngStyle]="{ color: 'var(--text-color)', opacity: '0.7', fontSize: '0.9rem' }">Loading stores...</span>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading() && filteredStores().length === 0" [ngStyle]="{
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+      padding: '4rem 1.5rem', gap: '1rem', textAlign: 'center',
+      background: 'var(--card-bg)', borderRadius: '12px', border: '1px dashed var(--border-color)'
+    }">
+    <div [ngStyle]="{
+        width: '64px', height: '64px', borderRadius: '50%',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'var(--bg-color)', color: 'var(--text-color)', opacity: '0.5'
+      }">
+      <i class="pi pi-shop" [ngStyle]="{ fontSize: '2rem' }"></i>
+    </div>
+    <div [ngStyle]="{ maxWidth: '380px' }">
+      <h3 [ngStyle]="{ margin: '0 0 0.4rem 0', fontSize: '1.15rem', color: 'var(--text-color)' }">No stores found</h3>
+      <p [ngStyle]="{ margin: '0', fontSize: '0.88rem', color: 'var(--text-color)', opacity: '0.65' }">
+        {{ searchTerm() ? 'No stores match your search query.' : (selectedCompanyCode() !== 'ALL' ? 'No stores exist for this company yet.' : 'Get started by creating your first store / sales outlet.') }}
+      </p>
+    </div>
+    <button *ngIf="permissions().canCreate && !searchTerm()" type="button" (click)="goToNew()" [ngStyle]="{
+        display: 'flex', alignItems: 'center', gap: '0.5rem',
+        padding: '0.6rem 1.2rem', borderRadius: '8px', cursor: 'pointer',
+        fontSize: '0.88rem', fontWeight: '600', border: 'none',
+        background: 'var(--sidebar-link-active-bg, #05517e)', color: '#ffffff', marginTop: '0.5rem'
+      }">
+      <i class="pi pi-plus"></i>
+      <span>Create Store</span>
+    </button>
+  </div>
+
+  <!-- Store Cards Grid -->
+  <div *ngIf="filteredStores().length > 0" [ngStyle]="{
+      display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(330px, 1fr))', gap: '1.25rem'
+    }">
+    <div *ngFor="let s of filteredStores()"
+         (click)="goToEdit(s)"
+         [ngStyle]="{
+           display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
+           background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+           borderRadius: '12px', padding: '1.25rem', cursor: 'pointer',
+           transition: 'all 0.2s ease', position: 'relative', overflow: 'hidden',
+           boxShadow: 'var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.03))'
+         }">
+
+      <!-- Top Row: Logo, Badges & Menu -->
+      <div>
+        <div [ngStyle]="{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.75rem', marginBottom: '0.85rem' }">
+          <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem' }">
+            <!-- Store Logo / Avatar -->
+            <div [ngStyle]="{
+                width: '44px', height: '44px', borderRadius: '10px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: 'var(--bg-color)', border: '1px solid var(--border-color)',
+                overflow: 'hidden', flexShrink: '0'
+              }">
+              <img *ngIf="s.logo" [src]="getLogoUrl(s.logo)" [alt]="s.name"
+                   [ngStyle]="{ width: '100%', height: '100%', objectFit: 'contain' }" />
+              <i *ngIf="!s.logo" class="pi pi-shop" [ngStyle]="{ fontSize: '1.25rem', color: 'var(--text-color)', opacity: '0.5' }"></i>
+            </div>
+
+            <div>
+              <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap' }">
+                <!-- Company Code Badge -->
+                <span [ngStyle]="{
+                    fontSize: '0.72rem', fontWeight: '700', padding: '0.15rem 0.45rem',
+                    borderRadius: '4px', background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+                    color: 'var(--sidebar-link-active-bg, #05517e)', letterSpacing: '0.5px'
+                  }" [title]="s.companyName ? 'Company: ' + s.companyName : 'Company: ' + s.companyCode">
+                  {{ s.companyCode }}
+                </span>
+                <!-- Store Code Badge -->
+                <span [ngStyle]="{
+                    fontSize: '0.75rem', fontWeight: '700', padding: '0.15rem 0.5rem',
+                    borderRadius: '4px', background: 'var(--sidebar-link-active-bg, #05517e)',
+                    color: '#ffffff', letterSpacing: '0.5px'
+                  }">
+                  {{ s.code }}
+                </span>
+                <!-- Store Type Badge -->
+                <span [ngStyle]="{
+                    fontSize: '0.72rem', fontWeight: '500', padding: '0.15rem 0.45rem',
+                    borderRadius: '4px', background: 'rgba(59, 130, 246, 0.12)',
+                    color: 'var(--primary, #3b82f6)'
+                  }">
+                  {{ s.storeType }}
+                </span>
+              </div>
+              <h4 [ngStyle]="{ margin: '0.35rem 0 0 0', fontSize: '1.05rem', fontWeight: '600', color: 'var(--text-color)' }">
+                {{ s.displayName || s.name }}
+              </h4>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.25rem' }">
+            <button *ngIf="permissions().canDelete"
+                    type="button"
+                    (click)="openDeleteModal(s, $event)"
+                    [ngStyle]="{
+                      background: 'transparent', border: 'none', cursor: 'pointer',
+                      padding: '0.4rem', borderRadius: '6px', color: 'var(--text-color)',
+                      opacity: '0.45', transition: 'all 0.15s ease'
+                    }"
+                    title="Delete Store">
+              <i class="pi pi-trash" [ngStyle]="{ fontSize: '0.95rem' }"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Store Details -->
+        <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.8', margin: '0.5rem 0' }">
+          <div *ngIf="s.city || s.countryCode" [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.4rem' }">
+            <i class="pi pi-map-marker" [ngStyle]="{ fontSize: '0.8rem', opacity: '0.6' }"></i>
+            <span>{{ s.city }}{{ s.stateCode ? ', ' + s.stateCode : '' }}{{ s.countryCode ? ' (' + s.countryCode + ')' : '' }}</span>
+          </div>
+          <div *ngIf="s.contact" [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.4rem' }">
+            <i class="pi pi-phone" [ngStyle]="{ fontSize: '0.8rem', opacity: '0.6' }"></i>
+            <span>{{ s.contact }}</span>
+          </div>
+          <div *ngIf="s.email" [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.4rem' }">
+            <i class="pi pi-envelope" [ngStyle]="{ fontSize: '0.8rem', opacity: '0.6' }"></i>
+            <span [ngStyle]="{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }">{{ s.email }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer: Status Badges -->
+      <div [ngStyle]="{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem', marginTop: '0.75rem'
+        }">
+        <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }">
+          <!-- Active Badge -->
+          <span [ngStyle]="{
+              display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
+              fontSize: '0.72rem', fontWeight: '600', padding: '0.2rem 0.55rem',
+              borderRadius: '12px',
+              background: s.isActive ? 'rgba(34, 197, 94, 0.12)' : 'rgba(100, 116, 139, 0.12)',
+              color: s.isActive ? 'var(--success, #22c55e)' : 'var(--text-color)',
+              opacity: s.isActive ? '1' : '0.6'
+            }">
+            <span [ngStyle]="{
+                width: '6px', height: '6px', borderRadius: '50%',
+                background: s.isActive ? 'var(--success, #22c55e)' : 'currentColor'
+              }"></span>
+            {{ s.isActive ? 'Active' : 'Inactive' }}
+          </span>
+
+          <!-- Test / Sandbox Badge -->
+          <span *ngIf="s.isTestStore" [ngStyle]="{
+              display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
+              fontSize: '0.72rem', fontWeight: '600', padding: '0.2rem 0.55rem',
+              borderRadius: '12px',
+              background: 'rgba(245, 158, 11, 0.12)', color: 'var(--warning, #f59e0b)'
+            }">
+            <i class="pi pi-shield" [ngStyle]="{ fontSize: '0.65rem' }"></i>
+            Sandbox
+          </span>
+        </div>
+
+        <div [ngStyle]="{ fontSize: '0.78rem', color: 'var(--sidebar-link-active-bg, #05517e)', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '0.25rem' }">
+          <span>Manage</span>
+          <i class="pi pi-arrow-right" [ngStyle]="{ fontSize: '0.7rem' }"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div *ngIf="storeToDelete()" [ngStyle]="{
+      position: 'fixed', top: '0', left: '0', right: '0', bottom: '0',
+      background: 'rgba(0, 0, 0, 0.55)', backdropFilter: 'blur(4px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      zIndex: '1100', padding: '1rem'
+    }">
+    <div [ngStyle]="{
+        background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+        borderRadius: '14px', width: '100%', maxWidth: '440px',
+        padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '1.25rem',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.25)'
+      }">
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem' }">
+        <div [ngStyle]="{
+            width: '42px', height: '42px', borderRadius: '50%',
+            background: 'rgba(239, 68, 68, 0.12)', color: 'var(--danger, #ef4444)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: '0'
+          }">
+          <i class="pi pi-exclamation-triangle" [ngStyle]="{ fontSize: '1.25rem' }"></i>
+        </div>
+        <div>
+          <h3 [ngStyle]="{ margin: '0', fontSize: '1.15rem', color: 'var(--text-color)' }">Delete Store</h3>
+          <span [ngStyle]="{ fontSize: '0.82rem', color: 'var(--text-color)', opacity: '0.65' }">
+            Company: {{ storeToDelete()?.companyCode }} | Code: {{ storeToDelete()?.code }}
+          </span>
+        </div>
+      </div>
+
+      <p [ngStyle]="{ margin: '0', fontSize: '0.88rem', color: 'var(--text-color)', opacity: '0.8', lineHeight: '1.45' }">
+        Are you sure you want to permanently delete store
+        <strong [ngStyle]="{ color: 'var(--text-color)' }">[{{ storeToDelete()?.companyCode }} / {{ storeToDelete()?.code }} - {{ storeToDelete()?.name }}]</strong>?
+        This action cannot be undone.
+      </p>
+
+      <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }">
+        <label [ngStyle]="{ fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-color)', opacity: '0.8' }">
+          Type <code [ngStyle]="{ color: 'var(--danger, #ef4444)', fontWeight: '700' }">DELETE</code> to confirm:
+        </label>
+        <input type="text"
+               placeholder="DELETE"
+               [value]="deleteInputText()"
+               (input)="deleteInputText.set($any($event.target).value)"
+               [ngStyle]="{
+                 background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+                 color: 'var(--input-text)', borderRadius: '8px', padding: '0.6rem 0.85rem',
+                 fontSize: '0.9rem', outline: 'none'
+               }" />
+      </div>
+
+      <div [ngStyle]="{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }">
+        <button type="button" (click)="closeDeleteModal()" [disabled]="deleting()" [ngStyle]="{
+            padding: '0.6rem 1.15rem', borderRadius: '8px', cursor: 'pointer',
+            fontSize: '0.88rem', fontWeight: '600', border: '1px solid var(--border-color)',
+            background: 'var(--card-bg)', color: 'var(--text-color)'
+          }">
+          Cancel
+        </button>
+
+        <button type="button" (click)="confirmDeleteModal()" [disabled]="deleteInputText().trim() !== 'DELETE' || deleting()" [ngStyle]="{
+            padding: '0.6rem 1.25rem', borderRadius: '8px', cursor: 'pointer',
+            fontSize: '0.88rem', fontWeight: '600', border: 'none',
+            background: 'var(--danger, #ef4444)', color: '#ffffff',
+            opacity: deleteInputText().trim() === 'DELETE' && !deleting() ? '1' : '0.45',
+            display: 'flex', alignItems: 'center', gap: '0.45rem'
+          }">
+          <i *ngIf="deleting()" class="pi pi-spin pi-spinner"></i>
+          <span>{{ deleting() ? 'Deleting...' : 'Delete Store' }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

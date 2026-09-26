@@ -23,6 +23,10 @@ DROP TABLE Users;
 
 DROP TABLE CountryMaster;
 
-DROP TABLE Company;
+DROP TABLE StoreAuditTrail;
+
+DROP TABLE Store;
 
 DROP TABLE CompanyAuditTrail;
+
+DROP TABLE Company;

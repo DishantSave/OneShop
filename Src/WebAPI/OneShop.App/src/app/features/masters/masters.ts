@@ -14,7 +14,7 @@ export class Masters implements OnInit {
 
   private allMenuItems = [
     { label: 'Company', icon: 'pi pi-building', route: 'company', screenKey: 'CompanyMaster' },
-    { label: 'Division', icon: 'pi pi-sitemap', route: 'division', screenKey: 'DivisionMaster' },
+    { label: 'Store', icon: 'pi pi-shop', route: 'store', screenKey: 'DivisionMaster' },
     { label: 'Customer', icon: 'pi pi-users', route: 'customers', screenKey: 'CustomerMaster' }
   ];
 

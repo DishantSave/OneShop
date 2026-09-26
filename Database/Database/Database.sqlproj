@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -86,5 +86,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="1.0.0.0\TableScripts\13.CreateTable_CompanyAuditTrail.sql" />
+    <None Include="1.0.0.0\TableScripts\14.CreateTable_Store.sql" />
+    <None Include="1.0.0.0\TableScripts\15.CreateTable_StoreAuditTrail.sql" />
+    <None Include="1.0.0.0\Triggers&amp;Functions\01.Trigger_Company_CascadeStatus.sql" />
   </ItemGroup>
 </Project>

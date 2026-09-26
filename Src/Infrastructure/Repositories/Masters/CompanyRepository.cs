@@ -1,4 +1,4 @@
-﻿using Application.Common.Tenant;
+using Application.Common.Tenant;
 using Application.DTOs.Masters.Company;
 using Application.GraphQL.Payloads;
 using Application.Interfaces.DataService;
@@ -357,6 +357,120 @@ public class CompanyRepository(IHttpContextAccessor httpContextAccessor) : IComp
                     },
                     transaction,
                     cancellationToken: cancellationToken));
+
+            if (current.CompanyDetails is not null)
+            {
+                var prevActive = current.CompanyDetails.IsActive;
+                var prevTest = current.CompanyDetails.IsTestCompany;
+
+                if (prevActive != isActive || prevTest != isTestCompany)
+                {
+                    const string cascadeStoreSql = """
+                    IF OBJECT_ID('dbo.Store', 'U') IS NOT NULL
+                    BEGIN
+                        IF @PrevActive = 1 AND @NewActive = 0
+                        BEGIN
+                            UPDATE dbo.Store
+                            SET OriginalIsActive = IsActive, IsActive = 0
+                            WHERE AccountId = @AccountId AND CompanyCode = @CompanyCode;
+                        END
+                        ELSE IF @PrevActive = 0 AND @NewActive = 1
+                        BEGIN
+                            UPDATE dbo.Store
+                            SET IsActive = OriginalIsActive
+                            WHERE AccountId = @AccountId AND CompanyCode = @CompanyCode;
+                        END
+
+                        IF @PrevTest = 0 AND @NewTest = 1
+                        BEGIN
+                            UPDATE dbo.Store
+                            SET OriginalIsTestStore = IsTestStore, IsTestStore = 1
+                            WHERE AccountId = @AccountId AND CompanyCode = @CompanyCode;
+                        END
+                        ELSE IF @PrevTest = 1 AND @NewTest = 0
+                        BEGIN
+                            UPDATE dbo.Store
+                            SET IsTestStore = OriginalIsTestStore
+                            WHERE AccountId = @AccountId AND CompanyCode = @CompanyCode;
+                        END
+                    END
+                    """;
+
+                    await db.ExecuteAsync(new CommandDefinition(
+                        cascadeStoreSql,
+                        new
+                        {
+                            AccountId = userAccountId,
+                            CompanyCode = companyCode,
+                            PrevActive = prevActive ? 1 : 0,
+                            NewActive = isActive ? 1 : 0,
+                            PrevTest = prevTest ? 1 : 0,
+                            NewTest = isTestCompany ? 1 : 0
+                        },
+                        transaction,
+                        cancellationToken: cancellationToken));
+
+                    if (prevActive != isActive)
+                    {
+                        var auditDesc = isActive
+                            ? $"Store reactivated to its original state following activation of parent Company [{companyCode}]."
+                            : $"Store deactivated following deactivation of parent Company [{companyCode}].";
+
+                        const string cascadeAuditSql = """
+                        IF OBJECT_ID('dbo.StoreAuditTrail', 'U') IS NOT NULL
+                        BEGIN
+                            INSERT INTO dbo.StoreAuditTrail (AccountId, CompanyCode, StoreCode, Field, Description, DateModified, ModifiedBy)
+                            SELECT AccountId, CompanyCode, Code, 'IsActive', @Description, @DateModified, @ModifiedBy
+                            FROM dbo.Store
+                            WHERE AccountId = @AccountId AND CompanyCode = @CompanyCode;
+                        END
+                        """;
+
+                        await db.ExecuteAsync(new CommandDefinition(
+                            cascadeAuditSql,
+                            new
+                            {
+                                AccountId = userAccountId,
+                                CompanyCode = companyCode,
+                                Description = auditDesc,
+                                DateModified = modificationTime,
+                                ModifiedBy = userName
+                            },
+                            transaction,
+                            cancellationToken: cancellationToken));
+                    }
+
+                    if (prevTest != isTestCompany)
+                    {
+                        var auditDesc = isTestCompany
+                            ? $"Store set to Sandbox following Sandbox activation on parent Company [{companyCode}]."
+                            : $"Store restored to production following Sandbox deactivation on parent Company [{companyCode}].";
+
+                        const string cascadeAuditSql = """
+                        IF OBJECT_ID('dbo.StoreAuditTrail', 'U') IS NOT NULL
+                        BEGIN
+                            INSERT INTO dbo.StoreAuditTrail (AccountId, CompanyCode, StoreCode, Field, Description, DateModified, ModifiedBy)
+                            SELECT AccountId, CompanyCode, Code, 'IsTestStore', @Description, @DateModified, @ModifiedBy
+                            FROM dbo.Store
+                            WHERE AccountId = @AccountId AND CompanyCode = @CompanyCode;
+                        END
+                        """;
+
+                        await db.ExecuteAsync(new CommandDefinition(
+                            cascadeAuditSql,
+                            new
+                            {
+                                AccountId = userAccountId,
+                                CompanyCode = companyCode,
+                                Description = auditDesc,
+                                DateModified = modificationTime,
+                                ModifiedBy = userName
+                            },
+                            transaction,
+                            cancellationToken: cancellationToken));
+                    }
+                }
+            }
 
             transaction.Commit();
 

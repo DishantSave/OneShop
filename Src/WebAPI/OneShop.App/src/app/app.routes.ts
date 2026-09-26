@@ -11,6 +11,9 @@ import { Masters } from './features/masters/masters';
 import { CompanyMaster } from './features/company/company-master/company-master';
 import { CompanyForm } from './features/company/company-form/company-form';
 import { CompanyList } from './features/company/company-list/company-list';
+import { StoreMaster } from './features/store/store-master/store-master';
+import { StoreForm } from './features/store/store-form/store-form';
+import { StoreList } from './features/store/store-list/store-list';
 
 export const routes: Routes = [
   {
@@ -66,9 +69,22 @@ export const routes: Routes = [
               { path: ':code', component: CompanyForm }
             ]
           },
-          // { path: 'division', component: DivisionMaster },
+          {
+            path: 'store',
+            component: StoreMaster,
+            children: [
+              { path: '', component: StoreList },
+              { path: 'new', component: StoreForm },
+              { path: ':companyCode/:code', component: StoreForm }
+            ]
+          },
+          {
+            path: 'division',
+            redirectTo: 'store',
+            pathMatch: 'full'
+          },
           // { path: 'customers', component: CustomerMaster }
-          // ...division, customers, etc.
+          // ...customers, etc.
         ]
       }
       // add more child routes here as you build them out:
