@@ -1,343 +1,531 @@
-<div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '900px' }">
+<div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '960px', margin: '0 auto', paddingBottom: '3rem' }">
 
-  <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }">
-    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem' }">
+  <!-- Header & Action Bar -->
+  <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }">
+    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.85rem' }">
       <button type="button"
               (click)="cancel()"
               [ngStyle]="{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                width: '38px',
-                height: '38px',
-                borderRadius: '8px',
+                width: '40px',
+                height: '40px',
+                borderRadius: '10px',
                 flexShrink: '0',
                 background: 'var(--card-bg)',
                 border: '1px solid var(--border-color)',
                 color: 'var(--text-color)',
                 cursor: 'pointer',
-                padding: '0'
-              }">
+                transition: 'all 0.2s ease'
+              }"
+              title="Back to Company Master">
         <i class="pi pi-arrow-left"></i>
       </button>
       <div>
-        <h2 [ngStyle]="{ margin: '0', fontSize: '1.35rem', fontWeight: '700', color: 'var(--text-color)' }">
-          {{ isEditMode ? 'Edit company' : 'New company' }}
-        </h2>
-        <span *ngIf="isEditMode" [ngStyle]="{ fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.65' }">
-          Code: {{ companyCode }}
+        <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
+          <h2 [ngStyle]="{ margin: '0', fontSize: '1.4rem', fontWeight: '700', color: 'var(--text-color)' }">
+            {{ isEditMode ? 'Edit Company' : 'New Company Setup' }}
+          </h2>
+          <span *ngIf="isEditMode" [ngStyle]="{
+            padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '700',
+            background: 'var(--sidebar-link-active-bg)', color: '#ffffff'
+          }">{{ companyCode }}</span>
+        </div>
+        <span [ngStyle]="{ fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.65' }">
+          {{ isEditMode ? 'Update company configuration, contact data, and view audit history' : 'Configure enterprise entity, operational currencies, and tenant properties' }}
         </span>
       </div>
     </div>
 
-    <span *ngIf="isEditMode && !permissions().canEdit" [ngStyle]="{
-        padding: '0.35rem 0.75rem', borderRadius: '999px', fontSize: '0.78rem', fontWeight: '600',
-        border: '1px solid var(--warning-color, #b8860b)', color: 'var(--warning-color, #b8860b)'
-      }">View only</span>
+    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem' }">
+      <span *ngIf="isEditMode && !permissions().canEdit" [ngStyle]="{
+          padding: '0.4rem 0.85rem', borderRadius: '999px', fontSize: '0.8rem', fontWeight: '600',
+          border: '1px solid var(--warning-color, #b8860b)', color: 'var(--warning-color, #b8860b)'
+        }">View Only</span>
+
+      <button type="button" (click)="cancel()" [ngStyle]="{
+          padding: '0.65rem 1.1rem', borderRadius: '8px', cursor: 'pointer',
+          fontSize: '0.9rem', fontWeight: '600', border: '1px solid var(--border-color)',
+          background: 'var(--card-bg)', color: 'var(--text-color)'
+        }">
+        Cancel
+      </button>
+
+      <button *ngIf="canSubmit()" type="button" (click)="submit()" [disabled]="saving()" [ngStyle]="{
+          display: 'flex', alignItems: 'center', gap: '0.5rem',
+          padding: '0.65rem 1.3rem', borderRadius: '8px', cursor: saving() ? 'not-allowed' : 'pointer',
+          fontSize: '0.9rem', fontWeight: '600', border: 'none',
+          background: 'var(--sidebar-link-active-bg, #05517e)', color: '#ffffff',
+          opacity: saving() ? '0.7' : '1', transition: 'all 0.2s ease',
+          boxShadow: '0 4px 12px rgba(5, 81, 126, 0.25)'
+        }">
+        <i *ngIf="saving()" class="pi pi-spin pi-spinner"></i>
+        <i *ngIf="!saving()" class="pi pi-check"></i>
+        <span>{{ saving() ? 'Saving…' : (isEditMode ? 'Save Changes' : 'Create Company') }}</span>
+      </button>
+    </div>
   </div>
 
-  <form [formGroup]="form" [ngStyle]="{
+  <!-- Loading State -->
+  <div *ngIf="loading()" [ngStyle]="{
+      padding: '3rem 1rem', textAlign: 'center', color: 'var(--text-color)',
+      background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '12px'
+    }">
+    <i class="pi pi-spin pi-spinner" [ngStyle]="{ fontSize: '1.75rem', marginBottom: '0.5rem', color: 'var(--sidebar-link-active-bg)' }"></i>
+    <div>Loading company details…</div>
+  </div>
+
+  <!-- Main Form -->
+  <form *ngIf="!loading()" [formGroup]="form" [ngStyle]="{
       display: 'flex', flexDirection: 'column', gap: '1.75rem',
       background: 'var(--card-bg)', border: '1px solid var(--border-color)',
-      borderRadius: '12px', padding: '1.5rem'
+      borderRadius: '14px', padding: '1.75rem', boxShadow: 'var(--shadow-sm, 0 4px 20px rgba(0,0,0,0.04))'
     }">
 
-    <!-- Logo Section -->
-    <section>
-      <div [ngStyle]="{ fontSize: '0.78rem', fontWeight: '700', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-color)', opacity: '0.55', marginBottom: '0.75rem' }">Company Logo</div>
+    <!-- Section 1: Logo & Branding -->
+    <section [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }">
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }">
+        <i class="pi pi-image" [ngStyle]="{ color: 'var(--sidebar-link-active-bg)' }"></i>
+        <span [ngStyle]="{ fontSize: '0.85rem', fontWeight: '700', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-color)' }">
+          Company Logo & Branding
+        </span>
+      </div>
 
-      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '1.25rem', alignItems: 'center' }">
+      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '130px 1fr', gap: '1.5rem', alignItems: 'center' }">
         <!-- Logo Preview Box -->
         <div [ngStyle]="{
-            width: '120px', height: '120px', borderRadius: '10px',
-            border: '1px solid var(--border-color)', background: 'var(--input-bg)',
+            width: '130px', height: '130px', borderRadius: '12px',
+            border: '2px solid var(--border-color)', background: 'var(--input-bg)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            overflow: 'hidden', position: 'relative', flexShrink: '0'
+            overflow: 'hidden', position: 'relative', flexShrink: '0',
+            boxShadow: 'inset 0 2px 6px rgba(0,0,0,0.03)'
           }">
           <img *ngIf="logoPreview()" [src]="logoPreview()" alt="Logo preview" [ngStyle]="{ width: '100%', height: '100%', objectFit: 'contain' }" />
-          <i *ngIf="!logoPreview()" class="pi pi-building" [ngStyle]="{ fontSize: '2rem', color: 'var(--text-color)', opacity: '0.3' }"></i>
+          <div *ngIf="!logoPreview()" [ngStyle]="{ textAlign: 'center', color: 'var(--text-color)', opacity: '0.35' }">
+            <i class="pi pi-building" [ngStyle]="{ fontSize: '2.5rem', display: 'block', marginBottom: '0.25rem' }"></i>
+            <span [ngStyle]="{ fontSize: '0.75rem' }">No Logo</span>
+          </div>
         </div>
 
-        <!-- Upload Options (Drag & Drop or URL) -->
-        <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }">
-
-          <!-- Local File / Drag & Drop -->
-          <div (dragover)="$event.preventDefault()" (drop)="onFileDropped($event)" [ngStyle]="{
-              border: '2px dashed var(--border-color)', borderRadius: '8px',
-              padding: '1rem', textAlign: 'center', background: 'var(--input-bg)',
+        <!-- Upload Options -->
+        <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }">
+          <div (dragover)="$event.preventDefault()" (drop)="onFileDropped($event)" (click)="fileInput.click()" [ngStyle]="{
+              border: '2px dashed var(--border-color)', borderRadius: '10px',
+              padding: '1.1rem', textAlign: 'center', background: 'var(--input-bg)',
               cursor: 'pointer', transition: 'all 0.2s ease'
-            }" (click)="fileInput.click()">
+            }">
             <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" style="display: none;" />
-            <div [ngStyle]="{ fontSize: '0.85rem', color: 'var(--text-color)' }">
-              <i class="pi pi-cloud-upload" [ngStyle]="{ fontSize: '1.2rem', marginBottom: '0.25rem', display: 'block', color: 'var(--navbar-link-active)' }"></i>
-              <span>Drag & drop logo here, or <span [ngStyle]="{ color: 'var(--navbar-link-active)', fontWeight: '600' }">browse</span></span>
+            <div [ngStyle]="{ fontSize: '0.88rem', color: 'var(--text-color)' }">
+              <i class="pi pi-cloud-upload" [ngStyle]="{ fontSize: '1.4rem', marginBottom: '0.3rem', display: 'block', color: 'var(--sidebar-link-active-bg)' }"></i>
+              <span>Drag & drop logo file here, or <strong [ngStyle]="{ color: 'var(--sidebar-link-active-bg)' }">browse</strong></span>
+              <div [ngStyle]="{ fontSize: '0.75rem', opacity: '0.6', marginTop: '0.25rem' }">PNG, JPG, SVG, WebP up to 2MB</div>
             </div>
           </div>
 
-          <!-- Logo URL Option -->
           <div [ngStyle]="{ display: 'flex', gap: '0.5rem', alignItems: 'center' }">
-            <input formControlName="logoUrl" (input)="onUrlInput($event)" placeholder="Or paste logo image URL (https://...)" [ngStyle]="{
-                width: '100%', boxSizing: 'border-box',
-                background: 'var(--input-bg)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none', fontSize: '0.85rem'
+            <input formControlName="logo" (input)="onUrlInput($event)" placeholder="Or paste external logo image URL (https://...)" [ngStyle]="{
+                flex: '1', boxSizing: 'border-box',
+                background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+                borderRadius: '8px', padding: '0.65rem 0.85rem', color: 'var(--input-text)', outline: 'none', fontSize: '0.85rem'
               }" />
             <button *ngIf="logoPreview()" type="button" (click)="clearLogo()" [ngStyle]="{
-                padding: '0.6rem 0.8rem', borderRadius: '8px', border: '1px solid var(--border-color)',
-                background: 'transparent', color: 'var(--danger-color, #c62828)', cursor: 'pointer', fontSize: '0.85rem'
+                padding: '0.65rem 0.9rem', borderRadius: '8px', border: '1px solid var(--border-color)',
+                background: 'transparent', color: 'var(--danger, #ef4444)', cursor: 'pointer', fontSize: '0.85rem'
               }" title="Remove logo">
               <i class="pi pi-trash"></i>
             </button>
           </div>
-
         </div>
       </div>
     </section>
 
-    <!-- Identity -->
-    <section>
-      <div [ngStyle]="{ fontSize: '0.78rem', fontWeight: '700', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-color)', opacity: '0.55', marginBottom: '0.75rem' }">Identity</div>
-      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '90px 1fr 1fr', gap: '0.9rem' }">
-        <div>
-          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Code *</label>
-          <input formControlName="code" maxlength="2" placeholder="IN" [ngStyle]="{
-              width: '100%', boxSizing: 'border-box', textTransform: 'uppercase',
-              background: 'var(--input-bg)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
-            }" />
-          <small *ngIf="fieldInvalid('code')" [ngStyle]="{ color: 'var(--danger-color, #c62828)' }">2 characters</small>
-        </div>
-        <div>
-          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Legal name *</label>
-          <input formControlName="name" placeholder="AMTERP Solutions India Ltd." [ngStyle]="{
-              width: '100%', boxSizing: 'border-box',
-              background: 'var(--input-bg)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
-            }" />
-          <small *ngIf="fieldInvalid('name')" [ngStyle]="{ color: 'var(--danger-color, #c62828)' }">Required</small>
-        </div>
-        <div>
-          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Display name *</label>
-          <input formControlName="displayName" placeholder="AMTERP India" [ngStyle]="{
-              width: '100%', boxSizing: 'border-box',
-              background: 'var(--input-bg)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
-            }" />
-          <small *ngIf="fieldInvalid('displayName')" [ngStyle]="{ color: 'var(--danger-color, #c62828)' }">Required</small>
-        </div>
+    <!-- Section 2: Identity -->
+    <section [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }">
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }">
+        <i class="pi pi-id-card" [ngStyle]="{ color: 'var(--sidebar-link-active-bg)' }"></i>
+        <span [ngStyle]="{ fontSize: '0.85rem', fontWeight: '700', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-color)' }">
+          Identity & Legal Information
+        </span>
       </div>
-    </section>
 
-    <!-- Address -->
-    <section>
-      <div [ngStyle]="{ fontSize: '0.78rem', fontWeight: '700', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-color)', opacity: '0.55', marginBottom: '0.75rem' }">Address</div>
-      <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }">
+      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '120px 1fr 1fr', gap: '1rem', alignItems: 'start' }">
+        <!-- Code Field -->
         <div>
-          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Address line 1 *</label>
-          <input formControlName="addressLine1" [ngStyle]="{
-              width: '100%', boxSizing: 'border-box',
-              background: 'var(--input-bg)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
-            }" />
-          <small *ngIf="fieldInvalid('addressLine1')" [ngStyle]="{ color: 'var(--danger-color, #c62828)' }">Required</small>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.35rem' }">
+            Code <span style="color: var(--danger, #ef4444)">*</span>
+          </label>
+          <div [ngStyle]="{ position: 'relative' }">
+            <input formControlName="code"
+                   maxlength="2"
+                   (blur)="onCodeBlur()"
+                   placeholder="e.g. US"
+                   [ngStyle]="{
+                     width: '100%', boxSizing: 'border-box',
+                     background: isEditMode ? 'rgba(0,0,0,0.03)' : 'var(--input-bg)',
+                     border: (fieldInvalid('code') || codeAvailability() === 'taken') ? '1px solid var(--danger, #ef4444)' : '1px solid var(--border-color)',
+                     borderRadius: '8px', padding: '0.65rem 0.75rem',
+                     color: 'var(--input-text)', outline: 'none', fontSize: '0.95rem', fontWeight: '700',
+                     textTransform: 'uppercase', letterSpacing: '0.1em'
+                   }" />
+            <i *ngIf="checkingCode()" class="pi pi-spin pi-spinner" [ngStyle]="{
+                position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)',
+                color: 'var(--sidebar-link-active-bg)', fontSize: '0.85rem'
+              }"></i>
+          </div>
+
+          <!-- Code Availability Status Pill -->
+          <div *ngIf="!isEditMode && codeAvailability() === 'available'" [ngStyle]="{
+              fontSize: '0.75rem', color: 'var(--success, #22c55e)', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.25rem'
+            }">
+            <i class="pi pi-check-circle"></i> Code available
+          </div>
+          <div *ngIf="!isEditMode && (codeAvailability() === 'taken' || form.get('code')?.hasError('codeTaken'))" [ngStyle]="{
+              fontSize: '0.75rem', color: 'var(--danger, #ef4444)', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.25rem'
+            }">
+            <i class="pi pi-times-circle"></i> Code already taken
+          </div>
+          <div *ngIf="fieldInvalid('code') && !form.get('code')?.hasError('codeTaken')" [ngStyle]="{
+              fontSize: '0.75rem', color: 'var(--danger, #ef4444)', marginTop: '0.25rem'
+            }">
+            Must be 2 alphanumeric chars.
+          </div>
         </div>
+
+        <!-- Name Field -->
         <div>
-          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Address line 2</label>
-          <input formControlName="addressLine2" [ngStyle]="{
-              width: '100%', boxSizing: 'border-box',
-              background: 'var(--input-bg)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
-            }" />
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.35rem' }">
+            Legal Company Name <span style="color: var(--danger, #ef4444)">*</span>
+          </label>
+          <input formControlName="name"
+                 placeholder="e.g. Acme Corporation Pvt Ltd"
+                 [ngStyle]="{
+                   width: '100%', boxSizing: 'border-box',
+                   background: 'var(--input-bg)',
+                   border: fieldInvalid('name') ? '1px solid var(--danger, #ef4444)' : '1px solid var(--border-color)',
+                   borderRadius: '8px', padding: '0.65rem 0.85rem', color: 'var(--input-text)', outline: 'none', fontSize: '0.9rem'
+                 }" />
+          <div *ngIf="fieldInvalid('name')" [ngStyle]="{ fontSize: '0.75rem', color: 'var(--danger, #ef4444)', marginTop: '0.25rem' }">
+            Company name is required.
+          </div>
         </div>
-        <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '0.9rem' }">
-          <div>
-            <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">City *</label>
-            <input formControlName="city" [ngStyle]="{
-                width: '100%', boxSizing: 'border-box',
-                background: 'var(--input-bg)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
-              }" />
-          </div>
-          <div>
-            <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">State *</label>
-            <input formControlName="stateCode" [ngStyle]="{
-                width: '100%', boxSizing: 'border-box',
-                background: 'var(--input-bg)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
-              }" />
-          </div>
-          <div>
-            <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Country *</label>
-            <select formControlName="countryCode" [ngStyle]="{
-                width: '100%', boxSizing: 'border-box',
-                background: 'var(--input-bg)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
-              }">
-              <option value="" disabled>Select</option>
-              <option *ngFor="let c of countryOptions" [value]="c.value">{{ c.label }}</option>
-            </select>
-          </div>
-          <div>
-            <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Postal code *</label>
-            <input formControlName="postalCode" [ngStyle]="{
-                width: '100%', boxSizing: 'border-box',
-                background: 'var(--input-bg)',
-                border: '1px solid var(--border-color)',
-                borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
-              }" />
+
+        <!-- Display Name Field -->
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.35rem' }">
+            Brand / Display Name <span style="color: var(--danger, #ef4444)">*</span>
+          </label>
+          <input formControlName="displayName"
+                 placeholder="e.g. Acme Stores"
+                 [ngStyle]="{
+                   width: '100%', boxSizing: 'border-box',
+                   background: 'var(--input-bg)',
+                   border: fieldInvalid('displayName') ? '1px solid var(--danger, #ef4444)' : '1px solid var(--border-color)',
+                   borderRadius: '8px', padding: '0.65rem 0.85rem', color: 'var(--input-text)', outline: 'none', fontSize: '0.9rem'
+                 }" />
+          <div *ngIf="fieldInvalid('displayName')" [ngStyle]="{ fontSize: '0.75rem', color: 'var(--danger, #ef4444)', marginTop: '0.25rem' }">
+            Display name is required.
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Contact -->
-    <section>
-      <div [ngStyle]="{ fontSize: '0.78rem', fontWeight: '700', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-color)', opacity: '0.55', marginBottom: '0.75rem' }">Contact</div>
-      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.9rem' }">
+    <!-- Section 3: Location & Address -->
+    <section [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }">
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }">
+        <i class="pi pi-map-marker" [ngStyle]="{ color: 'var(--sidebar-link-active-bg)' }"></i>
+        <span [ngStyle]="{ fontSize: '0.85rem', fontWeight: '700', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-color)' }">
+          Address & Location
+        </span>
+      </div>
+
+      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }">
         <div>
-          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Phone *</label>
-          <input formControlName="contact" [ngStyle]="{
-              width: '100%', boxSizing: 'border-box',
-              background: 'var(--input-bg)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
-            }" />
-          <small *ngIf="fieldInvalid('contact')" [ngStyle]="{ color: 'var(--danger-color, #c62828)' }">Min 10 digits</small>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.35rem' }">
+            Address Line 1 <span style="color: var(--danger, #ef4444)">*</span>
+          </label>
+          <input formControlName="addressLine1"
+                 placeholder="Street, Building No."
+                 [ngStyle]="{
+                   width: '100%', boxSizing: 'border-box',
+                   background: 'var(--input-bg)',
+                   border: fieldInvalid('addressLine1') ? '1px solid var(--danger, #ef4444)' : '1px solid var(--border-color)',
+                   borderRadius: '8px', padding: '0.65rem 0.85rem', color: 'var(--input-text)', outline: 'none', fontSize: '0.9rem'
+                 }" />
+          <div *ngIf="fieldInvalid('addressLine1')" [ngStyle]="{ fontSize: '0.75rem', color: 'var(--danger, #ef4444)', marginTop: '0.25rem' }">
+            Address line 1 is required.
+          </div>
         </div>
+
         <div>
-          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Email *</label>
-          <input formControlName="email" [ngStyle]="{
-              width: '100%', boxSizing: 'border-box',
-              background: 'var(--input-bg)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
-            }" />
-          <small *ngIf="fieldInvalid('email')" [ngStyle]="{ color: 'var(--danger-color, #c62828)' }">Valid email required</small>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.35rem' }">
+            Address Line 2 (Optional)
+          </label>
+          <input formControlName="addressLine2"
+                 placeholder="Suite, Floor, Landmark"
+                 [ngStyle]="{
+                   width: '100%', boxSizing: 'border-box',
+                   background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+                   borderRadius: '8px', padding: '0.65rem 0.85rem', color: 'var(--input-text)', outline: 'none', fontSize: '0.9rem'
+                 }" />
         </div>
+      </div>
+
+      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr 1fr', gap: '1rem' }">
         <div>
-          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Website</label>
-          <input formControlName="website" placeholder="https://" [ngStyle]="{
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.35rem' }">
+            City <span style="color: var(--danger, #ef4444)">*</span>
+          </label>
+          <input formControlName="city"
+                 placeholder="e.g. Mumbai"
+                 [ngStyle]="{
+                   width: '100%', boxSizing: 'border-box',
+                   background: 'var(--input-bg)',
+                   border: fieldInvalid('city') ? '1px solid var(--danger, #ef4444)' : '1px solid var(--border-color)',
+                   borderRadius: '8px', padding: '0.65rem 0.85rem', color: 'var(--input-text)', outline: 'none', fontSize: '0.9rem'
+                 }" />
+          <div *ngIf="fieldInvalid('city')" [ngStyle]="{ fontSize: '0.75rem', color: 'var(--danger, #ef4444)', marginTop: '0.25rem' }">
+            City is required.
+          </div>
+        </div>
+
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.35rem' }">
+            State Code <span style="color: var(--danger, #ef4444)">*</span>
+          </label>
+          <input formControlName="stateCode"
+                 placeholder="e.g. MH / NY"
+                 [ngStyle]="{
+                   width: '100%', boxSizing: 'border-box',
+                   background: 'var(--input-bg)',
+                   border: fieldInvalid('stateCode') ? '1px solid var(--danger, #ef4444)' : '1px solid var(--border-color)',
+                   borderRadius: '8px', padding: '0.65rem 0.85rem', color: 'var(--input-text)', outline: 'none', fontSize: '0.9rem'
+                 }" />
+          <div *ngIf="fieldInvalid('stateCode')" [ngStyle]="{ fontSize: '0.75rem', color: 'var(--danger, #ef4444)', marginTop: '0.25rem' }">
+            State is required.
+          </div>
+        </div>
+
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.35rem' }">
+            Country <span style="color: var(--danger, #ef4444)">*</span>
+          </label>
+          <select formControlName="countryCode" [ngStyle]="{
               width: '100%', boxSizing: 'border-box',
               background: 'var(--input-bg)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
-            }" />
+              border: fieldInvalid('countryCode') ? '1px solid var(--danger, #ef4444)' : '1px solid var(--border-color)',
+              borderRadius: '8px', padding: '0.65rem 0.85rem', color: 'var(--input-text)', outline: 'none', fontSize: '0.9rem'
+            }">
+            <option *ngFor="let opt of countryOptions" [value]="opt.value">{{ opt.label }}</option>
+          </select>
+        </div>
+
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.35rem' }">
+            Postal / ZIP <span style="color: var(--danger, #ef4444)">*</span>
+          </label>
+          <input formControlName="postalCode"
+                 placeholder="e.g. 400001"
+                 [ngStyle]="{
+                   width: '100%', boxSizing: 'border-box',
+                   background: 'var(--input-bg)',
+                   border: fieldInvalid('postalCode') ? '1px solid var(--danger, #ef4444)' : '1px solid var(--border-color)',
+                   borderRadius: '8px', padding: '0.65rem 0.85rem', color: 'var(--input-text)', outline: 'none', fontSize: '0.9rem'
+                 }" />
+          <div *ngIf="fieldInvalid('postalCode')" [ngStyle]="{ fontSize: '0.75rem', color: 'var(--danger, #ef4444)', marginTop: '0.25rem' }">
+            Postal code is required.
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- Regional -->
-    <section>
-      <div [ngStyle]="{ fontSize: '0.78rem', fontWeight: '700', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-color)', opacity: '0.55', marginBottom: '0.75rem' }">Regional settings</div>
-      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.9rem' }">
+    <!-- Section 4: Contact & Online Presence -->
+    <section [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }">
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }">
+        <i class="pi pi-phone" [ngStyle]="{ color: 'var(--sidebar-link-active-bg)' }"></i>
+        <span [ngStyle]="{ fontSize: '0.85rem', fontWeight: '700', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-color)' }">
+          Contact Details & Web Presence
+        </span>
+      </div>
+
+      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }">
         <div>
-          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Currency</label>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.35rem' }">
+            Primary Contact <span style="color: var(--danger, #ef4444)">*</span>
+          </label>
+          <input formControlName="contact"
+                 placeholder="+91 9876543210"
+                 [ngStyle]="{
+                   width: '100%', boxSizing: 'border-box',
+                   background: 'var(--input-bg)',
+                   border: fieldInvalid('contact') ? '1px solid var(--danger, #ef4444)' : '1px solid var(--border-color)',
+                   borderRadius: '8px', padding: '0.65rem 0.85rem', color: 'var(--input-text)', outline: 'none', fontSize: '0.9rem'
+                 }" />
+          <div *ngIf="fieldInvalid('contact')" [ngStyle]="{ fontSize: '0.75rem', color: 'var(--danger, #ef4444)', marginTop: '0.25rem' }">
+            Valid phone number (min 10 digits) is required.
+          </div>
+        </div>
+
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.35rem' }">
+            Official Email <span style="color: var(--danger, #ef4444)">*</span>
+          </label>
+          <input formControlName="email"
+                 type="email"
+                 placeholder="contact@company.com"
+                 [ngStyle]="{
+                   width: '100%', boxSizing: 'border-box',
+                   background: 'var(--input-bg)',
+                   border: fieldInvalid('email') ? '1px solid var(--danger, #ef4444)' : '1px solid var(--border-color)',
+                   borderRadius: '8px', padding: '0.65rem 0.85rem', color: 'var(--input-text)', outline: 'none', fontSize: '0.9rem'
+                 }" />
+          <div *ngIf="fieldInvalid('email')" [ngStyle]="{ fontSize: '0.75rem', color: 'var(--danger, #ef4444)', marginTop: '0.25rem' }">
+            Valid email address is required.
+          </div>
+        </div>
+
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.35rem' }">
+            Website (Optional)
+          </label>
+          <input formControlName="website"
+                 placeholder="https://company.com"
+                 [ngStyle]="{
+                   width: '100%', boxSizing: 'border-box',
+                   background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+                   borderRadius: '8px', padding: '0.65rem 0.85rem', color: 'var(--input-text)', outline: 'none', fontSize: '0.9rem'
+                 }" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Regional & System Flags -->
+    <section [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }">
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }">
+        <i class="pi pi-cog" [ngStyle]="{ color: 'var(--sidebar-link-active-bg)' }"></i>
+        <span [ngStyle]="{ fontSize: '0.85rem', fontWeight: '700', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-color)' }">
+          ERP & Operational Settings
+        </span>
+      </div>
+
+      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }">
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.35rem' }">
+            Base Currency <span style="color: var(--danger, #ef4444)">*</span>
+          </label>
           <select formControlName="currencyCode" [ngStyle]="{
               width: '100%', boxSizing: 'border-box',
               background: 'var(--input-bg)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
+              border: fieldInvalid('currencyCode') ? '1px solid var(--danger, #ef4444)' : '1px solid var(--border-color)',
+              borderRadius: '8px', padding: '0.65rem 0.85rem', color: 'var(--input-text)', outline: 'none', fontSize: '0.9rem'
             }">
-            <option value="">Select</option>
-            <option *ngFor="let c of currencyOptions" [value]="c.value">{{ c.label }}</option>
+            <option *ngFor="let curr of currencyOptions" [value]="curr.value">{{ curr.label }}</option>
           </select>
         </div>
+
         <div>
-          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', marginBottom: '0.35rem', color: 'var(--text-color)' }">Time zone</label>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.35rem' }">
+            Operating Time Zone <span style="color: var(--danger, #ef4444)">*</span>
+          </label>
           <select formControlName="timeZone" [ngStyle]="{
               width: '100%', boxSizing: 'border-box',
               background: 'var(--input-bg)',
-              border: '1px solid var(--border-color)',
-              borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)', outline: 'none'
+              border: fieldInvalid('timeZone') ? '1px solid var(--danger, #ef4444)' : '1px solid var(--border-color)',
+              borderRadius: '8px', padding: '0.65rem 0.85rem', color: 'var(--input-text)', outline: 'none', fontSize: '0.9rem'
             }">
-            <option value="">Select</option>
-            <option *ngFor="let t of timeZoneOptions" [value]="t.value">{{ t.label }}</option>
+            <option *ngFor="let tz of timeZoneOptions" [value]="tz.value">{{ tz.label }}</option>
           </select>
         </div>
       </div>
-    </section>
 
-    <!-- Flags -->
-    <section [ngStyle]="{ display: 'flex', gap: '2rem' }">
-      <label [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }">
-        <input type="checkbox" formControlName="isActive" [ngStyle]="{ width: '18px', height: '18px', accentColor: 'var(--navbar-link-active)' }" />
-        <span [ngStyle]="{ color: 'var(--text-color)', fontSize: '0.9rem' }">Active</span>
-      </label>
-      <label [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }">
-        <input type="checkbox" formControlName="isTestCompany" [ngStyle]="{ width: '18px', height: '18px', accentColor: 'var(--navbar-link-active)' }" />
-        <span [ngStyle]="{ color: 'var(--text-color)', fontSize: '0.9rem' }">Test company</span>
-      </label>
-    </section>
-
-    <!-- Actions -->
-    <div [ngStyle]="{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem' }">
-      <button type="button" (click)="cancel()" [ngStyle]="{
-              padding: '0.7rem 1.1rem', borderRadius: '8px', cursor: 'pointer',
-              fontSize: '0.9rem', fontWeight: '600',
-              background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-color)'
-            }">
-        {{ canSubmit() ? 'Cancel' : 'Back' }}
-      </button>
-      <button *ngIf="canSubmit()" type="button" (click)="submit()" [disabled]="saving()" [ngStyle]="{
-              display: 'flex', alignItems: 'center', gap: '0.5rem',
-              padding: '0.7rem 1.1rem', borderRadius: '8px', cursor: 'pointer',
-              fontSize: '0.9rem', fontWeight: '600', border: 'none',
-              background: 'var(--card-header-bg)', color: 'var(--card-header-text-color)',
-              opacity: saving() ? '0.7' : '1'
-            }">
-        <i class="pi" [ngClass]="saving() ? 'pi-spin pi-spinner' : 'pi-check'"></i>
-        <span>{{ isEditMode ? 'Save changes' : 'Create company' }}</span>
-      </button>
-    </div>
-  </form>
-
-  <!-- Audit trail — edit mode only -->
-  <div *ngIf="isEditMode" [ngStyle]="{
-      background: 'var(--card-bg)', border: '1px solid var(--border-color)',
-      borderRadius: '12px', overflow: 'hidden'
-    }">
-    <div [ngStyle]="{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '1rem 1.25rem', borderBottom: '1px solid var(--border-color)'
-      }">
-      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
-        <i class="pi pi-history" [ngStyle]="{ color: 'var(--text-color)', opacity: '0.6' }"></i>
-        <span [ngStyle]="{ fontWeight: '600', color: 'var(--text-color)' }">Activity for {{ companyCode }}</span>
-      </div>
-      <span [ngStyle]="{ fontSize: '0.8rem', color: 'var(--text-color)', opacity: '0.6' }">Last {{ auditTrail().length }} of 20</span>
-    </div>
-
-    <div *ngIf="auditTrail().length; else noAudit">
-      <div *ngFor="let entry of auditTrail(); let last = last" [ngStyle]="{
-           display: 'flex', gap: '0.9rem', padding: '0.85rem 1.25rem',
-           borderBottom: last ? 'none' : '1px solid var(--border-color)'
-          }">
-        <div [ngStyle]="{
-            width: '32px', height: '32px', borderRadius: '50%', flexShrink: '0',
-            border: '1px solid var(--border-color)', color: 'var(--text-color)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '0.7rem', fontWeight: '700'
-          }"><i class="pi pi-pencil" [ngStyle]="{ fontSize: '0.75rem', opacity: '0.7' }"></i></div>
-        <div [ngStyle]="{ flex: '1 1 auto', minWidth: '0' }">
-          <div [ngStyle]="{ color: 'var(--text-color)', fontSize: '0.9rem' }">{{ entry.description }}</div>
-          <div [ngStyle]="{ fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.6', marginTop: '0.15rem' }">
-            {{ entry.field }} · {{ entry.modifiedBy }} · {{ entry.dateModified | date:'MMM d, y, h:mm a' }}
+      <div [ngStyle]="{ display: 'flex', gap: '2rem', marginTop: '0.5rem', flexWrap: 'wrap' }">
+        <!-- Active Switch -->
+        <label [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer' }">
+          <input type="checkbox" formControlName="isActive" [ngStyle]="{ width: '18px', height: '18px', cursor: 'pointer' }" />
+          <div>
+            <span [ngStyle]="{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-color)' }">Active Company</span>
+            <div [ngStyle]="{ fontSize: '0.75rem', opacity: '0.65' }">Eligible for transaction posting & orders</div>
           </div>
+        </label>
+
+        <!-- Test / Sandbox Switch -->
+        <label [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.65rem', cursor: 'pointer' }">
+          <input type="checkbox" formControlName="isTestCompany" [ngStyle]="{ width: '18px', height: '18px', cursor: 'pointer' }" />
+          <div>
+            <span [ngStyle]="{ fontSize: '0.9rem', fontWeight: '600', color: 'var(--text-color)' }">Test / Sandbox Environment</span>
+            <div [ngStyle]="{ fontSize: '0.75rem', opacity: '0.65' }">Used for trials, testing & QA verification</div>
+          </div>
+        </label>
+      </div>
+    </section>
+
+    <!-- Section 6: SAP Audit Trail (Edit Mode Only) -->
+    <section *ngIf="isEditMode" [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }">
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }">
+        <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
+          <i class="pi pi-history" [ngStyle]="{ color: 'var(--sidebar-link-active-bg)' }"></i>
+          <span [ngStyle]="{ fontSize: '0.85rem', fontWeight: '700', letterSpacing: '0.04em', textTransform: 'uppercase', color: 'var(--text-color)' }">
+            SAP-Grade Audit Trail & Revision History
+          </span>
         </div>
+        <span [ngStyle]="{ fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.6' }">
+          {{ auditTrail().length }} revision{{ auditTrail().length === 1 ? '' : 's' }} logged
+        </span>
       </div>
-    </div>
-    <ng-template #noAudit>
-      <div [ngStyle]="{ padding: '2rem 1rem', textAlign: 'center', color: 'var(--text-color)', opacity: '0.6' }">
-        No activity recorded for this company yet.
+
+      <!-- No Revisions Found -->
+      <div *ngIf="auditTrail().length === 0" [ngStyle]="{
+          padding: '1.5rem', textAlign: 'center', color: 'var(--text-color)', opacity: '0.6',
+          border: '1px dashed var(--border-color)', borderRadius: '8px', fontSize: '0.85rem'
+        }">
+        No audit records logged yet for this company.
       </div>
-    </ng-template>
-  </div>
+
+      <!-- Revision Timeline Table -->
+      <div *ngIf="auditTrail().length > 0" [ngStyle]="{
+          border: '1px solid var(--border-color)', borderRadius: '10px', overflow: 'hidden'
+        }">
+        <table [ngStyle]="{ width: '100%', borderCollapse: 'collapse', fontSize: '0.83rem', textAlign: 'left', tableLayout: 'fixed' }">
+          <colgroup>
+            <col style="width: 22%;" />
+            <col style="width: 16%;" />
+            <col style="width: 24%;" />
+            <col style="width: 38%;" />
+          </colgroup>
+          <thead>
+            <tr [ngStyle]="{ background: 'var(--input-bg)', borderBottom: '1px solid var(--border-color)' }">
+              <th [ngStyle]="{ padding: '0.65rem 0.85rem', fontWeight: '600', color: 'var(--text-color)' }">Timestamp</th>
+              <th [ngStyle]="{ padding: '0.65rem 0.85rem', fontWeight: '600', color: 'var(--text-color)' }">User</th>
+              <th [ngStyle]="{ padding: '0.65rem 0.85rem', fontWeight: '600', color: 'var(--text-color)' }">Field</th>
+              <th [ngStyle]="{ padding: '0.65rem 0.85rem', fontWeight: '600', color: 'var(--text-color)' }">Change Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let entry of auditTrail()" [ngStyle]="{ borderBottom: '1px solid var(--border-color)' }">
+              <td [ngStyle]="{ padding: '0.65rem 0.85rem', whiteSpace: 'nowrap', opacity: '0.8' }">
+                {{ entry.dateModified | date:'medium' }}
+              </td>
+              <td [ngStyle]="{ padding: '0.65rem 0.85rem', fontWeight: '600', wordBreak: 'break-word' }">
+                <i class="pi pi-user" [ngStyle]="{ fontSize: '0.75rem', marginRight: '0.25rem', opacity: '0.6' }"></i>
+                {{ entry.modifiedBy }}
+              </td>
+              <td [ngStyle]="{ padding: '0.65rem 0.85rem' }">
+                <div [ngStyle]="{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }">
+                  <span *ngFor="let f of getFieldList(entry.field)" [ngStyle]="{
+                      padding: '0.2rem 0.45rem', borderRadius: '4px', fontSize: '0.75rem',
+                      background: 'var(--input-bg)', border: '1px solid var(--border-color)', fontWeight: '600',
+                      wordBreak: 'break-word'
+                    }">{{ f }}</span>
+                </div>
+              </td>
+              <td [ngStyle]="{ padding: '0.65rem 0.85rem', whiteSpace: 'pre-wrap', lineHeight: '1.4', wordBreak: 'break-word', overflowWrap: 'anywhere' }">
+                {{ entry.description }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </form>
 </div>

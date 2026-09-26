@@ -19,7 +19,6 @@ body.light-theme {
   --footer-text: #5e5e5e;
   --badge-bg: #dedede;
   --badge-text: #1a1a1a;
-
   --card-header-bg: #efefef;
   --card-header-text-color: #1a1a1a;
   --label-color: #5e5e5e;
@@ -53,7 +52,6 @@ body.dark-theme {
   --footer-text: #cccccc;
   --badge-bg: #616161;
   --badge-text: #f0f0f0;
-
   --card-header-bg: #484848;
   --card-header-text-color: #efefef;
   --label-color: #ffffff;
@@ -87,7 +85,6 @@ body.neonocean-theme {
   --footer-text: #c8f6ff;
   --badge-bg: #114657;
   --badge-text: #ffffff;
-
   --card-header-bg: linear-gradient(135deg, #8aecf7 0%, #67d9eb 50%, #38bdea 100%);
   --card-header-text-color: #05517e;
   --label-color: #003a63;
@@ -121,7 +118,6 @@ body.solarflare-theme {
   --footer-text: #ffdaaa;
   --badge-bg: #ffb733;
   --badge-text: #1a1a1a;
-
   --card-header-bg: linear-gradient(135deg, #ff8d1b, #fcb110, #ff6228);
   --card-header-text-color: #efefef;
   --label-color: #ffad66;
@@ -155,7 +151,6 @@ body.sunsetblush-theme {
   --footer-text: #f8e9e4;
   --badge-bg: #a16765;
   --badge-text: #fdf3f0;
-
   --card-header-bg: #fed4c2;
   --card-header-text-color: #a16765;
   --label-color: #a36259;
@@ -193,9 +188,9 @@ body.sunsetblush-theme {
   border-color: var(--sidebar-link-active-bg) !important;
 }
 
-.pill-active i {
-  opacity: 1 !important;
-}
+  .pill-active i {
+    opacity: 1 !important;
+  }
 
 /* Global PrimeNG Toast Theme Adaptation */
 .p-toast {

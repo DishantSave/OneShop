@@ -1,43 +1,67 @@
-<div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }">
+<div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '1100px', margin: '0 auto', paddingBottom: '3rem' }">
 
-  <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }">
-    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem' }">
+  <!-- Header & Action Bar -->
+  <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }">
+    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.85rem' }">
       <div [ngStyle]="{
-          width: '42px', height: '42px', borderRadius: '10px',
+          width: '46px', height: '46px', borderRadius: '12px',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           background: 'var(--card-bg)', border: '1px solid var(--border-color)',
-          color: 'var(--text-color)', flexShrink: '0'
+          color: 'var(--sidebar-link-active-bg, #05517e)', flexShrink: '0',
+          boxShadow: 'var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.05))'
         }">
-        <i class="pi pi-building" [ngStyle]="{ fontSize: '1.15rem' }"></i>
+        <i class="pi pi-building" [ngStyle]="{ fontSize: '1.35rem' }"></i>
       </div>
       <div>
-        <h2 [ngStyle]="{ margin: '0', fontSize: '1.35rem', fontWeight: '700', color: 'var(--text-color)' }">Company Master</h2>
+        <h2 [ngStyle]="{ margin: '0', fontSize: '1.45rem', fontWeight: '700', color: 'var(--text-color)' }">Company Master</h2>
         <span [ngStyle]="{ fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.65' }">
-          {{ companies().length }} compan{{ companies().length === 1 ? 'y' : 'ies' }} on this account
+          Manage tenant business entities, regional ERP configuration & subsidiaries
         </span>
       </div>
     </div>
 
-    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.6rem' }">
-      <!-- Smart Search bar -->
+    <!-- Actions & Search -->
+    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }">
+      <!-- Search Box -->
       <div [ngStyle]="{
           display: 'flex', alignItems: 'center', gap: '0.5rem',
-          background: 'var(--input-bg)',
-          border: '1px solid var(--border-color)',
-          borderRadius: '8px', padding: '0.6rem 0.9rem', width: '240px'
+          background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+          borderRadius: '8px', padding: '0.55rem 0.85rem', width: '250px'
         }">
-        <i class="pi pi-search" [ngStyle]="{ color: 'var(--text-color)', opacity: '0.55', fontSize: '0.9rem' }"></i>
-        <input type="text" placeholder="Search here (ie. active)"
-               [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)"
-               [ngStyle]="{ border: 'none', outline: 'none', background: 'transparent', color: 'var(--input-text)', fontSize: '0.9rem', width: '100%' }" />
+        <i class="pi pi-search" [ngStyle]="{ color: 'var(--text-color)', opacity: '0.5', fontSize: '0.85rem' }"></i>
+        <input type="text"
+               placeholder="Search by name, code, city…"
+               [value]="searchTerm()"
+               (input)="searchTerm.set($any($event.target).value)"
+               [ngStyle]="{
+                 border: 'none', outline: 'none', background: 'transparent',
+                 color: 'var(--input-text)', fontSize: '0.88rem', width: '100%'
+               }" />
+        <button *ngIf="searchTerm()" (click)="searchTerm.set('')" type="button" [ngStyle]="{
+            background: 'transparent', border: 'none', cursor: 'pointer', padding: '0',
+            color: 'var(--text-color)', opacity: '0.5'
+          }">
+          <i class="pi pi-times"></i>
+        </button>
       </div>
 
-      <!-- New Company button -->
+      <!-- Refresh Button -->
+      <button type="button" (click)="refresh()" [disabled]="loading()" [ngStyle]="{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          width: '38px', height: '38px', borderRadius: '8px', cursor: 'pointer',
+          background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+          color: 'var(--text-color)', opacity: loading() ? '0.5' : '1'
+        }" title="Refresh companies list">
+        <i class="pi pi-refresh" [class.pi-spin]="loading()"></i>
+      </button>
+
+      <!-- New Company Button -->
       <button *ngIf="permissions().canCreate" type="button" (click)="goToNew()" [ngStyle]="{
           display: 'flex', alignItems: 'center', gap: '0.5rem',
-          padding: '0.7rem 1.1rem', borderRadius: '8px', cursor: 'pointer',
-          fontSize: '0.9rem', fontWeight: '600', whiteSpace: 'nowrap', border: 'none',
-          background: 'var(--card-header-bg)', color: 'var(--card-header-text-color)'
+          padding: '0.65rem 1.15rem', borderRadius: '8px', cursor: 'pointer',
+          fontSize: '0.9rem', fontWeight: '600', border: 'none',
+          background: 'var(--sidebar-link-active-bg, #05517e)', color: '#ffffff',
+          boxShadow: '0 4px 12px rgba(5, 81, 126, 0.25)', transition: 'all 0.2s ease'
         }">
         <i class="pi pi-plus" [ngStyle]="{ fontSize: '0.85rem' }"></i>
         <span>New Company</span>
@@ -45,201 +69,283 @@
     </div>
   </div>
 
-  <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }">
-
-    <div *ngIf="loading()" [ngStyle]="{
-        padding: '2.5rem 1rem', textAlign: 'center', color: 'var(--text-color)', opacity: '0.6',
-        background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '10px'
-      }">Loading companies…</div>
-
-    <ng-container *ngIf="!loading()">
-      <div *ngFor="let company of filteredCompanies()" (click)="goToEdit(company)" [ngStyle]="{
-           display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer',
-           padding: '0.9rem 1.1rem', borderRadius: '10px',
-           background: 'var(--card-bg)', border: '1px solid var(--border-color)', transition: 'all 0.2s ease'
-          }">
-
-        <!-- Company Logo with active/inactive status dot and sandbox/test indicator -->
-        <div [ngStyle]="{
-    position: 'relative',
-    width: '66px',
-    height: '66px',
-    flexShrink: '0'
-  }">
-
-          <!-- Company Logo -->
-          <div [ngStyle]="{
-      width: '66px',
-      height: '66px',
-      borderRadius: '12px',
-      overflow: 'hidden',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: company.isTestCompany
-        ? 'rgba(184, 134, 11, 0.08)'
-        : 'var(--input-bg)',
-      border: company.isTestCompany
-        ? '2px dashed var(--warning-color, #b8860b)'
-        : '1px solid var(--border-color)'
-    }">
-
-            <img *ngIf="company.logo"
-                 [src]="getLogoUrl(company.logo)"
-                 [alt]="company.displayName"
-                 [ngStyle]="{
-        width: '100%',
-        height: '100%',
-        objectFit: 'contain',
-        display: 'block'
-      }" />
-
-            <!-- Fallback when no logo -->
-            <span *ngIf="!company.logo"
-                  [ngStyle]="{
-        color: 'var(--text-color)',
-        fontWeight: '700',
-        fontSize: '0.9rem',
-        letterSpacing: '0.03em'
-      }">
-              {{ company.code }}
-            </span>
-
-          </div>
-
-          <!-- Green/Red Status Dot -->
-          <span [ngStyle]="{
-      position: 'absolute',
-      top: '-3px',
-      right: '-3px',
-      width: '10px',
-      height: '10px',
-      borderRadius: '50%',
-      background: company.isActive ? '#2e7d32' : '#c62828',
-      border: '2px solid var(--card-bg)'
-    }"
-                [title]="company.isActive ? 'Active' : 'Inactive'">
-          </span>
-
-          <!-- Sandbox Badge Icon if test company -->
-          <span *ngIf="company.isTestCompany"
-                [ngStyle]="{
-      position: 'absolute',
-      bottom: '-4px',
-      right: '-4px',
-      background: 'var(--warning-color, #b8860b)',
-      color: '#fff',
-      width: '14px',
-      height: '14px',
-      borderRadius: '50%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontSize: '0.55rem'
-    }"
-                title="Sandbox / Test Company">
-            <i class="pi pi-shield"></i>
-          </span>
-
-        </div>
-
-        <div [ngStyle]="{ flex: '1 1 240px', minWidth: '0' }">
-          <div [ngStyle]="{ fontWeight: '600', color: 'var(--text-color)' }">{{ company.displayName }}</div>
-          <div [ngStyle]="{ fontSize: '0.8rem', color: 'var(--text-color)', opacity: '0.6' }">{{ company.name }}</div>
-        </div>
-
-        <div [ngStyle]="{ flex: '1 1 160px', fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.8' }">
-          {{ company.city }}, {{ company.stateCode }} · {{ company.countryCode }}
-        </div>
-
-        <div [ngStyle]="{ flex: '1 1 200px', fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.8' }">
-          {{ company.email }}
-        </div>
-
-        <!-- Delete button triggers custom modal instead of old confirm -->
-        <button *ngIf="permissions().canDelete" type="button" (click)="openDeleteModal(company, $event)" [ngStyle]="{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  width: '32px', height: '32px', borderRadius: '8px', flexShrink: '0',
-                  background: 'transparent', border: '1px solid var(--border-color)',
-                  color: 'var(--danger-color, #c62828)', cursor: 'pointer'
-                }">
-          <i class="pi pi-trash" [ngStyle]="{ fontSize: '0.85rem' }"></i>
-        </button>
-      </div>
-
-      <div *ngIf="!filteredCompanies().length" [ngStyle]="{
-          padding: '2.5rem 1rem', textAlign: 'center', color: 'var(--text-color)', opacity: '0.6',
-          background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '10px'
+  <!-- Filter Pills & Status Bar -->
+  <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }">
+    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.4rem' }">
+      <button type="button" (click)="filterMode.set('all')" [ngStyle]="{
+          padding: '0.4rem 0.85rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600',
+          border: filterMode() === 'all' ? '1px solid var(--sidebar-link-active-bg)' : '1px solid var(--border-color)',
+          background: filterMode() === 'all' ? 'var(--sidebar-link-active-bg)' : 'var(--card-bg)',
+          color: filterMode() === 'all' ? '#ffffff' : 'var(--text-color)', transition: 'all 0.15s ease'
         }">
-        <i class="pi pi-building" [ngStyle]="{ fontSize: '1.75rem', opacity: '0.5' }"></i>
-        <div [ngStyle]="{ marginTop: '0.5rem' }">
-          {{ searchTerm() ? 'No companies match your search.' : 'No companies yet — create the first one to get started.' }}
-        </div>
-      </div>
-    </ng-container>
+        All ({{ stats().total }})
+      </button>
+
+      <button type="button" (click)="filterMode.set('active')" [ngStyle]="{
+          padding: '0.4rem 0.85rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600',
+          border: filterMode() === 'active' ? '1px solid var(--success, #22c55e)' : '1px solid var(--border-color)',
+          background: filterMode() === 'active' ? 'var(--success, #22c55e)' : 'var(--card-bg)',
+          color: filterMode() === 'active' ? '#ffffff' : 'var(--text-color)', transition: 'all 0.15s ease'
+        }">
+        Active ({{ stats().active }})
+      </button>
+
+      <button type="button" (click)="filterMode.set('inactive')" [ngStyle]="{
+          padding: '0.4rem 0.85rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600',
+          border: filterMode() === 'inactive' ? '1px solid var(--text-color)' : '1px solid var(--border-color)',
+          background: filterMode() === 'inactive' ? 'var(--text-color)' : 'var(--card-bg)',
+          color: filterMode() === 'inactive' ? 'var(--bg-color)' : 'var(--text-color)', transition: 'all 0.15s ease'
+        }">
+        Inactive ({{ stats().inactive }})
+      </button>
+
+      <button type="button" (click)="filterMode.set('test')" [ngStyle]="{
+          padding: '0.4rem 0.85rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '600',
+          border: filterMode() === 'test' ? '1px solid var(--warning, #f59e0b)' : '1px solid var(--border-color)',
+          background: filterMode() === 'test' ? 'var(--warning, #f59e0b)' : 'var(--card-bg)',
+          color: filterMode() === 'test' ? '#ffffff' : 'var(--text-color)', transition: 'all 0.15s ease'
+        }">
+        Sandbox ({{ stats().test }})
+      </button>
+    </div>
+
+    <span [ngStyle]="{ fontSize: '0.82rem', color: 'var(--text-color)', opacity: '0.6' }">
+      Showing {{ filteredCompanies().length }} of {{ stats().total }}
+    </span>
   </div>
 
-  <!-- CUSTOM THEME MATCHED DELETE MODAL POPUP -->
-  <div *ngIf="companyToDelete()" [ngStyle]="{
-      position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh',
-      background: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(4px)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: '9999'
-    }" (click)="closeDeleteModal()">
+  <!-- Loading View -->
+  <div *ngIf="loading()" [ngStyle]="{
+      padding: '3rem 1rem', textAlign: 'center', color: 'var(--text-color)', opacity: '0.7',
+      background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '12px'
+    }">
+    <i class="pi pi-spin pi-spinner" [ngStyle]="{ fontSize: '1.75rem', marginBottom: '0.5rem', display: 'block', color: 'var(--sidebar-link-active-bg)' }"></i>
+    <span>Loading companies…</span>
+  </div>
 
+  <!-- Empty State -->
+  <div *ngIf="!loading() && filteredCompanies().length === 0" [ngStyle]="{
+      padding: '3.5rem 1.5rem', textAlign: 'center',
+      background: 'var(--card-bg)', border: '1px dashed var(--border-color)', borderRadius: '14px'
+    }">
     <div [ngStyle]="{
-        background: 'var(--card-bg)', border: '1px solid var(--border-color)',
-        borderRadius: '12px', padding: '1.5rem', width: '400px', maxWidth: '90vw',
-        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3)', display: 'flex', flexDirection: 'column', gap: '1.2rem'
-      }" (click)="$event.stopPropagation()">
+        width: '64px', height: '64px', borderRadius: '50%', margin: '0 auto 1rem auto',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'var(--input-bg)', color: 'var(--text-color)', opacity: '0.45'
+      }">
+      <i class="pi pi-building" [ngStyle]="{ fontSize: '2rem' }"></i>
+    </div>
+    <h3 [ngStyle]="{ margin: '0 0 0.5rem 0', fontSize: '1.2rem', color: 'var(--text-color)' }">
+      {{ searchTerm() || filterMode() !== 'all' ? 'No matching companies found' : 'No companies registered yet' }}
+    </h3>
+    <p [ngStyle]="{ margin: '0 0 1.25rem 0', fontSize: '0.88rem', color: 'var(--text-color)', opacity: '0.65', maxWidth: '400px', marginLeft: 'auto', marginRight: 'auto' }">
+      {{ searchTerm() || filterMode() !== 'all' ? 'Try adjusting your search terms or clearing status filters.' : 'Get started by setting up your first enterprise business entity.' }}
+    </p>
 
-      <!-- Header -->
-      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem' }">
+    <div [ngStyle]="{ display: 'flex', justifyContent: 'center', gap: '0.75rem' }">
+      <button *ngIf="searchTerm() || filterMode() !== 'all'" type="button" (click)="searchTerm.set(''); filterMode.set('all')" [ngStyle]="{
+          padding: '0.6rem 1.1rem', borderRadius: '8px', cursor: 'pointer',
+          background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+          color: 'var(--text-color)', fontSize: '0.88rem', fontWeight: '600'
+        }">
+        Clear Filters
+      </button>
+
+      <button *ngIf="permissions().canCreate && !(searchTerm() || filterMode() !== 'all')" type="button" (click)="goToNew()" [ngStyle]="{
+          padding: '0.6rem 1.2rem', borderRadius: '8px', cursor: 'pointer',
+          background: 'var(--sidebar-link-active-bg, #05517e)', border: 'none',
+          color: '#ffffff', fontSize: '0.88rem', fontWeight: '600'
+        }">
+        Create First Company
+      </button>
+    </div>
+  </div>
+
+  <!-- Companies List Cards -->
+  <div *ngIf="!loading() && filteredCompanies().length > 0" [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }">
+    <div *ngFor="let company of filteredCompanies()"
+         (click)="goToEdit(company)"
+         [ngStyle]="{
+           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+           padding: '1.1rem 1.25rem', borderRadius: '12px', cursor: 'pointer',
+           background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+           transition: 'all 0.2s ease', boxShadow: 'var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.03))'
+         }">
+
+      <!-- Left: Logo & Company Information -->
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '1.25rem', flex: '1', minWidth: '0' }">
+        <!-- Logo Container -->
         <div [ngStyle]="{
-            width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(198, 40, 40, 0.15)',
-            color: '#c62828', display: 'flex', alignItems: 'center', justifyContent: 'center'
+            width: '64px', height: '64px', borderRadius: '12px', flexShrink: '0',
+            border: '1px solid var(--border-color)', background: 'var(--input-bg)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden',
+            position: 'relative'
           }">
-          <i class="pi pi-exclamation-triangle" [ngStyle]="{ fontSize: '1rem' }"></i>
+          <img *ngIf="company.logo" [src]="getLogoUrl(company.logo)" [alt]="company.name" [ngStyle]="{ width: '100%', height: '100%', objectFit: 'contain' }" />
+          <span *ngIf="!company.logo" [ngStyle]="{ fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.7' }">
+            {{ company.code }}
+          </span>
+
+          <!-- Test / Sandbox Stripe Indicator -->
+          <div *ngIf="company.isTestCompany" title="Sandbox Environment" [ngStyle]="{
+              position: 'absolute', bottom: '0', left: '0', right: '0', height: '4px',
+              background: 'var(--warning, #f59e0b)'
+            }"></div>
         </div>
-        <div>
-          <h3 [ngStyle]="{ margin: '0', fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-color)' }">Delete Confirmation</h3>
-          <span [ngStyle]="{ fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.6' }">This action cannot be undone</span>
+
+        <!-- Details -->
+        <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.35rem', minWidth: '0' }">
+          <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }">
+            <span [ngStyle]="{
+                padding: '0.15rem 0.5rem', borderRadius: '5px', fontSize: '0.75rem', fontWeight: '800',
+                background: 'var(--sidebar-link-active-bg)', color: '#ffffff', letterSpacing: '0.05em'
+              }">{{ company.code }}</span>
+
+            <span [ngStyle]="{ fontSize: '1.05rem', fontWeight: '700', color: 'var(--text-color)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }">
+              {{ company.name }}
+            </span>
+
+            <span *ngIf="company.displayName && company.displayName !== company.name" [ngStyle]="{ fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.65' }">
+              ({{ company.displayName }})
+            </span>
+
+            <!-- Status Pill -->
+            <span [ngStyle]="{
+                padding: '0.15rem 0.55rem', borderRadius: '12px', fontSize: '0.72rem', fontWeight: '700',
+                background: company.isActive ? 'rgba(34, 197, 94, 0.12)' : 'rgba(107, 114, 128, 0.15)',
+                color: company.isActive ? 'var(--success, #22c55e)' : 'var(--text-color)',
+                display: 'inline-flex', alignItems: 'center', gap: '0.3rem'
+              }">
+              <span [ngStyle]="{ width: '6px', height: '6px', borderRadius: '50%', background: company.isActive ? 'var(--success, #22c55e)' : '#9ca3af' }"></span>
+              {{ company.isActive ? 'Active' : 'Inactive' }}
+            </span>
+
+            <!-- Sandbox Tag -->
+            <span *ngIf="company.isTestCompany" [ngStyle]="{
+                padding: '0.15rem 0.55rem', borderRadius: '12px', fontSize: '0.72rem', fontWeight: '700',
+                background: 'rgba(245, 158, 11, 0.15)', color: 'var(--warning, #f59e0b)'
+              }">Sandbox</span>
+          </div>
+
+          <!-- Subtext Info -->
+          <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap', fontSize: '0.82rem', color: 'var(--text-color)', opacity: '0.75' }">
+            <span title="Location">
+              <i class="pi pi-map-marker" [ngStyle]="{ fontSize: '0.75rem', marginRight: '0.25rem' }"></i>
+              {{ company.city }}, {{ company.countryCode }}
+            </span>
+
+            <span *ngIf="company.email" title="Email">
+              <i class="pi pi-envelope" [ngStyle]="{ fontSize: '0.75rem', marginRight: '0.25rem' }"></i>
+              {{ company.email }}
+            </span>
+
+            <span *ngIf="company.currencyCode" title="Base Currency">
+              <i class="pi pi-money-bill" [ngStyle]="{ fontSize: '0.75rem', marginRight: '0.25rem' }"></i>
+              {{ company.currencyCode }}
+            </span>
+
+            <span *ngIf="company.timeZone" title="Operating Time Zone">
+              <i class="pi pi-clock" [ngStyle]="{ fontSize: '0.75rem', marginRight: '0.25rem' }"></i>
+              {{ company.timeZone }}
+            </span>
+          </div>
         </div>
       </div>
 
-      <!-- Content -->
-      <div [ngStyle]="{ fontSize: '0.9rem', color: 'var(--text-color)', lineHeight: '1.5' }">
-        Are you sure you want to delete <b style="color: var(--text-color);">{{ companyToDelete()?.name }}</b>? Type <b style="color: #c62828;">DELETE</b> below to confirm.
-      </div>
-
-      <!-- Input Field -->
-      <div>
-        <input type="text" [(ngModel)]="deleteInputText" placeholder="Type DELETE here" autocomplete="off" [ngStyle]="{
-            width: '100%', boxSizing: 'border-box', background: 'var(--input-bg)',
-            border: '1px solid var(--border-color)', borderRadius: '8px',
-            padding: '0.65rem 0.9rem', color: 'var(--input-text)', fontSize: '0.9rem', outline: 'none'
-          }" />
-      </div>
-
-      <!-- Actions -->
-      <div [ngStyle]="{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', marginTop: '0.5rem' }">
-        <button type="button" (click)="closeDeleteModal()" [ngStyle]="{
-            padding: '0.6rem 1rem', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: '600',
-            background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-color)'
+      <!-- Right: Action Buttons -->
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: '0' }">
+        <button type="button" (click)="goToEdit(company)" [ngStyle]="{
+            display: 'flex', alignItems: 'center', gap: '0.35rem',
+            padding: '0.5rem 0.85rem', borderRadius: '8px', cursor: 'pointer',
+            background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+            color: 'var(--text-color)', fontSize: '0.82rem', fontWeight: '600'
           }">
-          Cancel
+          <i class="pi pi-pencil"></i>
+          <span>Edit</span>
         </button>
-        <button type="button" (click)="confirmDeleteModal()" [disabled]="deleteInputText().trim() !== 'DELETE'" [ngStyle]="{
-            padding: '0.6rem 1rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: '600',
-            border: deleteInputText().trim() === 'DELETE' ? 'none' : '1px solid var(--border-color)',
-            background: deleteInputText().trim() === 'DELETE' ? '#c62828' : 'var(--input-bg)',
-            color: deleteInputText().trim() === 'DELETE' ? '#fff' : 'var(--text-color)',
-            cursor: deleteInputText().trim() === 'DELETE' ? 'pointer' : 'not-allowed',
-            opacity: deleteInputText().trim() === 'DELETE' ? '1' : '0.7', transition: 'all 0.2s ease'
-          }">
-          Delete Company
+
+        <button *ngIf="permissions().canDelete" type="button" (click)="openDeleteModal(company, $event)" [ngStyle]="{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            width: '34px', height: '34px', borderRadius: '8px', cursor: 'pointer',
+            background: 'transparent', border: '1px solid var(--border-color)',
+            color: 'var(--danger, #ef4444)', fontSize: '0.85rem'
+          }" title="Delete Company">
+          <i class="pi pi-trash"></i>
         </button>
       </div>
 
     </div>
   </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div *ngIf="companyToDelete()" [ngStyle]="{
+      position: 'fixed', top: '0', left: '0', right: '0', bottom: '0',
+      background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      zIndex: '9999', padding: '1rem'
+    }" (click)="closeDeleteModal()">
+
+    <div [ngStyle]="{
+        background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+        borderRadius: '14px', width: '100%', maxWidth: '440px', padding: '1.75rem',
+        boxShadow: '0 20px 50px rgba(0,0,0,0.25)', display: 'flex', flexDirection: 'column', gap: '1rem'
+      }" (click)="$event.stopPropagation()">
+
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem' }">
+        <div [ngStyle]="{
+            width: '42px', height: '42px', borderRadius: '50%',
+            background: 'rgba(239, 68, 68, 0.12)', color: 'var(--danger, #ef4444)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: '0'
+          }">
+          <i class="pi pi-exclamation-triangle" [ngStyle]="{ fontSize: '1.25rem' }"></i>
+        </div>
+        <div>
+          <h3 [ngStyle]="{ margin: '0', fontSize: '1.15rem', color: 'var(--text-color)' }">Delete Company</h3>
+          <span [ngStyle]="{ fontSize: '0.8rem', color: 'var(--text-color)', opacity: '0.6' }">Permanent removal confirmation</span>
+        </div>
+      </div>
+
+      <p [ngStyle]="{ margin: '0', fontSize: '0.88rem', color: 'var(--text-color)', lineHeight: '1.5' }">
+        Are you sure you want to delete <strong>[{{ companyToDelete()?.code }} - {{ companyToDelete()?.name }}]</strong>?
+        This will permanently remove the company entity along with all its historical SAP audit trail records.
+      </p>
+
+      <div>
+        <label [ngStyle]="{ display: 'block', fontSize: '0.8rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.35rem' }">
+          Type <strong>DELETE</strong> to confirm:
+        </label>
+        <input type="text"
+               placeholder="DELETE"
+               [value]="deleteInputText()"
+               (input)="deleteInputText.set($any($event.target).value)"
+               [ngStyle]="{
+                 width: '100%', boxSizing: 'border-box',
+                 background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+                 borderRadius: '8px', padding: '0.6rem 0.75rem', color: 'var(--input-text)',
+                 fontSize: '0.9rem', fontWeight: '700'
+               }" />
+      </div>
+
+      <div [ngStyle]="{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }">
+        <button type="button" (click)="closeDeleteModal()" [ngStyle]="{
+            padding: '0.6rem 1rem', borderRadius: '8px', cursor: 'pointer',
+            background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+            color: 'var(--text-color)', fontSize: '0.88rem', fontWeight: '600'
+          }">
+          Cancel
+        </button>
+
+        <button type="button" (click)="confirmDeleteModal()" [disabled]="deleteInputText() !== 'DELETE' || deleting()" [ngStyle]="{
+            display: 'flex', alignItems: 'center', gap: '0.4rem',
+            padding: '0.6rem 1.2rem', borderRadius: '8px', cursor: (deleteInputText() !== 'DELETE' || deleting()) ? 'not-allowed' : 'pointer',
+            background: 'var(--danger, #ef4444)', border: 'none', color: '#ffffff',
+            fontSize: '0.88rem', fontWeight: '600', opacity: (deleteInputText() !== 'DELETE' || deleting()) ? '0.5' : '1'
+          }">
+          <i *ngIf="deleting()" class="pi pi-spin pi-spinner"></i>
+          <span>{{ deleting() ? 'Deleting…' : 'Delete Company' }}</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
 </div>

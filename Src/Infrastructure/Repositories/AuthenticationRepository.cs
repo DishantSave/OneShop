@@ -151,7 +151,8 @@ public class AuthenticationRepository(IHttpContextAccessor httpContextAccessor, 
                                                        VALUES
                                                        (@UserName, @Field, @Description, @DateModified);";
             var insertUserCreationAuditTrailCmd = new CommandDefinition(insertUserCreationAuditTrailSql,
-                                                      new {
+                                                      new
+                                                      {
                                                           UserName = userName,
                                                           Field = "All",
                                                           Description = $"Created new User {userName}.",

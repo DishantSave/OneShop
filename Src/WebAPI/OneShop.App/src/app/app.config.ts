@@ -6,6 +6,7 @@ import { routes } from './app.routes';
 import { provideApollo } from 'apollo-angular';
 import { provideHttpClient } from '@angular/common/http';
 import { createApollo } from './core/graphql/apollo.config';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -14,6 +15,7 @@ export const appConfig: ApplicationConfig = {
       eventCoalescing: true
     }),
     provideRouter(routes),
+    provideAnimationsAsync(),
     providePrimeNG({
       theme: {
         preset: Aura
