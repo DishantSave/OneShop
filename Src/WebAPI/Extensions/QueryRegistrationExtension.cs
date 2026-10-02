@@ -13,6 +13,7 @@ public static class QueryRegistrationExtension
         builder.AddTypeExtension<MastersQuery>();
         builder.AddTypeExtension<CompanyQuery>();
         builder.AddTypeExtension<StoreQuery>();
+        builder.AddTypeExtension<UserQuery>();
 
         return builder;
     }

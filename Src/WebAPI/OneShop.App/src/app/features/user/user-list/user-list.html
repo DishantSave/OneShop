@@ -1,0 +1,818 @@
+<div [ngStyle]="{
+  'display': 'flex',
+  'flex-direction': 'column',
+  'gap': '1.5rem',
+  'padding': '1.5rem 0',
+  'min-height': '100%'
+}">
+
+  <!-- Header Banner & Action Bar -->
+  <div [ngStyle]="{
+    'display': 'flex',
+    'flex-wrap': 'wrap',
+    'justify-content': 'space-between',
+    'align-items': 'center',
+    'gap': '1rem',
+    'background': 'var(--card-bg)',
+    'border': '1px solid var(--border-color)',
+    'border-radius': '16px',
+    'padding': '1.5rem 2rem',
+    'box-shadow': '0 4px 20px -4px rgba(0,0,0,0.06)'
+  }">
+    <div [ngStyle]="{'display': 'flex', 'align-items': 'center', 'gap': '1.25rem'}">
+      <div [ngStyle]="{
+        'width': '52px',
+        'height': '52px',
+        'border-radius': '14px',
+        'background': 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+        'display': 'flex',
+        'align-items': 'center',
+        'justify-content': 'center',
+        'color': '#ffffff',
+        'font-size': '1.5rem',
+        'box-shadow': '0 6px 16px -2px rgba(99, 102, 241, 0.35)'
+      }">
+        <i class="pi pi-users"></i>
+      </div>
+      <div>
+        <div [ngStyle]="{'display': 'flex', 'align-items': 'center', 'gap': '0.75rem'}">
+          <h1 [ngStyle]="{
+            'margin': '0',
+            'font-size': '1.5rem',
+            'font-weight': '700',
+            'color': 'var(--text-color)',
+            'letter-spacing': '-0.02em'
+          }">Staff & Sub-Accounts</h1>
+          <span [ngStyle]="{
+            'font-size': '0.75rem',
+            'font-weight': '600',
+            'padding': '0.2rem 0.6rem',
+            'border-radius': '20px',
+            'background': 'rgba(99, 102, 241, 0.1)',
+            'color': '#6366f1',
+            'border': '1px solid rgba(99, 102, 241, 0.2)'
+          }">Main Account Only</span>
+        </div>
+        <p [ngStyle]="{
+          'margin': '0.35rem 0 0 0',
+          'font-size': '0.875rem',
+          'color': 'var(--text-muted)'
+        }">
+          Delegate departmental access (Sales, BI, Finance, Support, Warehouse) with granular permissions and per-user audit trails.
+        </p>
+      </div>
+    </div>
+
+    <!-- Create Button -->
+    <div [ngStyle]="{'display': 'flex', 'align-items': 'center', 'gap': '0.75rem'}">
+      <button
+        type="button"
+        (click)="refresh()"
+        title="Reload Users"
+        [ngStyle]="{
+          'display': 'flex',
+          'align-items': 'center',
+          'justify-content': 'center',
+          'width': '40px',
+          'height': '40px',
+          'border-radius': '10px',
+          'border': '1px solid var(--border-color)',
+          'background': 'transparent',
+          'color': 'var(--text-color)',
+          'cursor': 'pointer',
+          'transition': 'all 0.2s ease'
+        }">
+        <i class="pi pi-refresh" [ngClass]="{'pi-spin': loading()}"></i>
+      </button>
+
+      <button
+        type="button"
+        (click)="navigateToCreate()"
+        [ngStyle]="{
+          'display': 'flex',
+          'align-items': 'center',
+          'gap': '0.6rem',
+          'padding': '0.7rem 1.4rem',
+          'border-radius': '12px',
+          'background': 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+          'color': '#ffffff',
+          'font-weight': '600',
+          'font-size': '0.9rem',
+          'border': 'none',
+          'cursor': 'pointer',
+          'box-shadow': '0 4px 14px -1px rgba(79, 70, 229, 0.4)',
+          'transition': 'all 0.2s ease'
+        }">
+        <i class="pi pi-user-plus"></i>
+        <span>Create Sub-Account</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Key Metrics Row -->
+  <div [ngStyle]="{
+    'display': 'grid',
+    'grid-template-columns': 'repeat(auto-fit, minmax(200px, 1fr))',
+    'gap': '1rem'
+  }">
+    <!-- Total Card -->
+    <div [ngStyle]="{
+      'background': 'var(--card-bg)',
+      'border': '1px solid var(--border-color)',
+      'border-radius': '14px',
+      'padding': '1.15rem 1.25rem',
+      'display': 'flex',
+      'align-items': 'center',
+      'gap': '1rem'
+    }">
+      <div [ngStyle]="{
+        'width': '42px',
+        'height': '42px',
+        'border-radius': '10px',
+        'background': 'rgba(99, 102, 241, 0.12)',
+        'color': '#6366f1',
+        'display': 'flex',
+        'align-items': 'center',
+        'justify-content': 'center',
+        'font-size': '1.25rem'
+      }">
+        <i class="pi pi-users"></i>
+      </div>
+      <div>
+        <div [ngStyle]="{'font-size': '1.35rem', 'font-weight': '700', 'color': 'var(--text-color)'}">
+          {{ stats().total }}
+        </div>
+        <div [ngStyle]="{'font-size': '0.8rem', 'color': 'var(--text-muted)', 'margin-top': '0.15rem'}">
+          Total Staff Logins
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Card -->
+    <div [ngStyle]="{
+      'background': 'var(--card-bg)',
+      'border': '1px solid var(--border-color)',
+      'border-radius': '14px',
+      'padding': '1.15rem 1.25rem',
+      'display': 'flex',
+      'align-items': 'center',
+      'gap': '1rem'
+    }">
+      <div [ngStyle]="{
+        'width': '42px',
+        'height': '42px',
+        'border-radius': '10px',
+        'background': 'rgba(16, 185, 129, 0.12)',
+        'color': '#10b981',
+        'display': 'flex',
+        'align-items': 'center',
+        'justify-content': 'center',
+        'font-size': '1.25rem'
+      }">
+        <i class="pi pi-check-circle"></i>
+      </div>
+      <div>
+        <div [ngStyle]="{'font-size': '1.35rem', 'font-weight': '700', 'color': 'var(--text-color)'}">
+          {{ stats().active }}
+        </div>
+        <div [ngStyle]="{'font-size': '0.8rem', 'color': 'var(--text-muted)', 'margin-top': '0.15rem'}">
+          Active Accounts
+        </div>
+      </div>
+    </div>
+
+    <!-- Inactive Card -->
+    <div [ngStyle]="{
+      'background': 'var(--card-bg)',
+      'border': '1px solid var(--border-color)',
+      'border-radius': '14px',
+      'padding': '1.15rem 1.25rem',
+      'display': 'flex',
+      'align-items': 'center',
+      'gap': '1rem'
+    }">
+      <div [ngStyle]="{
+        'width': '42px',
+        'height': '42px',
+        'border-radius': '10px',
+        'background': 'rgba(239, 68, 68, 0.12)',
+        'color': '#ef4444',
+        'display': 'flex',
+        'align-items': 'center',
+        'justify-content': 'center',
+        'font-size': '1.25rem'
+      }">
+        <i class="pi pi-ban"></i>
+      </div>
+      <div>
+        <div [ngStyle]="{'font-size': '1.35rem', 'font-weight': '700', 'color': 'var(--text-color)'}">
+          {{ stats().inactive }}
+        </div>
+        <div [ngStyle]="{'font-size': '0.8rem', 'color': 'var(--text-muted)', 'margin-top': '0.15rem'}">
+          Inactive / Suspended
+        </div>
+      </div>
+    </div>
+
+    <!-- Departments Represented -->
+    <div [ngStyle]="{
+      'background': 'var(--card-bg)',
+      'border': '1px solid var(--border-color)',
+      'border-radius': '14px',
+      'padding': '1.15rem 1.25rem',
+      'display': 'flex',
+      'align-items': 'center',
+      'gap': '1rem'
+    }">
+      <div [ngStyle]="{
+        'width': '42px',
+        'height': '42px',
+        'border-radius': '10px',
+        'background': 'rgba(245, 158, 11, 0.12)',
+        'color': '#f59e0b',
+        'display': 'flex',
+        'align-items': 'center',
+        'justify-content': 'center',
+        'font-size': '1.25rem'
+      }">
+        <i class="pi pi-sitemap"></i>
+      </div>
+      <div>
+        <div [ngStyle]="{'font-size': '1.35rem', 'font-weight': '700', 'color': 'var(--text-color)'}">
+          {{ stats().departmentsCount }}
+        </div>
+        <div [ngStyle]="{'font-size': '0.8rem', 'color': 'var(--text-muted)', 'margin-top': '0.15rem'}">
+          Departments Active
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search & Filters Toolbar -->
+  <div [ngStyle]="{
+    'background': 'var(--card-bg)',
+    'border': '1px solid var(--border-color)',
+    'border-radius': '14px',
+    'padding': '1rem 1.25rem',
+    'display': 'flex',
+    'flex-wrap': 'wrap',
+    'align-items': 'center',
+    'justify-content': 'space-between',
+    'gap': '1rem'
+  }">
+    <!-- Search Bar -->
+    <div [ngStyle]="{'position': 'relative', 'flex': '1 1 300px', 'max-width': '480px'}">
+      <i class="pi pi-search" [ngStyle]="{
+        'position': 'absolute',
+        'left': '1rem',
+        'top': '50%',
+        'transform': 'translateY(-50%)',
+        'color': 'var(--text-muted)',
+        'font-size': '0.9rem'
+      }"></i>
+      <input
+        type="text"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)"
+        placeholder="Search staff by username, role, department, email..."
+        [ngStyle]="{
+          'width': '100%',
+          'box-sizing': 'border-box',
+          'padding': '0.65rem 1rem 0.65rem 2.5rem',
+          'border-radius': '10px',
+          'border': '1px solid var(--border-color)',
+          'background': 'transparent',
+          'color': 'var(--text-color)',
+          'font-size': '0.875rem',
+          'outline': 'none'
+        }"
+      />
+    </div>
+
+    <!-- Filters Group -->
+    <div [ngStyle]="{'display': 'flex', 'flex-wrap': 'wrap', 'align-items': 'center', 'gap': '0.75rem'}">
+      <!-- Department Selector -->
+      <div [ngStyle]="{'display': 'flex', 'align-items': 'center', 'gap': '0.5rem'}">
+        <span [ngStyle]="{'font-size': '0.8rem', 'color': 'var(--text-muted)', 'font-weight': '600'}">Team:</span>
+        <select
+          [ngModel]="selectedDepartment()"
+          (ngModelChange)="selectedDepartment.set($event)"
+          [ngStyle]="{
+            'padding': '0.55rem 1rem',
+            'border-radius': '10px',
+            'border': '1px solid var(--border-color)',
+            'background': 'var(--card-bg)',
+            'color': 'var(--text-color)',
+            'font-size': '0.85rem',
+            'cursor': 'pointer',
+            'outline': 'none'
+          }">
+          <option *ngFor="let dept of departmentList" [value]="dept">
+            {{ dept === 'ALL' ? 'All Departments' : dept }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Status Pills -->
+      <div [ngStyle]="{
+        'display': 'flex',
+        'background': 'rgba(150, 150, 150, 0.08)',
+        'border-radius': '10px',
+        'padding': '0.2rem',
+        'border': '1px solid var(--border-color)'
+      }">
+        <button
+          type="button"
+          (click)="filterStatus.set('all')"
+          [ngStyle]="{
+            'padding': '0.4rem 0.8rem',
+            'border-radius': '8px',
+            'border': 'none',
+            'font-size': '0.8rem',
+            'font-weight': '600',
+            'cursor': 'pointer',
+            'background': filterStatus() === 'all' ? 'var(--card-bg)' : 'transparent',
+            'color': filterStatus() === 'all' ? '#6366f1' : 'var(--text-muted)',
+            'box-shadow': filterStatus() === 'all' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none'
+          }">All</button>
+
+        <button
+          type="button"
+          (click)="filterStatus.set('active')"
+          [ngStyle]="{
+            'padding': '0.4rem 0.8rem',
+            'border-radius': '8px',
+            'border': 'none',
+            'font-size': '0.8rem',
+            'font-weight': '600',
+            'cursor': 'pointer',
+            'background': filterStatus() === 'active' ? 'var(--card-bg)' : 'transparent',
+            'color': filterStatus() === 'active' ? '#10b981' : 'var(--text-muted)',
+            'box-shadow': filterStatus() === 'active' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none'
+          }">Active</button>
+
+        <button
+          type="button"
+          (click)="filterStatus.set('inactive')"
+          [ngStyle]="{
+            'padding': '0.4rem 0.8rem',
+            'border-radius': '8px',
+            'border': 'none',
+            'font-size': '0.8rem',
+            'font-weight': '600',
+            'cursor': 'pointer',
+            'background': filterStatus() === 'inactive' ? 'var(--card-bg)' : 'transparent',
+            'color': filterStatus() === 'inactive' ? '#ef4444' : 'var(--text-muted)',
+            'box-shadow': filterStatus() === 'inactive' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none'
+          }">Inactive</button>
+
+        <button
+          type="button"
+          (click)="filterStatus.set('test')"
+          [ngStyle]="{
+            'padding': '0.4rem 0.8rem',
+            'border-radius': '8px',
+            'border': 'none',
+            'font-size': '0.8rem',
+            'font-weight': '600',
+            'cursor': 'pointer',
+            'background': filterStatus() === 'test' ? 'var(--card-bg)' : 'transparent',
+            'color': filterStatus() === 'test' ? '#f59e0b' : 'var(--text-muted)',
+            'box-shadow': filterStatus() === 'test' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none'
+          }">Test</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading() && users().length === 0" [ngStyle]="{
+    'padding': '3rem',
+    'display': 'flex',
+    'flex-direction': 'column',
+    'align-items': 'center',
+    'justify-content': 'center',
+    'gap': '1rem'
+  }">
+    <i class="pi pi-spin pi-spinner" [ngStyle]="{'font-size': '2.5rem', 'color': '#6366f1'}"></i>
+    <span [ngStyle]="{'color': 'var(--text-muted)', 'font-size': '0.95rem'}">Loading staff accounts...</span>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading() && filteredUsers().length === 0" [ngStyle]="{
+    'background': 'var(--card-bg)',
+    'border': '1px dashed var(--border-color)',
+    'border-radius': '16px',
+    'padding': '4rem 2rem',
+    'display': 'flex',
+    'flex-direction': 'column',
+    'align-items': 'center',
+    'justify-content': 'center',
+    'text-align': 'center',
+    'gap': '1.25rem'
+  }">
+    <div [ngStyle]="{
+      'width': '72px',
+      'height': '72px',
+      'border-radius': '50%',
+      'background': 'rgba(99, 102, 241, 0.1)',
+      'color': '#6366f1',
+      'display': 'flex',
+      'align-items': 'center',
+      'justify-content': 'center',
+      'font-size': '2rem'
+    }">
+      <i class="pi pi-user-plus"></i>
+    </div>
+    <div>
+      <h3 [ngStyle]="{'margin': '0', 'font-size': '1.25rem', 'font-weight': '600', 'color': 'var(--text-color)'}">
+        {{ users().length === 0 ? 'No sub-accounts created yet' : 'No staff accounts match your filter' }}
+      </h3>
+      <p [ngStyle]="{'margin': '0.5rem 0 0 0', 'font-size': '0.9rem', 'color': 'var(--text-muted)', 'max-width': '420px'}">
+        {{ users().length === 0 
+            ? 'Create sub-accounts for your Sales, Finance, Support, and Analytics teams so staff have dedicated logins and tailored access.' 
+            : 'Try adjusting your search criteria or reset your department and status filters.' }}
+      </p>
+    </div>
+    <button
+      *ngIf="users().length === 0"
+      type="button"
+      (click)="navigateToCreate()"
+      [ngStyle]="{
+        'display': 'flex',
+        'align-items': 'center',
+        'gap': '0.5rem',
+        'padding': '0.75rem 1.5rem',
+        'border-radius': '10px',
+        'background': 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+        'color': '#ffffff',
+        'font-weight': '600',
+        'font-size': '0.9rem',
+        'border': 'none',
+        'cursor': 'pointer',
+        'box-shadow': '0 4px 12px rgba(79, 70, 229, 0.3)'
+      }">
+      <i class="pi pi-plus"></i>
+      <span>Add First Sub-Account</span>
+    </button>
+  </div>
+
+  <!-- Users Grid -->
+  <div *ngIf="filteredUsers().length > 0" [ngStyle]="{
+    'display': 'grid',
+    'grid-template-columns': 'repeat(auto-fill, minmax(340px, 1fr))',
+    'gap': '1.25rem'
+  }">
+    <div
+      *ngFor="let user of filteredUsers()"
+      (click)="navigateToEdit(user)"
+      [ngStyle]="{
+        'background': 'var(--card-bg)',
+        'border': '1px solid var(--border-color)',
+        'border-radius': '16px',
+        'padding': '1.35rem',
+        'display': 'flex',
+        'flex-direction': 'column',
+        'justify-content': 'space-between',
+        'cursor': 'pointer',
+        'position': 'relative',
+        'transition': 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
+        'box-shadow': '0 2px 10px rgba(0,0,0,0.03)'
+      }">
+
+      <!-- Top Row: Avatar, Info, and Status -->
+      <div>
+        <div [ngStyle]="{'display': 'flex', 'align-items': 'flex-start', 'justify-content': 'space-between', 'gap': '0.75rem'}">
+          <div [ngStyle]="{'display': 'flex', 'align-items': 'center', 'gap': '0.85rem'}">
+            <!-- Avatar -->
+            <div [ngStyle]="{
+              'width': '46px',
+              'height': '46px',
+              'border-radius': '12px',
+              'background': user.isActive 
+                ? 'linear-gradient(135deg, #4f46e5 0%, #06b6d4 100%)' 
+                : 'linear-gradient(135deg, #64748b 0%, #94a3b8 100%)',
+              'color': '#ffffff',
+              'display': 'flex',
+              'align-items': 'center',
+              'justify-content': 'center',
+              'font-size': '1.1rem',
+              'font-weight': '700',
+              'box-shadow': '0 4px 10px rgba(0,0,0,0.1)'
+            }">
+              {{ getInitials(user.userName) }}
+            </div>
+
+            <!-- Name & Designation -->
+            <div>
+              <div [ngStyle]="{
+                'font-size': '1.05rem',
+                'font-weight': '700',
+                'color': 'var(--text-color)',
+                'line-height': '1.2'
+              }">
+                {{ user.userName }}
+              </div>
+              <div [ngStyle]="{
+                'font-size': '0.825rem',
+                'color': 'var(--text-muted)',
+                'margin-top': '0.2rem'
+              }">
+                {{ user.designation || 'Staff Member' }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Active & Test Badges -->
+          <div [ngStyle]="{'display': 'flex', 'flex-direction': 'column', 'align-items': 'flex-end', 'gap': '0.35rem'}">
+            <span [ngStyle]="{
+              'font-size': '0.7rem',
+              'font-weight': '700',
+              'padding': '0.2rem 0.55rem',
+              'border-radius': '12px',
+              'background': user.isActive ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+              'color': user.isActive ? '#10b981' : '#ef4444',
+              'border': user.isActive ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid rgba(239, 68, 68, 0.25)'
+            }">
+              {{ user.isActive ? 'Active' : 'Inactive' }}
+            </span>
+            <span *ngIf="user.isTestAccount" [ngStyle]="{
+              'font-size': '0.65rem',
+              'font-weight': '600',
+              'padding': '0.15rem 0.45rem',
+              'border-radius': '10px',
+              'background': 'rgba(245, 158, 11, 0.12)',
+              'color': '#f59e0b'
+            }">
+              Sandbox
+            </span>
+          </div>
+        </div>
+
+        <!-- Department Tag & Company -->
+        <div [ngStyle]="{'margin-top': '1rem', 'display': 'flex', 'flex-wrap': 'wrap', 'align-items': 'center', 'gap': '0.5rem'}">
+          <span
+            *ngIf="user.department"
+            [ngStyle]="{
+              'font-size': '0.75rem',
+              'font-weight': '600',
+              'padding': '0.25rem 0.65rem',
+              'border-radius': '6px',
+              'background': getDepartmentBadgeColor(user.department).bg,
+              'color': getDepartmentBadgeColor(user.department).text,
+              'border': '1px solid ' + getDepartmentBadgeColor(user.department).border
+            }">
+            <i class="pi pi-tag" [ngStyle]="{'font-size': '0.65rem', 'margin-right': '0.3rem'}"></i>
+            {{ user.department }}
+          </span>
+
+          <span
+            *ngIf="user.company"
+            [ngStyle]="{
+              'font-size': '0.75rem',
+              'color': 'var(--text-muted)',
+              'background': 'rgba(150, 150, 150, 0.08)',
+              'padding': '0.25rem 0.55rem',
+              'border-radius': '6px'
+            }">
+            <i class="pi pi-building" [ngStyle]="{'font-size': '0.65rem', 'margin-right': '0.25rem'}"></i>
+            {{ user.company }}
+          </span>
+        </div>
+
+        <!-- Contact & Location Info -->
+        <div [ngStyle]="{
+          'margin-top': '1rem',
+          'padding-top': '0.85rem',
+          'border-top': '1px solid var(--border-color)',
+          'display': 'flex',
+          'flex-direction': 'column',
+          'gap': '0.45rem',
+          'font-size': '0.8rem',
+          'color': 'var(--text-muted)'
+        }">
+          <div [ngStyle]="{'display': 'flex', 'align-items': 'center', 'gap': '0.5rem'}">
+            <i class="pi pi-envelope" [ngStyle]="{'color': '#6366f1'}"></i>
+            <span [ngStyle]="{'overflow': 'hidden', 'text-overflow': 'ellipsis', 'white-space': 'nowrap'}">
+              {{ user.email || 'No email specified' }}
+            </span>
+          </div>
+
+          <div [ngStyle]="{'display': 'flex', 'align-items': 'center', 'justify-content': 'space-between'}">
+            <div [ngStyle]="{'display': 'flex', 'align-items': 'center', 'gap': '0.5rem'}">
+              <i class="pi pi-phone" [ngStyle]="{'color': '#10b981'}"></i>
+              <span>{{ user.contact || 'No phone' }}</span>
+            </div>
+            <div [ngStyle]="{'display': 'flex', 'align-items': 'center', 'gap': '0.35rem'}">
+              <i class="pi pi-globe"></i>
+              <span>{{ user.country || 'N/A' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Permissions Summary Badge -->
+        <div [ngStyle]="{
+          'margin-top': '0.85rem',
+          'background': 'rgba(99, 102, 241, 0.06)',
+          'border': '1px solid rgba(99, 102, 241, 0.15)',
+          'border-radius': '8px',
+          'padding': '0.6rem 0.8rem'
+        }">
+          <div [ngStyle]="{'display': 'flex', 'align-items': 'center', 'justify-content': 'space-between', 'font-size': '0.75rem'}">
+            <span [ngStyle]="{'color': '#6366f1', 'font-weight': '600'}">Screen Access</span>
+            <span [ngStyle]="{'color': 'var(--text-color)', 'font-weight': '700'}">
+              {{ getAccessibleScreensCount(user) }} active
+            </span>
+          </div>
+          <!-- Screen chips preview -->
+          <div [ngStyle]="{'display': 'flex', 'flex-wrap': 'wrap', 'gap': '0.3rem', 'margin-top': '0.4rem'}">
+            <span
+              *ngFor="let s of getAccessibleScreenNames(user).slice(0, 3)"
+              [ngStyle]="{
+                'font-size': '0.65rem',
+                'padding': '0.15rem 0.4rem',
+                'border-radius': '4px',
+                'background': 'var(--card-bg)',
+                'color': 'var(--text-color)',
+                'border': '1px solid var(--border-color)'
+              }">
+              {{ s }}
+            </span>
+            <span
+              *ngIf="getAccessibleScreenNames(user).length > 3"
+              [ngStyle]="{
+                'font-size': '0.65rem',
+                'padding': '0.15rem 0.4rem',
+                'border-radius': '4px',
+                'color': 'var(--text-muted)'
+              }">
+              +{{ getAccessibleScreenNames(user).length - 3 }} more
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Actions -->
+      <div [ngStyle]="{
+        'margin-top': '1.25rem',
+        'display': 'flex',
+        'align-items': 'center',
+        'justify-content': 'space-between',
+        'gap': '0.5rem'
+      }">
+        <span [ngStyle]="{'font-size': '0.75rem', 'color': 'var(--text-muted)'}">
+          Created {{ user.dateCreated | date:'mediumDate' }}
+        </span>
+
+        <div [ngStyle]="{'display': 'flex', 'align-items': 'center', 'gap': '0.5rem'}">
+          <button
+            type="button"
+            (click)="openDeleteModal(user, $event)"
+            title="Delete User"
+            [ngStyle]="{
+              'padding': '0.45rem 0.65rem',
+              'border-radius': '8px',
+              'border': '1px solid rgba(239, 68, 68, 0.25)',
+              'background': 'rgba(239, 68, 68, 0.08)',
+              'color': '#ef4444',
+              'cursor': 'pointer',
+              'font-size': '0.8rem',
+              'transition': 'all 0.15s ease'
+            }">
+            <i class="pi pi-trash"></i>
+          </button>
+
+          <button
+            type="button"
+            (click)="navigateToEdit(user)"
+            [ngStyle]="{
+              'display': 'flex',
+              'align-items': 'center',
+              'gap': '0.4rem',
+              'padding': '0.45rem 0.85rem',
+              'border-radius': '8px',
+              'border': '1px solid var(--border-color)',
+              'background': 'var(--card-bg)',
+              'color': 'var(--text-color)',
+              'cursor': 'pointer',
+              'font-size': '0.8rem',
+              'font-weight': '600',
+              'transition': 'all 0.15s ease'
+            }">
+            <i class="pi pi-cog" [ngStyle]="{'color': '#6366f1'}"></i>
+            <span>Edit</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal Dialog -->
+  <div *ngIf="userToDelete()" [ngStyle]="{
+    'position': 'fixed',
+    'top': '0',
+    'left': '0',
+    'width': '100vw',
+    'height': '100vh',
+    'background': 'rgba(0, 0, 0, 0.65)',
+    'backdrop-filter': 'blur(4px)',
+    'display': 'flex',
+    'align-items': 'center',
+    'justify-content': 'center',
+    'z-index': '9999',
+    'padding': '1rem'
+  }">
+    <div [ngStyle]="{
+      'background': 'var(--card-bg)',
+      'border': '1px solid var(--border-color)',
+      'border-radius': '18px',
+      'max-width': '460px',
+      'width': '100%',
+      'padding': '1.75rem',
+      'box-shadow': '0 20px 40px rgba(0,0,0,0.25)',
+      'display': 'flex',
+      'flex-direction': 'column',
+      'gap': '1.25rem'
+    }">
+      <!-- Modal Header -->
+      <div [ngStyle]="{'display': 'flex', 'align-items': 'center', 'gap': '1rem'}">
+        <div [ngStyle]="{
+          'width': '48px',
+          'height': '48px',
+          'border-radius': '12px',
+          'background': 'rgba(239, 68, 68, 0.12)',
+          'color': '#ef4444',
+          'display': 'flex',
+          'align-items': 'center',
+          'justify-content': 'center',
+          'font-size': '1.4rem'
+        }">
+          <i class="pi pi-exclamation-triangle"></i>
+        </div>
+        <div>
+          <h3 [ngStyle]="{'margin': '0', 'font-size': '1.15rem', 'font-weight': '700', 'color': 'var(--text-color)'}">
+            Delete Sub-Account
+          </h3>
+          <p [ngStyle]="{'margin': '0.2rem 0 0 0', 'font-size': '0.85rem', 'color': 'var(--text-muted)'}">
+            This will permanently revoke all access permissions for this staff member.
+          </p>
+        </div>
+      </div>
+
+      <!-- Warning Box -->
+      <div [ngStyle]="{
+        'background': 'rgba(239, 68, 68, 0.06)',
+        'border': '1px solid rgba(239, 68, 68, 0.2)',
+        'border-radius': '10px',
+        'padding': '0.85rem 1rem',
+        'font-size': '0.85rem',
+        'color': 'var(--text-color)'
+      }">
+        Are you sure you want to delete user <strong>{{ userToDelete()?.userName }}</strong> ({{ userToDelete()?.designation || 'Staff' }})? All historical audit trail modifications made by this user will remain preserved for compliance.
+      </div>
+
+      <!-- Actions -->
+      <div [ngStyle]="{'display': 'flex', 'justify-content': 'flex-end', 'gap': '0.75rem', 'margin-top': '0.5rem'}">
+        <button
+          type="button"
+          (click)="closeDeleteModal()"
+          [disabled]="deleting()"
+          [ngStyle]="{
+            'padding': '0.6rem 1.25rem',
+            'border-radius': '10px',
+            'border': '1px solid var(--border-color)',
+            'background': 'transparent',
+            'color': 'var(--text-color)',
+            'cursor': 'pointer',
+            'font-weight': '600',
+            'font-size': '0.85rem'
+          }">
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          (click)="confirmDelete()"
+          [disabled]="deleting()"
+          [ngStyle]="{
+            'display': 'flex',
+            'align-items': 'center',
+            'gap': '0.5rem',
+            'padding': '0.6rem 1.25rem',
+            'border-radius': '10px',
+            'border': 'none',
+            'background': '#ef4444',
+            'color': '#ffffff',
+            'cursor': deleting() ? 'not-allowed' : 'pointer',
+            'font-weight': '600',
+            'font-size': '0.85rem',
+            'box-shadow': '0 4px 12px rgba(239, 68, 68, 0.35)'
+          }">
+          <i class="pi" [ngClass]="deleting() ? 'pi-spin pi-spinner' : 'pi-trash'"></i>
+          <span>{{ deleting() ? 'Deleting...' : 'Delete Account' }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>

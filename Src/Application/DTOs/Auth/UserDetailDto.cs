@@ -1,4 +1,4 @@
-﻿using Domain.Enums;
+using Domain.Enums;
 
 namespace Application.DTOs.Auth;
 
@@ -19,4 +19,7 @@ public class UserDetailDto
     public DateTime Created { get; init; }
     public List<UserDetailAuditTrailDto> Audit { get; set; } = [];
     public SubscriptionType? SubscriptionType { get; init; }
+    public bool IsMainAccount { get; set; } = true;
+    public string? Designation { get; set; }
+    public string? Department { get; set; }
 }

@@ -14,6 +14,10 @@ import { CompanyList } from './features/company/company-list/company-list';
 import { StoreMaster } from './features/store/store-master/store-master';
 import { StoreForm } from './features/store/store-form/store-form';
 import { StoreList } from './features/store/store-list/store-list';
+import { UserMaster } from './features/user/user-master/user-master';
+import { UserList } from './features/user/user-list/user-list';
+import { UserForm } from './features/user/user-form/user-form';
+import { mainAccountGuard } from './core/guards/main-account.guard';
 
 export const routes: Routes = [
   {
@@ -61,6 +65,11 @@ export const routes: Routes = [
         component: Masters,
         children: [
           {
+            path: '',
+            redirectTo: 'company',
+            pathMatch: 'full'
+          },
+          {
             path: 'company',
             component: CompanyMaster,
             children: [
@@ -86,12 +95,17 @@ export const routes: Routes = [
           // { path: 'customers', component: CustomerMaster }
           // ...customers, etc.
         ]
+      },
+      {
+        path: 'users',
+        component: UserMaster,
+        canActivate: [mainAccountGuard],
+        children: [
+          { path: '', component: UserList },
+          { path: 'new', component: UserForm },
+          { path: ':userName', component: UserForm }
+        ]
       }
-      // add more child routes here as you build them out:
-      // { path: 'customers', component: CustomerMaster },
-      // { path: 'items', component: ItemMaster },
-      // { path: 'orders', component: Orders },
-      // ...
     ]
   }
 ];

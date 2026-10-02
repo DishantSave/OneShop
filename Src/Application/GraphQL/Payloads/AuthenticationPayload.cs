@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Auth;
+using Application.DTOs.Auth;
 using Domain.Accessibility;
 using Domain.Enums;
 
@@ -9,5 +9,16 @@ public class AuthenticationPayload
     public bool Success { get; init; } = false;
     public string Message { get; init; } = string.Empty;
     public UserDetailDto? UserDetails { get; init; }
-    public IReadOnlyList<FeatureAccessibility>? AccessibleScreens => Success ? SubscriptionScreensAccess.GetScreens(UserDetails?.SubscriptionType ?? SubscriptionType.Basic) : null;
+
+    private IReadOnlyList<FeatureAccessibility>? _accessibleScreens;
+    public IReadOnlyList<FeatureAccessibility>? AccessibleScreens
+    {
+        get
+        {
+            if (!Success) return null;
+            if (_accessibleScreens != null) return _accessibleScreens;
+            return SubscriptionScreensAccess.GetScreens(UserDetails?.SubscriptionType ?? SubscriptionType.Basic);
+        }
+        init => _accessibleScreens = value;
+    }
 }

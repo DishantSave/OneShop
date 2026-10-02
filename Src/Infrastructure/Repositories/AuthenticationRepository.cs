@@ -1,4 +1,4 @@
-﻿using Application.Common.Tenant;
+using Application.Common.Tenant;
 using Application.DTOs.Auth;
 using Application.GraphQL.Payloads;
 using Application.Interfaces.DataService;
@@ -166,38 +166,6 @@ public class AuthenticationRepository(IHttpContextAccessor httpContextAccessor, 
             transaction.Commit();
 
             return await FetchAuthenticationResponse(userName, cancellationToken);
-
-            /*string getUserDetails = @"SELECT ac.UserName, ac.UserId, ac.AccountId, ac.ApiTokenKey AS ApiToken,
-                                             ac.IsCustomerAccount, ac.IsSellerAccount, ac.Company, ac.ProfilePicture,
-                                             ac.Email, ac.Contact, ac.Country, ac.IsTestAccount, ac.DateCreated AS Created,
-                                             acs.SubscriptionType
-                                      FROM dbo.AccountCredential AS ac
-                                      INNER JOIN AccountSubscription AS acs ON ac.AccountId = acs.AccountId
-                                      WHERE UserName = @UserName AND UserId = @UserId;";
-            var getUserDetailsCmd = new CommandDefinition(getUserDetails,
-                                                     new { UserName = userName, UserId = userId },
-                                                     transaction: transaction,
-                                                     cancellationToken: cancellationToken);
-
-            var user = await db.QuerySingleAsync<UserDetailDto>(getUserDetailsCmd);
-
-            string getUserAuditTrailDetails = @"SELECT UserName, Field, Description, DateModified
-                                                FROM dbo.AccountCredentialAuditTrail
-                                                WHERE UserName = @UserName;";
-            var getUserAuditTrailDetailsCmd = new CommandDefinition(getUserAuditTrailDetails,
-                                                     new { UserName = userName },
-                                                     transaction: transaction,
-                                                     cancellationToken: cancellationToken);
-
-            var auditTrail = (await db.QueryAsync<UserDetailAuditTrail>(getUserAuditTrailDetailsCmd)).ToList();
-
-            user.Audit = auditTrail;
-
-            return new AuthenticationResponse() {
-                Success = true,
-                Message = "Registration successful.",
-                UserDetails = user
-            };*/
         }
         catch
         {
@@ -224,11 +192,7 @@ public class AuthenticationRepository(IHttpContextAccessor httpContextAccessor, 
 
         if (passwordHash == null)
         {
-            return new AuthenticationPayload
-            {
-                Success = false,
-                Message = "Invalid username or password."
-            };
+            return await AuthenticateSubAccountAsync(db, userName, password, cancellationToken);
         }
 
         var hasher = new PasswordHasher<object>();
@@ -244,10 +208,128 @@ public class AuthenticationRepository(IHttpContextAccessor httpContextAccessor, 
             };
         }
 
-        return await FetchAuthenticationResponse(userName, cancellationToken);
+        return await FetchAuthenticationResponse(userName, cancellationToken, "Login successful.");
     }
 
-    private async Task<AuthenticationPayload> FetchAuthenticationResponse(string userName, CancellationToken cancellationToken)
+    private async Task<AuthenticationPayload> AuthenticateSubAccountAsync(IDbConnection db, string userName, string password, CancellationToken cancellationToken)
+    {
+        string subAccountSql = @"
+            SELECT sa.AccountId, sa.SubUserId, sa.UserName, sa.Password,
+                   sa.IsCustomerAccount, sa.IsSellerAccount, sa.Company, sa.ProfilePicture,
+                   sa.Email, sa.Contact, sa.Country, sa.IsTestAccount, sa.Designation,
+                   sa.Department, sa.IsActive, sa.DateCreated, acs.SubscriptionType
+            FROM dbo.SubAccountCredential AS sa
+            LEFT JOIN dbo.AccountSubscription AS acs ON sa.AccountId = acs.AccountId
+            WHERE UPPER(sa.UserName) = UPPER(@UserName);";
+
+        var subAccount = await db.QueryFirstOrDefaultAsync<dynamic>(new CommandDefinition(subAccountSql, new { UserName = userName }, cancellationToken: cancellationToken));
+
+        if (subAccount == null)
+        {
+            return new AuthenticationPayload
+            {
+                Success = false,
+                Message = "Invalid username or password."
+            };
+        }
+
+        if (subAccount.IsActive == false)
+        {
+            return new AuthenticationPayload
+            {
+                Success = false,
+                Message = "Account is inactive. Please contact the primary account administrator."
+            };
+        }
+
+        var hasher = new PasswordHasher<object>();
+        string subPasswordHash = (string)subAccount.Password;
+        var verifyResult = hasher.VerifyHashedPassword(userName, subPasswordHash, password);
+
+        if (verifyResult == PasswordVerificationResult.Failed)
+        {
+            return new AuthenticationPayload
+            {
+                Success = false,
+                Message = "Invalid username or password."
+            };
+        }
+
+        string accountId = (string)subAccount.AccountId;
+        string subUserId = (string)subAccount.SubUserId;
+        string subUserName = (string)subAccount.UserName;
+
+        var token = _jwtTokenService.GenerateToken(accountId, subUserId, subUserName);
+
+        string getAuditSql = @"
+            SELECT UserName, Field, Description, DateModified
+            FROM dbo.SubAccountCredentialAuditTrail
+            WHERE UPPER(UserName) = UPPER(@UserName)
+            ORDER BY DateModified DESC;";
+
+        var auditTrail = (await db.QueryAsync<UserDetailAuditTrailDto>(new CommandDefinition(getAuditSql, new { UserName = userName }, cancellationToken: cancellationToken))).ToList();
+
+        string getScreenAccessSql = @"
+            SELECT ScreenName, CanView, CanCreate, CanEdit, CanDelete
+            FROM dbo.SubAccountScreenAccess
+            WHERE AccountId = @AccountId AND SubUserId = @SubUserId;";
+
+        var accessRows = await db.QueryAsync<(string ScreenName, bool CanView, bool CanCreate, bool CanEdit, bool CanDelete)>(
+            new CommandDefinition(getScreenAccessSql, new { AccountId = accountId, SubUserId = subUserId }, cancellationToken: cancellationToken));
+
+        var accessibleScreens = new List<Domain.Accessibility.FeatureAccessibility>();
+        foreach (var row in accessRows)
+        {
+            if (Enum.TryParse<Domain.Enums.Screen>(row.ScreenName, true, out var screenEnum))
+            {
+                if (screenEnum == Domain.Enums.Screen.Users)
+                    continue;
+
+                accessibleScreens.Add(new Domain.Accessibility.FeatureAccessibility(
+                    new Domain.Accessibility.ScreenThreshold(screenEnum, 0, true),
+                    row.CanView,
+                    row.CanCreate,
+                    row.CanEdit,
+                    row.CanDelete
+                ));
+            }
+        }
+
+        string? subscriptionTypeStr = subAccount.SubscriptionType?.ToString();
+        var subscriptionType = Enum.TryParse<Domain.Enums.SubscriptionType>(subscriptionTypeStr, true, out var parsedSub) ? parsedSub : Domain.Enums.SubscriptionType.Basic;
+
+        var userDto = new UserDetailDto
+        {
+            UserName = subUserName,
+            UserId = subUserId,
+            AccountId = accountId,
+            ApiToken = token,
+            IsCustomerAccount = (bool)subAccount.IsCustomerAccount,
+            IsSellerAccount = (bool)subAccount.IsSellerAccount,
+            Company = (string)(subAccount.Company ?? string.Empty),
+            ProfilePicture = (string)(subAccount.ProfilePicture ?? string.Empty),
+            Email = (string)(subAccount.Email ?? string.Empty),
+            Contact = (string)(subAccount.Contact ?? string.Empty),
+            Country = (string)(subAccount.Country ?? string.Empty),
+            IsTestAccount = (bool)subAccount.IsTestAccount,
+            Created = (DateTime)subAccount.DateCreated,
+            Audit = auditTrail,
+            SubscriptionType = subscriptionType,
+            IsMainAccount = false,
+            Designation = (string?)subAccount.Designation,
+            Department = (string?)subAccount.Department
+        };
+
+        return new AuthenticationPayload
+        {
+            Success = true,
+            Message = "Login successful.",
+            UserDetails = userDto,
+            AccessibleScreens = accessibleScreens
+        };
+    }
+
+    private async Task<AuthenticationPayload> FetchAuthenticationResponse(string userName, CancellationToken cancellationToken, string successMessage = "Registration successful.")
     {
         using IDbConnection db = new SqlConnection(GetConnectionString());
 
@@ -257,10 +339,9 @@ public class AuthenticationRepository(IHttpContextAccessor httpContextAccessor, 
                                          acs.SubscriptionType
                                   FROM dbo.AccountCredential AS ac
                                   INNER JOIN AccountSubscription AS acs ON ac.AccountId = acs.AccountId
-                                  WHERE ac.UserName = @UserName"; //AND ac.UserId = @UserId;";
+                                  WHERE ac.UserName = @UserName";
         var getUserDetailsCmd = new CommandDefinition(getUserDetails,
-                                                 new { UserName = userName/*, UserId = userId*/ },
-                                                 //transaction: transaction,
+                                                 new { UserName = userName },
                                                  cancellationToken: cancellationToken);
 
         var user = await db.QuerySingleAsync<UserDetailDto>(getUserDetailsCmd);
@@ -271,13 +352,13 @@ public class AuthenticationRepository(IHttpContextAccessor httpContextAccessor, 
             user.UserName);
 
         user.ApiToken = token;
+        user.IsMainAccount = true;
 
         string getUserAuditTrailDetails = @"SELECT UserName, Field, Description, DateModified
                                                 FROM dbo.AccountCredentialAuditTrail
                                                 WHERE UserName = @UserName;";
         var getUserAuditTrailDetailsCmd = new CommandDefinition(getUserAuditTrailDetails,
                                                  new { UserName = userName },
-                                                 //transaction: transaction,
                                                  cancellationToken: cancellationToken);
 
         var auditTrail = (await db.QueryAsync<UserDetailAuditTrailDto>(getUserAuditTrailDetailsCmd)).ToList();
@@ -287,7 +368,7 @@ public class AuthenticationRepository(IHttpContextAccessor httpContextAccessor, 
         return new AuthenticationPayload()
         {
             Success = true,
-            Message = "Registration successful.",
+            Message = successMessage,
             UserDetails = user
         };
     }

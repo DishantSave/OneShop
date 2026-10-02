@@ -41,6 +41,7 @@ public static class ServiceExtensions
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<ICompanyService, CompanyService>();
         services.AddScoped<IStoreService, StoreService>();
+        services.AddScoped<ISubAccountService, SubAccountService>();
         
         // GraphQL Service Dependencies ends...
 
@@ -52,6 +53,7 @@ public static class ServiceExtensions
         services.AddScoped<ICountryRepository, CountryRepository>();
         services.AddScoped<ICompanyRepository, CompanyRepository>();
         services.AddScoped<IStoreRepository, StoreRepository>();
+        services.AddScoped<ISubAccountRepository, SubAccountRepository>();
         // Data Layer Dependencies ends...
 
         /***************************************************************************************************************/

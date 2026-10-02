@@ -377,7 +377,7 @@ export class StoreForm implements OnInit {
   }
 
   cancel() {
-    this.router.navigate(['../../'], { relativeTo: this.route });
+    this.router.navigate(['/dashboard/masters/store']);
   }
 
   async submit() {

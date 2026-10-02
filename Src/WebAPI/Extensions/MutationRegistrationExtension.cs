@@ -18,6 +18,9 @@ public static class MutationRegistrationExtension
         builder.AddTypeExtension<CompanyMutation>();
         builder.AddTypeExtension<StoreMutation>();
 
+        //Users
+        builder.AddTypeExtension<UserMutation>();
+
         return builder;
     }
 }
