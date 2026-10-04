@@ -17,6 +17,16 @@ import { StoreList } from './features/store/store-list/store-list';
 import { UserMaster } from './features/user/user-master/user-master';
 import { UserList } from './features/user/user-list/user-list';
 import { UserForm } from './features/user/user-form/user-form';
+import { WarehouseMaster } from './features/warehouse/warehouse-master/warehouse-master';
+import { WarehouseList } from './features/warehouse/warehouse-list/warehouse-list';
+import { WarehouseForm } from './features/warehouse/warehouse-form/warehouse-form';
+import { ColourMaster } from './features/colour/colour-master/colour-master';
+import { SizeMaster } from './features/size/size-master/size-master';
+import { ItemMaster } from './features/item/item-master/item-master';
+import { ItemList } from './features/item/item-list/item-list';
+import { ItemForm } from './features/item/item-form/item-form';
+import { InventoryMaster } from './features/inventory/inventory-master/inventory-master';
+import { InventoryList } from './features/inventory/inventory-list/inventory-list';
 import { mainAccountGuard } from './core/guards/main-account.guard';
 
 export const routes: Routes = [
@@ -92,8 +102,46 @@ export const routes: Routes = [
             redirectTo: 'store',
             pathMatch: 'full'
           },
+          {
+            path: 'warehouse',
+            component: WarehouseMaster,
+            children: [
+              { path: '', component: WarehouseList },
+              { path: 'new', component: WarehouseForm },
+              { path: ':companyCode/:code', component: WarehouseForm }
+            ]
+          },
+          {
+            path: 'colour',
+            component: ColourMaster
+          },
+          {
+            path: 'color',
+            redirectTo: 'colour',
+            pathMatch: 'full'
+          },
+          {
+            path: 'size',
+            component: SizeMaster
+          }
           // { path: 'customers', component: CustomerMaster }
           // ...customers, etc.
+        ]
+      },
+      {
+        path: 'items',
+        component: ItemMaster,
+        children: [
+          { path: '', component: ItemList },
+          { path: 'new', component: ItemForm },
+          { path: ':companyCode/:itemNumber', component: ItemForm }
+        ]
+      },
+      {
+        path: 'inventory',
+        component: InventoryMaster,
+        children: [
+          { path: '', component: InventoryList }
         ]
       },
       {

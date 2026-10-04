@@ -1,6 +1,27 @@
 @use "./themes" as *;
 @import "primeicons/primeicons.css";
 
+/* ==========================================================================
+   Global Scrollbar Hiding
+   Keep all elements fully scrollable via mouse wheel, touch, trackpad, and keys,
+   while completely hiding visual scrollbars across all browsers.
+   ========================================================================== */
+html,
+body,
+* {
+  scrollbar-width: none !important;        /* Firefox and modern Chromium */
+  -ms-overflow-style: none !important;    /* IE and legacy Edge */
+}
+
+*::-webkit-scrollbar,
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none !important;               /* Chrome, Safari, Edge, Opera */
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+}
+
 html,
 body {
   margin: 0;

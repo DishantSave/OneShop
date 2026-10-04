@@ -1,0 +1,495 @@
+<div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '950px', margin: '0 auto', paddingBottom: '3rem' }">
+
+  <!-- Breadcrumb & Back -->
+  <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }">
+    <button (click)="cancel()" type="button" [ngStyle]="{
+        background: 'transparent', border: 'none', color: 'var(--text-color)',
+        display: 'flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.88rem',
+        fontWeight: '600', cursor: 'pointer', opacity: '0.75'
+      }">
+      <i class="pi pi-arrow-left"></i> Back to Items
+    </button>
+
+    <span *ngIf="isEditMode" [ngStyle]="{
+        fontSize: '0.8rem', fontWeight: '700', padding: '0.25rem 0.65rem', borderRadius: '6px',
+        background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--sidebar-link-active-bg, #05517e)'
+      }">
+      Editing: {{ companyCode }} &bull; {{ itemNumber }}
+    </span>
+  </div>
+
+  <!-- Form Header -->
+  <div [ngStyle]="{
+      background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '12px',
+      padding: '1.25rem 1.5rem', display: 'flex', alignItems: 'center', gap: '1rem'
+    }">
+    <div [ngStyle]="{
+        width: '46px', height: '46px', borderRadius: '12px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        background: 'var(--input-bg)', color: 'var(--sidebar-link-active-bg, #05517e)',
+        fontSize: '1.25rem', border: '1px solid var(--border-color)'
+      }">
+      <i class="pi pi-box"></i>
+    </div>
+    <div>
+      <h2 [ngStyle]="{ margin: '0', fontSize: '1.35rem', fontWeight: '700', color: 'var(--text-color)' }">
+        {{ isEditMode ? 'Edit Product Item' : 'Create New Product Item' }}
+      </h2>
+      <span [ngStyle]="{ fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.65' }">
+        Configure B2C retail & B2B wholesale pricing, MOQ parameters, and variant matrix
+      </span>
+    </div>
+  </div>
+
+  <!-- Main Form -->
+  <form [formGroup]="form" (ngSubmit)="submit()" [ngStyle]="{
+      background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '12px',
+      padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.75rem'
+    }">
+
+    <!-- Section 1: Product Identifiers & Company Assignment -->
+    <div>
+      <h3 [ngStyle]="{ margin: '0 0 1rem', fontSize: '1rem', fontWeight: '700', color: 'var(--text-color)', display: 'flex', alignItems: 'center', gap: '0.5rem' }">
+        <i class="pi pi-id-card" [ngStyle]="{ color: 'var(--sidebar-link-active-bg, #05517e)' }"></i>
+        1. Product Identifiers & Company
+      </h3>
+
+      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem' }">
+        <!-- Company Dropdown (Primary Key component) -->
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+            Company (Primary Key) <span [ngStyle]="{ color: '#ef4444' }">*</span>
+          </label>
+          <select formControlName="companyCode"
+                  (change)="onCompanySelect($any($event.target).value)"
+                  [ngStyle]="{
+                    width: '100%', background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+                    color: 'var(--input-text)', padding: '0.6rem 0.85rem', borderRadius: '8px', fontSize: '0.9rem', outline: 'none',
+                    cursor: isEditMode ? 'not-allowed' : 'pointer', opacity: isEditMode ? '0.75' : '1'
+                  }">
+            <option value="" disabled>Select Company</option>
+            <option *ngFor="let c of companies()" [value]="c.code">
+              {{ c.code }} — {{ c.name }}
+            </option>
+          </select>
+          <span *ngIf="isEditMode" [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.6', marginTop: '0.2rem', display: 'block' }">
+            Company code is part of Primary Key and cannot be changed.
+          </span>
+        </div>
+
+        <!-- Item Number (Style / Product Code) -->
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+            Item Number / Style Code (Primary Key) <span [ngStyle]="{ color: '#ef4444' }">*</span>
+          </label>
+          <div [ngStyle]="{ position: 'relative' }">
+            <input type="text"
+                   formControlName="itemNumber"
+                   (blur)="checkNumberUniqueness()"
+                   placeholder="e.g. POLO-101, TEE-SS26"
+                   maxlength="50"
+                   [ngStyle]="{
+                     width: '100%', background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+                     color: 'var(--input-text)', padding: '0.6rem 0.85rem', borderRadius: '8px', fontSize: '0.9rem', outline: 'none',
+                     cursor: isEditMode ? 'not-allowed' : 'text', opacity: isEditMode ? '0.75' : '1', textTransform: 'uppercase'
+                   }" />
+            <i *ngIf="checkingNumber()" class="pi pi-spin pi-spinner" [ngStyle]="{ position: 'absolute', right: '10px', top: '12px', fontSize: '0.9rem', color: 'var(--text-color)' }"></i>
+          </div>
+          <span *ngIf="numberAvailability() === 'available'" [ngStyle]="{ fontSize: '0.75rem', color: '#10b981', marginTop: '0.2rem', display: 'block' }">
+            Item Number is available!
+          </span>
+          <span *ngIf="numberAvailability() === 'taken'" [ngStyle]="{ fontSize: '0.75rem', color: '#ef4444', marginTop: '0.2rem', display: 'block' }">
+            Item Number is already registered for this company.
+          </span>
+        </div>
+      </div>
+
+      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginTop: '1rem' }">
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+            Item Name <span [ngStyle]="{ color: '#ef4444' }">*</span>
+          </label>
+          <input type="text" formControlName="name" placeholder="e.g. Classic Pique Polo Shirt" [ngStyle]="{
+              width: '100%', background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+              color: 'var(--input-text)', padding: '0.6rem 0.85rem', borderRadius: '8px', fontSize: '0.9rem', outline: 'none'
+            }" />
+        </div>
+
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+            Category <span [ngStyle]="{ color: '#ef4444' }">*</span>
+          </label>
+          <input type="text" formControlName="category" placeholder="e.g. Tops, Apparel, Footwear" [ngStyle]="{
+              width: '100%', background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+              color: 'var(--input-text)', padding: '0.6rem 0.85rem', borderRadius: '8px', fontSize: '0.9rem', outline: 'none'
+            }" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Order Channel & Pricing Architecture (B2B vs B2C) -->
+    <div [ngStyle]="{
+        background: 'var(--input-bg)', border: '1px solid var(--border-color)', borderRadius: '10px',
+        padding: '1.25rem'
+      }">
+      <h3 [ngStyle]="{ margin: '0 0 0.5rem', fontSize: '1rem', fontWeight: '700', color: 'var(--text-color)', display: 'flex', alignItems: 'center', gap: '0.5rem' }">
+        <i class="pi pi-sliders-h" [ngStyle]="{ color: 'var(--sidebar-link-active-bg, #05517e)' }"></i>
+        2. Sales Channel & Segregated Pricing
+      </h3>
+      <p [ngStyle]="{ margin: '0 0 1rem', fontSize: '0.82rem', color: 'var(--text-color)', opacity: '0.7' }">
+        B2C orders allow any purchase quantity at retail price. B2B wholesale orders apply specialized pricing with Minimum Order Quantity (MOQ) criteria.
+      </p>
+
+      <!-- Channel Selector Radio Pills -->
+      <div [ngStyle]="{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1.25rem' }">
+        <label [ngStyle]="{
+            display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px',
+            border: '1px solid', cursor: 'pointer',
+            borderColor: form.get('salesChannel')?.value === 'Both' ? '#8b5cf6' : 'var(--border-color)',
+            background: form.get('salesChannel')?.value === 'Both' ? 'rgba(139, 92, 246, 0.12)' : 'var(--card-bg)'
+          }">
+          <input type="radio" formControlName="salesChannel" value="Both" [ngStyle]="{ accentColor: '#8b5cf6' }" />
+          <span [ngStyle]="{ fontSize: '0.85rem', fontWeight: '700', color: form.get('salesChannel')?.value === 'Both' ? '#8b5cf6' : 'var(--text-color)' }">
+            Both B2B & B2C
+          </span>
+        </label>
+
+        <label [ngStyle]="{
+            display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px',
+            border: '1px solid', cursor: 'pointer',
+            borderColor: form.get('salesChannel')?.value === 'B2C' ? '#10b981' : 'var(--border-color)',
+            background: form.get('salesChannel')?.value === 'B2C' ? 'rgba(16, 185, 129, 0.12)' : 'var(--card-bg)'
+          }">
+          <input type="radio" formControlName="salesChannel" value="B2C" [ngStyle]="{ accentColor: '#10b981' }" />
+          <span [ngStyle]="{ fontSize: '0.85rem', fontWeight: '700', color: form.get('salesChannel')?.value === 'B2C' ? '#10b981' : 'var(--text-color)' }">
+            B2C Retail Only
+          </span>
+        </label>
+
+        <label [ngStyle]="{
+            display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', borderRadius: '8px',
+            border: '1px solid', cursor: 'pointer',
+            borderColor: form.get('salesChannel')?.value === 'B2B' ? '#3b82f6' : 'var(--border-color)',
+            background: form.get('salesChannel')?.value === 'B2B' ? 'rgba(59, 130, 246, 0.12)' : 'var(--card-bg)'
+          }">
+          <input type="radio" formControlName="salesChannel" value="B2B" [ngStyle]="{ accentColor: '#3b82f6' }" />
+          <span [ngStyle]="{ fontSize: '0.85rem', fontWeight: '700', color: form.get('salesChannel')?.value === 'B2B' ? '#3b82f6' : 'var(--text-color)' }">
+            B2B Wholesale Only
+          </span>
+        </label>
+      </div>
+
+      <!-- Pricing & MOQ Grid -->
+      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }">
+        <!-- B2C Retail Price -->
+        <div *ngIf="form.get('salesChannel')?.value === 'B2C' || form.get('salesChannel')?.value === 'Both'">
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: '#10b981' }">
+            B2C Retail Price ($) <span [ngStyle]="{ color: '#ef4444' }">*</span>
+          </label>
+          <input type="number" step="0.01" formControlName="b2cPrice" placeholder="0.00" [ngStyle]="{
+              width: '100%', background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+              color: 'var(--input-text)', padding: '0.6rem 0.85rem', borderRadius: '8px', fontSize: '0.9rem', outline: 'none'
+            }" />
+          <span [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.6', marginTop: '0.2rem', display: 'block' }">
+            Standard customer checkout price (any quantity).
+          </span>
+        </div>
+
+        <!-- B2C Compare At Price -->
+        <div *ngIf="form.get('salesChannel')?.value === 'B2C' || form.get('salesChannel')?.value === 'Both'">
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+            Compare At / MRP ($)
+          </label>
+          <input type="number" step="0.01" formControlName="b2cCompareAtPrice" placeholder="0.00" [ngStyle]="{
+              width: '100%', background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+              color: 'var(--input-text)', padding: '0.6rem 0.85rem', borderRadius: '8px', fontSize: '0.9rem', outline: 'none'
+            }" />
+        </div>
+
+        <!-- B2B Wholesale Price -->
+        <div *ngIf="form.get('salesChannel')?.value === 'B2B' || form.get('salesChannel')?.value === 'Both'">
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: '#3b82f6' }">
+            B2B Wholesale Price ($) <span [ngStyle]="{ color: '#ef4444' }">*</span>
+          </label>
+          <input type="number" step="0.01" formControlName="b2bPrice" placeholder="0.00" [ngStyle]="{
+              width: '100%', background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+              color: 'var(--input-text)', padding: '0.6rem 0.85rem', borderRadius: '8px', fontSize: '0.9rem', outline: 'none'
+            }" />
+          <span [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.6', marginTop: '0.2rem', display: 'block' }">
+            Discounted tier for wholesale buyers / stockists.
+          </span>
+        </div>
+
+        <!-- B2B Minimum Order Quantity (MOQ) -->
+        <div *ngIf="form.get('salesChannel')?.value === 'B2B' || form.get('salesChannel')?.value === 'Both'">
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: '#3b82f6' }">
+            B2B Min Order Quantity (MOQ) <span [ngStyle]="{ color: '#ef4444' }">*</span>
+          </label>
+          <input type="number" min="1" formControlName="b2bMinQuantity" placeholder="e.g. 50" [ngStyle]="{
+              width: '100%', background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+              color: 'var(--input-text)', padding: '0.6rem 0.85rem', borderRadius: '8px', fontSize: '0.9rem', outline: 'none'
+            }" />
+          <span [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.6', marginTop: '0.2rem', display: 'block' }">
+            Orders under this quantity cannot be placed as B2B.
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Variant Matrix (Colour & Size Combinations) -->
+    <div>
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.75rem' }">
+        <div>
+          <h3 [ngStyle]="{ margin: '0', fontSize: '1rem', fontWeight: '700', color: 'var(--text-color)', display: 'flex', alignItems: 'center', gap: '0.5rem' }">
+            <i class="pi pi-clone" [ngStyle]="{ color: 'var(--sidebar-link-active-bg, #05517e)' }"></i>
+            3. Product Variant Matrix (ColourCode + SizeCode)
+          </h3>
+          <span [ngStyle]="{ fontSize: '0.8rem', color: 'var(--text-color)', opacity: '0.65' }">
+            Colours and Sizes are loaded directly from your company's masters. Select desired options and click Generate Matrix.
+          </span>
+        </div>
+
+        <button *ngIf="variantsArray.length > 0" (click)="clearAllVariants()" type="button" [ngStyle]="{
+            background: 'transparent', border: 'none', color: '#ef4444', fontSize: '0.82rem', fontWeight: '600', cursor: 'pointer'
+          }">
+          Clear Matrix
+        </button>
+      </div>
+
+      <!-- Option Selectors -->
+      <div [ngStyle]="{
+          background: 'var(--input-bg)', border: '1px solid var(--border-color)', borderRadius: '10px',
+          padding: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem'
+        }">
+
+        <!-- Colour Multi-Selection Chips -->
+        <div>
+          <div [ngStyle]="{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-color)', marginBottom: '0.45rem' }">
+            Select Available Colours (from Colour Master):
+          </div>
+
+          <div *ngIf="companyColours().length === 0" [ngStyle]="{ fontSize: '0.82rem', color: 'var(--text-color)', opacity: '0.6' }">
+            No colours found for this company. Please add colours in Masters &gt; Colour.
+          </div>
+
+          <div [ngStyle]="{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }">
+            <button *ngFor="let clr of companyColours()"
+                    (click)="toggleColourSelection(clr.code)"
+                    type="button"
+                    [ngStyle]="{
+                      display: 'flex', alignItems: 'center', gap: '0.45rem', padding: '0.35rem 0.75rem', borderRadius: '20px',
+                      border: '1px solid', cursor: 'pointer',
+                      borderColor: selectedColourCodes().includes(clr.code) ? 'var(--sidebar-link-active-bg, #05517e)' : 'var(--border-color)',
+                      background: selectedColourCodes().includes(clr.code) ? 'var(--sidebar-link-active-bg, #05517e)' : 'var(--card-bg)',
+                      color: selectedColourCodes().includes(clr.code) ? '#fff' : 'var(--text-color)',
+                      fontSize: '0.82rem', fontWeight: '600'
+                    }">
+              <span [ngStyle]="{ width: '12px', height: '12px', borderRadius: '50%', background: clr.hexCode || '#888', border: '1px solid rgba(0,0,0,0.2)' }"></span>
+              {{ clr.name }} ({{ clr.code }})
+            </button>
+          </div>
+        </div>
+
+        <!-- Size Multi-Selection Chips -->
+        <div>
+          <div [ngStyle]="{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-color)', marginBottom: '0.45rem' }">
+            Select Available Sizes (from Size Master):
+          </div>
+
+          <div *ngIf="companySizes().length === 0" [ngStyle]="{ fontSize: '0.82rem', color: 'var(--text-color)', opacity: '0.6' }">
+            No sizes found for this company. Please add sizes in Masters &gt; Size.
+          </div>
+
+          <div [ngStyle]="{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }">
+            <button *ngFor="let sz of companySizes()"
+                    (click)="toggleSizeSelection(sz.code)"
+                    type="button"
+                    [ngStyle]="{
+                      padding: '0.35rem 0.75rem', borderRadius: '20px',
+                      border: '1px solid', cursor: 'pointer',
+                      borderColor: selectedSizeCodes().includes(sz.code) ? 'var(--sidebar-link-active-bg, #05517e)' : 'var(--border-color)',
+                      background: selectedSizeCodes().includes(sz.code) ? 'var(--sidebar-link-active-bg, #05517e)' : 'var(--card-bg)',
+                      color: selectedSizeCodes().includes(sz.code) ? '#fff' : 'var(--text-color)',
+                      fontSize: '0.82rem', fontWeight: '700'
+                    }">
+              {{ sz.code }} ({{ sz.name }})
+            </button>
+          </div>
+        </div>
+
+        <!-- Generate Matrix Button -->
+        <div [ngStyle]="{ display: 'flex', justifyContent: 'flex-start' }">
+          <button (click)="generateVariantsMatrix()" type="button" [ngStyle]="{
+              background: 'var(--sidebar-link-active-bg, #05517e)', color: '#fff', border: 'none',
+              padding: '0.5rem 1rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: '600', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '0.4rem'
+            }">
+            <i class="pi pi-cog"></i>
+            Generate Matrix Combinations ({{ selectedColourCodes().length * selectedSizeCodes().length }} SKUs)
+          </button>
+        </div>
+      </div>
+
+      <!-- Generated Variants Table -->
+      <div *ngIf="variantsArray.length > 0" [ngStyle]="{ marginTop: '1rem', overflowX: 'auto' }">
+        <table [ngStyle]="{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }">
+          <thead>
+            <tr [ngStyle]="{ borderBottom: '1px solid var(--border-color)', textAlign: 'left', opacity: '0.7' }">
+              <th [ngStyle]="{ padding: '0.6rem 0.5rem' }">Colour</th>
+              <th [ngStyle]="{ padding: '0.6rem 0.5rem' }">Size</th>
+              <th [ngStyle]="{ padding: '0.6rem 0.5rem' }">SKU</th>
+              <th [ngStyle]="{ padding: '0.6rem 0.5rem' }">Barcode</th>
+              <th [ngStyle]="{ padding: '0.6rem 0.5rem' }">Price Adj ($)</th>
+              <th [ngStyle]="{ padding: '0.6rem 0.5rem' }">Active</th>
+              <th [ngStyle]="{ padding: '0.6rem 0.5rem', textAlign: 'center' }">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let vGroup of variantsArray.controls; let i = index" [formGroup]="$any(vGroup)" [ngStyle]="{ borderBottom: '1px solid var(--border-color)' }">
+              <td [ngStyle]="{ padding: '0.5rem', fontWeight: '700' }">
+                {{ vGroup.get('colourCode')?.value }}
+              </td>
+              <td [ngStyle]="{ padding: '0.5rem', fontWeight: '700' }">
+                {{ vGroup.get('sizeCode')?.value }}
+              </td>
+              <td [ngStyle]="{ padding: '0.5rem' }">
+                <input type="text" formControlName="sku" [ngStyle]="{
+                    width: '100%', background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+                    color: 'var(--input-text)', padding: '0.35rem 0.5rem', borderRadius: '6px', fontSize: '0.82rem', outline: 'none'
+                  }" />
+              </td>
+              <td [ngStyle]="{ padding: '0.5rem' }">
+                <input type="text" formControlName="barcode" placeholder="Optional barcode" [ngStyle]="{
+                    width: '100%', background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+                    color: 'var(--input-text)', padding: '0.35rem 0.5rem', borderRadius: '6px', fontSize: '0.82rem', outline: 'none'
+                  }" />
+              </td>
+              <td [ngStyle]="{ padding: '0.5rem' }">
+                <input type="number" step="0.01" formControlName="additionalPrice" placeholder="0.00" [ngStyle]="{
+                    width: '90px', background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+                    color: 'var(--input-text)', padding: '0.35rem 0.5rem', borderRadius: '6px', fontSize: '0.82rem', outline: 'none'
+                  }" />
+              </td>
+              <td [ngStyle]="{ padding: '0.5rem' }">
+                <input type="checkbox" formControlName="isActive" [ngStyle]="{ width: '16px', height: '16px', accentColor: 'var(--sidebar-link-active-bg, #05517e)' }" />
+              </td>
+              <td [ngStyle]="{ padding: '0.5rem', textAlign: 'center' }">
+                <button (click)="removeVariant(i)" type="button" [ngStyle]="{
+                    background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '0.2rem'
+                  }">
+                  <i class="pi pi-times"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Section 4: Specifications, Season, Media -->
+    <div>
+      <h3 [ngStyle]="{ margin: '0 0 1rem', fontSize: '1rem', fontWeight: '700', color: 'var(--text-color)', display: 'flex', alignItems: 'center', gap: '0.5rem' }">
+        <i class="pi pi-file-edit" [ngStyle]="{ color: 'var(--sidebar-link-active-bg, #05517e)' }"></i>
+        4. Marketing & Specifications
+      </h3>
+
+      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }">
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+            Unit of Measure <span [ngStyle]="{ color: '#ef4444' }">*</span>
+          </label>
+          <input type="text" formControlName="unitOfMeasure" placeholder="e.g. PCS, PACK, BOX" [ngStyle]="{
+              width: '100%', background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+              color: 'var(--input-text)', padding: '0.6rem 0.85rem', borderRadius: '8px', fontSize: '0.9rem', outline: 'none'
+            }" />
+        </div>
+
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+            Brand
+          </label>
+          <input type="text" formControlName="brand" placeholder="e.g. In-house, Premium Line" [ngStyle]="{
+              width: '100%', background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+              color: 'var(--input-text)', padding: '0.6rem 0.85rem', borderRadius: '8px', fontSize: '0.9rem', outline: 'none'
+            }" />
+        </div>
+
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+            Season
+          </label>
+          <input type="text" formControlName="season" placeholder="e.g. Spring/Summer 2026, Core" [ngStyle]="{
+              width: '100%', background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+              color: 'var(--input-text)', padding: '0.6rem 0.85rem', borderRadius: '8px', fontSize: '0.9rem', outline: 'none'
+            }" />
+        </div>
+      </div>
+
+      <div [ngStyle]="{ marginTop: '1rem' }">
+        <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+          Product Description
+        </label>
+        <textarea formControlName="description" rows="3" placeholder="Enter product composition, fabric details, sizing notes…" [ngStyle]="{
+            width: '100%', background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+            color: 'var(--input-text)', padding: '0.6rem 0.85rem', borderRadius: '8px', fontSize: '0.9rem', outline: 'none', resize: 'vertical'
+          }"></textarea>
+      </div>
+
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '1rem' }">
+        <input type="checkbox" formControlName="isActive" id="itemActive" [ngStyle]="{ width: '17px', height: '17px', accentColor: 'var(--sidebar-link-active-bg, #05517e)' }" />
+        <label for="itemActive" [ngStyle]="{ fontSize: '0.88rem', color: 'var(--text-color)', cursor: 'pointer' }">
+          <strong>Active Product</strong> (Available for ordering and inventory stock)
+        </label>
+      </div>
+    </div>
+
+    <!-- Actions Bar -->
+    <div [ngStyle]="{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem' }">
+      <button (click)="cancel()" type="button" [disabled]="saving()" [ngStyle]="{
+          background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--text-color)',
+          padding: '0.6rem 1.25rem', borderRadius: '8px', fontWeight: '600', fontSize: '0.88rem', cursor: 'pointer'
+        }">
+        Cancel
+      </button>
+
+      <button type="submit" [disabled]="saving() || !canSubmit()" [ngStyle]="{
+          background: 'var(--sidebar-link-active-bg, #05517e)', color: '#fff', border: 'none',
+          padding: '0.6rem 1.5rem', borderRadius: '8px', fontWeight: '600', fontSize: '0.88rem',
+          cursor: (saving() || !canSubmit()) ? 'not-allowed' : 'pointer',
+          opacity: (saving() || !canSubmit()) ? '0.6' : '1', display: 'flex', alignItems: 'center', gap: '0.5rem'
+        }">
+        <i *ngIf="saving()" class="pi pi-spin pi-spinner"></i>
+        <span>{{ saving() ? 'Saving...' : (isEditMode ? 'Update Item' : 'Create Item') }}</span>
+      </button>
+    </div>
+  </form>
+
+  <!-- Audit Trail History (Edit Mode Only) -->
+  <div *ngIf="isEditMode && auditTrail().length > 0" [ngStyle]="{
+      background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '12px',
+      padding: '1.5rem'
+    }">
+    <h3 [ngStyle]="{ margin: '0 0 1rem', fontSize: '1rem', fontWeight: '700', color: 'var(--text-color)', display: 'flex', alignItems: 'center', gap: '0.5rem' }">
+      <i class="pi pi-history" [ngStyle]="{ color: 'var(--sidebar-link-active-bg, #05517e)' }"></i>
+      Audit Trail History
+    </h3>
+
+    <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }">
+      <div *ngFor="let a of auditTrail()" [ngStyle]="{
+          background: 'var(--input-bg)', border: '1px solid var(--border-color)', borderRadius: '8px',
+          padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem'
+        }">
+        <div>
+          <div [ngStyle]="{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)' }">{{ a.description }}</div>
+          <div [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.6', marginTop: '0.2rem' }">
+            Modified by: <strong>{{ a.modifiedBy }}</strong>
+          </div>
+        </div>
+        <div [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.65' }">
+          {{ a.dateModified | date:'medium' }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

@@ -1,5 +1,7 @@
 using HotChocolate.Execution.Configuration;
 using WebAPI.Mutations;
+using WebAPI.Mutations.Catalog;
+using WebAPI.Mutations.Inventory;
 using WebAPI.Mutations.Masters;
 
 namespace WebAPI.Extensions;
@@ -17,6 +19,16 @@ public static class MutationRegistrationExtension
         //Masters
         builder.AddTypeExtension<CompanyMutation>();
         builder.AddTypeExtension<StoreMutation>();
+        builder.AddTypeExtension<WarehouseMutation>();
+        builder.AddTypeExtension<ColourMutation>();
+        builder.AddTypeExtension<SizeMutation>();
+
+        //Catalog
+        builder.AddTypeExtension<ItemMutation>();
+        builder.AddTypeExtension<CollectionMutation>();
+
+        //Inventory
+        builder.AddTypeExtension<InventoryMutation>();
 
         //Users
         builder.AddTypeExtension<UserMutation>();

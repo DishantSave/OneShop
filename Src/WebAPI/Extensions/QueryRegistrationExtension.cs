@@ -13,6 +13,12 @@ public static class QueryRegistrationExtension
         builder.AddTypeExtension<MastersQuery>();
         builder.AddTypeExtension<CompanyQuery>();
         builder.AddTypeExtension<StoreQuery>();
+        builder.AddTypeExtension<WarehouseQuery>();
+        builder.AddTypeExtension<ColourQuery>();
+        builder.AddTypeExtension<SizeQuery>();
+        builder.AddTypeExtension<ItemQuery>();
+        builder.AddTypeExtension<CollectionQuery>();
+        builder.AddTypeExtension<InventoryQuery>();
         builder.AddTypeExtension<UserQuery>();
 
         return builder;
