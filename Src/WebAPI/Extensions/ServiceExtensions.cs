@@ -48,6 +48,10 @@ public static class ServiceExtensions
         services.AddScoped<IItemService, Application.Services.Catalog.ItemService>();
         services.AddScoped<ICollectionService, Application.Services.Catalog.CollectionService>();
         services.AddScoped<IInventoryService, Application.Services.Inventory.InventoryService>();
+        services.AddScoped<IOrderService, Application.Services.Order.OrderService>();
+        services.AddScoped<IStateTaxService, Application.Services.Tax.StateTaxService>();
+        services.AddScoped<IPromoCodeService, Application.Services.Discounts.PromoCodeService>();
+        services.AddScoped<IUserAddressService, Application.Services.Address.UserAddressService>();
         
         // GraphQL Service Dependencies ends...
 
@@ -66,6 +70,10 @@ public static class ServiceExtensions
         services.AddScoped<IItemRepository, Infrastructure.Repositories.Catalog.ItemRepository>();
         services.AddScoped<ICollectionRepository, Infrastructure.Repositories.Catalog.CollectionRepository>();
         services.AddScoped<IInventoryRepository, Infrastructure.Repositories.Inventory.InventoryRepository>();
+        services.AddScoped<IOrderRepository, Infrastructure.Repositories.Order.OrderRepository>();
+        services.AddScoped<IStateTaxRepository, Infrastructure.Repositories.Masters.StateTaxRepository>();
+        services.AddScoped<IPromoCodeRepository, Infrastructure.Repositories.Discounts.PromoCodeRepository>();
+        services.AddScoped<IUserAddressRepository, Infrastructure.Repositories.Address.UserAddressRepository>();
         // Data Layer Dependencies ends...
 
         /***************************************************************************************************************/

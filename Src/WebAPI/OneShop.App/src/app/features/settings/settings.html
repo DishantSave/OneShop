@@ -1,9 +1,137 @@
-<div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '2.5rem', paddingBottom: '2rem' }">
+<p-toast></p-toast>
 
-  <h2 [ngStyle]="{ fontWeight: '700', color: 'var(--heading-primary)', margin: '0' }">Settings</h2>
+<div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '2.5rem', paddingBottom: '3rem' }">
+
+  <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }">
+    <div>
+      <h2 [ngStyle]="{ fontWeight: '700', color: 'var(--heading-primary)', margin: '0', fontSize: '1.75rem' }">Settings</h2>
+      <p [ngStyle]="{ color: 'var(--description-color)', margin: '0.25rem 0 0', fontSize: '0.9rem' }">
+        Manage profile info, preferences, and saved delivery address books.
+      </p>
+    </div>
+  </div>
+
+  <!-- Address Book Section -->
+  <div [ngStyle]="{ display: 'flex', gap: '2rem', alignItems: 'flex-start', flexWrap: 'wrap', borderTop: '1.5px solid var(--card-border-primary)', paddingTop: '2rem' }">
+    <div [ngStyle]="{ flex: '1 1 250px', maxWidth: '320px' }">
+      <h5 [ngStyle]="{ color: 'var(--description-heading-color)', fontWeight: '600', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }">
+        <i class="pi pi-map-marker" [ngStyle]="{ color: 'var(--primary-color, #6366f1)' }"></i>
+        Saved Address Book
+      </h5>
+      <p [ngStyle]="{ color: 'var(--description-color)', fontSize: '0.92rem', lineHeight: '1.5', margin: '0' }">
+        Create set of addresses like <strong>Office, Home, Warehouse Dock, Branch</strong>. These saved addresses can be picked directly while placing or dispatching orders!
+      </p>
+      <button (click)="openAddAddressModal()"
+              [ngStyle]="{
+                marginTop: '1.25rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                background: 'var(--primary-color, #6366f1)', color: '#ffffff',
+                border: 'none', borderRadius: '8px', padding: '0.6rem 1.1rem',
+                fontWeight: '600', fontSize: '0.88rem', cursor: 'pointer',
+                boxShadow: '0 2px 4px rgba(99, 102, 241, 0.2)'
+              }">
+        <i class="pi pi-plus"></i>
+        Add New Address
+      </button>
+    </div>
+
+    <div [ngStyle]="{ flex: '2 1 400px' }">
+      <p-card [style]="{ background: 'var(--card-bg)', border: '2px solid var(--card-border-primary)', borderRadius: '14px' }">
+        <ng-template pTemplate="header">
+          <div [ngStyle]="{
+            background: 'var(--card-header-bg)', color: 'var(--card-header-text-color)',
+            fontWeight: '900', fontSize: '1.15rem', padding: '1rem 1.5rem', borderRadius: '12px 12px 0 0',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+          }">
+            <span>Your Delivery & Billing Addresses</span>
+            <span [ngStyle]="{ fontSize: '0.85rem', fontWeight: '500', opacity: '0.8' }">
+              {{ addresses().length }} saved
+            </span>
+          </div>
+        </ng-template>
+
+        <div *ngIf="loadingAddresses()" [ngStyle]="{ textAlign: 'center', padding: '2rem', color: 'var(--text-color-secondary)' }">
+          <i class="pi pi-spin pi-spinner" [ngStyle]="{ fontSize: '1.8rem' }"></i>
+          <p [ngStyle]="{ marginTop: '0.5rem', fontSize: '0.9rem' }">Loading address book...</p>
+        </div>
+
+        <div *ngIf="!loadingAddresses() && addresses().length === 0" [ngStyle]="{ textAlign: 'center', padding: '2.5rem 1rem', color: 'var(--text-color-secondary)' }">
+          <i class="pi pi-map" [ngStyle]="{ fontSize: '2.5rem', opacity: '0.3', marginBottom: '0.5rem' }"></i>
+          <h4 [ngStyle]="{ margin: '0.5rem 0 0.25rem', color: 'var(--text-color)' }">No Addresses Saved</h4>
+          <p [ngStyle]="{ fontSize: '0.85rem', margin: '0 0 1rem' }">Add your frequent pickup/shipping locations for quick 1-click checkout.</p>
+          <button (click)="openAddAddressModal()" [ngStyle]="{
+            background: 'var(--primary-color, #6366f1)', color: '#fff', border: 'none',
+            borderRadius: '6px', padding: '0.45rem 0.9rem', cursor: 'pointer', fontSize: '0.85rem'
+          }">+ Add First Address</button>
+        </div>
+
+        <div *ngIf="!loadingAddresses() && addresses().length > 0"
+             [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }">
+          <div *ngFor="let addr of addresses()"
+               [ngStyle]="{
+                 border: addr.isDefault ? '2px solid #6366f1' : '1px solid var(--card-border-primary)',
+                 background: addr.isDefault ? 'rgba(99, 102, 241, 0.03)' : 'var(--input-bg, #ffffff)',
+                 borderRadius: '10px', padding: '1rem', display: 'flex', flexDirection: 'column',
+                 justifyContent: 'space-between', gap: '0.75rem', position: 'relative'
+               }">
+            <div>
+              <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }">
+                <span [ngStyle]="{
+                  fontWeight: '700', fontSize: '0.85rem', textTransform: 'uppercase',
+                  background: 'rgba(99, 102, 241, 0.1)', color: '#4f46e5',
+                  padding: '0.2rem 0.55rem', borderRadius: '4px'
+                }">{{ addr.addressType }}</span>
+
+                <span *ngIf="addr.isDefault" [ngStyle]="{
+                  fontSize: '0.75rem', fontWeight: '700', color: '#16a34a',
+                  background: 'rgba(34, 197, 94, 0.15)', padding: '0.15rem 0.5rem', borderRadius: '12px'
+                }">DEFAULT</span>
+              </div>
+
+              <div [ngStyle]="{ fontWeight: '700', fontSize: '0.98rem', color: 'var(--text-color)', marginBottom: '0.25rem' }">
+                {{ addr.contactName }}
+              </div>
+              <div *ngIf="addr.phone" [ngStyle]="{ fontSize: '0.85rem', color: 'var(--text-color-secondary)', marginBottom: '0.4rem' }">
+                <i class="pi pi-phone" [ngStyle]="{ fontSize: '0.75rem', marginRight: '0.25rem' }"></i>{{ addr.phone }}
+              </div>
+              <div [ngStyle]="{ fontSize: '0.88rem', color: 'var(--text-color)', lineHeight: '1.4' }">
+                {{ addr.addressLine1 }}<span *ngIf="addr.addressLine2">, {{ addr.addressLine2 }}</span><br/>
+                {{ addr.city }}, <strong>{{ addr.state }}</strong> - {{ addr.postalCode }}<br/>
+                {{ addr.country }}
+              </div>
+            </div>
+
+            <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--card-border-primary)', paddingTop: '0.6rem', marginTop: '0.4rem' }">
+              <button *ngIf="!addr.isDefault"
+                      (click)="setAsDefault(addr)"
+                      [ngStyle]="{
+                        background: 'transparent', border: 'none', color: '#6366f1',
+                        fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer', padding: '0'
+                      }">
+                Set as Default
+              </button>
+              <span *ngIf="addr.isDefault" [ngStyle]="{ fontSize: '0.8rem', color: '#16a34a', fontWeight: '600' }">
+                <i class="pi pi-check-circle"></i> Default Address
+              </span>
+
+              <div [ngStyle]="{ display: 'flex', gap: '0.4rem' }">
+                <button (click)="openEditAddressModal(addr)" title="Edit"
+                        [ngStyle]="{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-color)', padding: '0.25rem' }">
+                  <i class="pi pi-pencil"></i>
+                </button>
+                <button (click)="confirmDeleteAddress(addr)" title="Delete"
+                        [ngStyle]="{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '0.25rem' }">
+                  <i class="pi pi-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </p-card>
+    </div>
+  </div>
 
   <!-- General Section -->
-  <div [ngStyle]="{ display: 'flex', gap: '2rem', alignItems: 'flex-start', flexWrap: 'wrap' }">
+  <div [ngStyle]="{ display: 'flex', gap: '2rem', alignItems: 'flex-start', flexWrap: 'wrap', borderTop: '1.5px solid var(--card-border-primary)', paddingTop: '2rem' }">
     <div [ngStyle]="{ flex: '1 1 250px', maxWidth: '320px' }">
       <h5 [ngStyle]="{ color: 'var(--description-heading-color)', fontWeight: '600', marginBottom: '0.5rem' }">General</h5>
       <p [ngStyle]="{ color: 'var(--description-color)', fontSize: '0.95rem', lineHeight: '1.4', margin: '0' }">
@@ -94,7 +222,201 @@
 
   <!-- Save button -->
   <div [ngStyle]="{ display: 'flex', justifyContent: 'flex-end' }">
-    <p-button label="Save Changes" (onClick)="saveChanges()"></p-button>
+    <p-button label="Save General Settings" (onClick)="saveChanges()"></p-button>
   </div>
 
+</div>
+
+<!-- Add / Edit Address Modal -->
+<div *ngIf="showAddressModal()" [ngStyle]="{
+  position: 'fixed', inset: '0', zIndex: '1000',
+  background: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(3px)',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
+}">
+  <div [ngStyle]="{
+    background: 'var(--card-bg, #ffffff)', border: '1px solid var(--card-border-primary)',
+    borderRadius: '16px', width: '100%', maxWidth: '520px', padding: '1.5rem',
+    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)'
+  }">
+    <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }">
+      <h3 [ngStyle]="{ margin: '0', fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-color)' }">
+        {{ isEditAddressMode() ? 'Edit Saved Address' : 'Add New Address to Book' }}
+      </h3>
+      <button (click)="closeAddressModal()" [ngStyle]="{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-color-secondary)', fontSize: '1.1rem' }">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <form [formGroup]="addressForm" (ngSubmit)="saveAddress()" [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }">
+      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }">
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.3rem' }">
+            Address Label / Type *
+          </label>
+          <select formControlName="addressType" [ngStyle]="{
+            width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
+            border: '1px solid var(--card-border-primary)', background: 'var(--input-bg, #ffffff)', color: 'var(--text-color)'
+          }">
+            <option value="Office">Office</option>
+            <option value="Home">Home</option>
+            <option value="Warehouse Dock">Warehouse Dock</option>
+            <option value="Branch">Branch</option>
+            <option value="Billing Address">Billing Address</option>
+            <option value="Store Location">Store Location</option>
+          </select>
+        </div>
+
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.3rem' }">
+            Contact / Recipient Name *
+          </label>
+          <input type="text"
+                 formControlName="contactName"
+                 placeholder="e.g. John Doe / Receiving Dept"
+                 [ngStyle]="{
+                   width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
+                   border: '1px solid var(--card-border-primary)',
+                   background: 'var(--input-bg, #ffffff)', color: 'var(--text-color)'
+                 }" />
+        </div>
+      </div>
+
+      <div>
+        <label [ngStyle]="{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.3rem' }">
+          Contact Phone
+        </label>
+        <input type="text"
+               formControlName="phone"
+               placeholder="e.g. +91 9876543210"
+               [ngStyle]="{
+                 width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
+                 border: '1px solid var(--card-border-primary)',
+                 background: 'var(--input-bg, #ffffff)', color: 'var(--text-color)'
+               }" />
+      </div>
+
+      <div>
+        <label [ngStyle]="{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.3rem' }">
+          Address Line 1 *
+        </label>
+        <input type="text"
+               formControlName="addressLine1"
+               placeholder="Street address, building, suite"
+               [ngStyle]="{
+                 width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
+                 border: '1px solid var(--card-border-primary)',
+                 background: 'var(--input-bg, #ffffff)', color: 'var(--text-color)'
+               }" />
+      </div>
+
+      <div>
+        <label [ngStyle]="{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.3rem' }">
+          Address Line 2
+        </label>
+        <input type="text"
+               formControlName="addressLine2"
+               placeholder="Apartment, landmark, floor (optional)"
+               [ngStyle]="{
+                 width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
+                 border: '1px solid var(--card-border-primary)',
+                 background: 'var(--input-bg, #ffffff)', color: 'var(--text-color)'
+               }" />
+      </div>
+
+      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }">
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.3rem' }">
+            City *
+          </label>
+          <input type="text"
+                 formControlName="city"
+                 placeholder="Mumbai"
+                 [ngStyle]="{
+                   width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
+                   border: '1px solid var(--card-border-primary)',
+                   background: 'var(--input-bg, #ffffff)', color: 'var(--text-color)'
+                 }" />
+        </div>
+
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.3rem' }">
+            State *
+          </label>
+          <input type="text"
+                 formControlName="state"
+                 placeholder="Maharashtra"
+                 [ngStyle]="{
+                   width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
+                   border: '1px solid var(--card-border-primary)',
+                   background: 'var(--input-bg, #ffffff)', color: 'var(--text-color)'
+                 }" />
+        </div>
+
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.3rem' }">
+            PIN / Zip *
+          </label>
+          <input type="text"
+                 formControlName="postalCode"
+                 placeholder="400001"
+                 [ngStyle]="{
+                   width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
+                   border: '1px solid var(--card-border-primary)',
+                   background: 'var(--input-bg, #ffffff)', color: 'var(--text-color)'
+                 }" />
+        </div>
+      </div>
+
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }">
+        <input type="checkbox" id="isDefaultAddress" formControlName="isDefault" [ngStyle]="{ width: '16px', height: '16px', cursor: 'pointer' }" />
+        <label for="isDefaultAddress" [ngStyle]="{ fontSize: '0.9rem', color: 'var(--text-color)', cursor: 'pointer' }">
+          Set as Default Address
+        </label>
+      </div>
+
+      <div [ngStyle]="{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem', borderTop: '1px solid var(--card-border-primary)', paddingTop: '1rem' }">
+        <button type="button" (click)="closeAddressModal()" [ngStyle]="{
+          background: 'transparent', border: '1px solid var(--card-border-primary)',
+          borderRadius: '8px', padding: '0.6rem 1.25rem', cursor: 'pointer', color: 'var(--text-color)'
+        }">
+          Cancel
+        </button>
+        <button type="submit" [disabled]="savingAddress()" [ngStyle]="{
+          background: 'var(--primary-color, #6366f1)', color: '#fff', border: 'none',
+          borderRadius: '8px', padding: '0.6rem 1.5rem', cursor: 'pointer', fontWeight: '600'
+        }">
+          {{ savingAddress() ? 'Saving...' : 'Save Address' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Address Modal -->
+<div *ngIf="addressToDelete()" [ngStyle]="{
+  position: 'fixed', inset: '0', zIndex: '1050',
+  background: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(3px)',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
+}">
+  <div [ngStyle]="{
+    background: 'var(--card-bg, #ffffff)', border: '1px solid var(--card-border-primary)',
+    borderRadius: '16px', width: '100%', maxWidth: '400px', padding: '1.5rem', textAlign: 'center'
+  }">
+    <i class="pi pi-exclamation-triangle" [ngStyle]="{ fontSize: '2.5rem', color: '#ef4444' }"></i>
+    <h3 [ngStyle]="{ margin: '0.75rem 0 0.5rem', color: 'var(--text-color)' }">Delete Address?</h3>
+    <p [ngStyle]="{ fontSize: '0.9rem', color: 'var(--text-color-secondary)', margin: '0 0 1.25rem' }">
+      Are you sure you want to delete this {{ addressToDelete()?.addressType }} address ({{ addressToDelete()?.contactName }})?
+    </p>
+
+    <div [ngStyle]="{ display: 'flex', justifyContent: 'center', gap: '0.75rem' }">
+      <button (click)="cancelDeleteAddress()" [ngStyle]="{
+        background: 'transparent', border: '1px solid var(--card-border-primary)',
+        borderRadius: '8px', padding: '0.55rem 1.25rem', cursor: 'pointer', color: 'var(--text-color)'
+      }">Cancel</button>
+      <button (click)="deleteAddress()" [disabled]="savingAddress()" [ngStyle]="{
+        background: '#ef4444', color: '#fff', border: 'none',
+        borderRadius: '8px', padding: '0.55rem 1.25rem', cursor: 'pointer', fontWeight: '600'
+      }">{{ savingAddress() ? 'Deleting...' : 'Yes, Delete' }}</button>
+    </div>
+  </div>
 </div>

@@ -28,6 +28,9 @@ import { ItemForm } from './features/item/item-form/item-form';
 import { InventoryMaster } from './features/inventory/inventory-master/inventory-master';
 import { InventoryList } from './features/inventory/inventory-list/inventory-list';
 import { mainAccountGuard } from './core/guards/main-account.guard';
+import { DashboardHome } from './features/dashboard-home/dashboard-home';
+import { OrderMaster } from './features/orders/order-master/order-master';
+import { OrderList } from './features/orders/order-list/order-list';
 
 export const routes: Routes = [
   {
@@ -62,10 +65,17 @@ export const routes: Routes = [
     component: DashboardLayout,
     // TODO: Add an AuthGuard here later to secure the route
     children: [
-      /*{
+      {
         path: '',
-        component: DashboardLayout, // whatever your default dashboard view component is called
-      },*/
+        component: DashboardHome
+      },
+      {
+        path: 'orders',
+        component: OrderMaster,
+        children: [
+          { path: '', component: OrderList }
+        ]
+      },
       {
         path: 'settings',
         component: Setting
@@ -123,6 +133,14 @@ export const routes: Routes = [
           {
             path: 'size',
             component: SizeMaster
+          },
+          {
+            path: 'tax',
+            loadComponent: () => import('./features/tax/tax-master/tax-master').then(m => m.TaxMaster)
+          },
+          {
+            path: 'discounts',
+            loadComponent: () => import('./features/discounts/promo-master/promo-master').then(m => m.PromoMaster)
           }
           // { path: 'customers', component: CustomerMaster }
           // ...customers, etc.

@@ -20,6 +20,10 @@ public static class QueryRegistrationExtension
         builder.AddTypeExtension<CollectionQuery>();
         builder.AddTypeExtension<InventoryQuery>();
         builder.AddTypeExtension<UserQuery>();
+        builder.AddTypeExtension<OrderQuery>();
+        builder.AddTypeExtension<TaxQuery>();
+        builder.AddTypeExtension<PromoCodeQuery>();
+        builder.AddTypeExtension<UserAddressQuery>();
 
         return builder;
     }

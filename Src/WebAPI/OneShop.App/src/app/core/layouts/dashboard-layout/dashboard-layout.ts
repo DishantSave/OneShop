@@ -6,11 +6,12 @@ import { Sidebar } from '../components/sidebar/sidebar';
 import { Footer } from '../components/footer/footer';
 import { Theme, ThemeType } from '../../services/theme';
 import { Access } from '../../services/access';
+import { CartDrawer } from '../../../features/orders/cart-drawer/cart-drawer';
 
 @Component({
   selector: 'app-dashboard-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, Navbar, Sidebar, Footer],
+  imports: [CommonModule, RouterModule, Navbar, Sidebar, Footer, CartDrawer],
   templateUrl: './dashboard-layout.html'
 })
 export class DashboardLayout implements OnInit {

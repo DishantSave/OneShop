@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Theme, ThemeType } from '../../../../core/services/theme';
+import { CartService } from '../../../../features/orders/services/cart.service';
 
 @Component({
   selector: 'app-navbar',
@@ -12,12 +13,19 @@ import { Theme, ThemeType } from '../../../../core/services/theme';
 })
 export class Navbar implements OnInit, OnDestroy {
   private themeService = inject(Theme);
+  public cartService = inject(CartService);
   private themeSub?: Subscription;
+
+  cartCount = this.cartService.cartCount;
 
   @Input() tabItems: { label: string; route: string }[] = [];
   @Input() logoUrl?: string;
 
   @Output() toggleSidebar = new EventEmitter<void>();
+
+  openCart() {
+    this.cartService.openDrawer();
+  }
 
   currentTheme: ThemeType = 'light-theme';
 

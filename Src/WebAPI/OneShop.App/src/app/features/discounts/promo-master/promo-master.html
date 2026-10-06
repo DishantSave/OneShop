@@ -1,0 +1,359 @@
+<p-toast></p-toast>
+
+<div class="promo-master-container" [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1.25rem', height: '100%' }">
+  <!-- Header Bar -->
+  <div [ngStyle]="{
+    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+    background: 'var(--card-bg)', border: '1px solid var(--card-border-primary)',
+    borderRadius: '12px', padding: '1rem 1.5rem', flexWrap: 'wrap', gap: '1rem'
+  }">
+    <div>
+      <h2 [ngStyle]="{ margin: '0', fontSize: '1.4rem', fontWeight: '700', color: 'var(--text-color)', display: 'flex', alignItems: 'center', gap: '0.6rem' }">
+        <i class="pi pi-ticket" [ngStyle]="{ color: 'var(--primary-color, #6366f1)' }"></i>
+        Discounts & Promo Codes
+      </h2>
+      <p [ngStyle]="{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--text-color-secondary, #6b7280)' }">
+        Create promo codes (percentage or flat discounts) that customers and sales reps can apply during checkout.
+      </p>
+    </div>
+
+    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem' }">
+      <div [ngStyle]="{ position: 'relative', minWidth: '240px' }">
+        <i class="pi pi-search" [ngStyle]="{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', opacity: '0.5' }"></i>
+        <input type="text"
+               placeholder="Search promo codes..."
+               [ngModel]="searchTerm()"
+               (ngModelChange)="searchTerm.set($event)"
+               [ngStyle]="{
+                 width: '100%', padding: '0.6rem 0.75rem 0.6rem 2.25rem',
+                 borderRadius: '8px', border: '1px solid var(--card-border-primary)',
+                 background: 'var(--input-bg, #ffffff)', color: 'var(--text-color)', fontSize: '0.9rem'
+               }" />
+      </div>
+
+      <button (click)="openAddModal()"
+              [ngStyle]="{
+                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                background: 'var(--primary-color, #6366f1)', color: '#ffffff',
+                border: 'none', borderRadius: '8px', padding: '0.6rem 1.25rem',
+                fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer',
+                boxShadow: '0 2px 4px rgba(99, 102, 241, 0.25)'
+              }">
+        <i class="pi pi-plus"></i>
+        Create Promo Code
+      </button>
+    </div>
+  </div>
+
+  <!-- Content Table Card -->
+  <div [ngStyle]="{
+    background: 'var(--card-bg)', border: '1px solid var(--card-border-primary)',
+    borderRadius: '12px', padding: '1.25rem', flex: '1', overflowY: 'auto'
+  }">
+    <div *ngIf="loading()" [ngStyle]="{ textAlign: 'center', padding: '3rem', color: 'var(--text-color-secondary)' }">
+      <i class="pi pi-spin pi-spinner" [ngStyle]="{ fontSize: '2rem' }"></i>
+      <p [ngStyle]="{ marginTop: '0.75rem' }">Loading promotional discounts...</p>
+    </div>
+
+    <div *ngIf="!loading() && filteredPromos().length === 0" [ngStyle]="{ textAlign: 'center', padding: '3rem', color: 'var(--text-color-secondary)' }">
+      <i class="pi pi-ticket" [ngStyle]="{ fontSize: '3rem', opacity: '0.4' }"></i>
+      <h3 [ngStyle]="{ margin: '0.75rem 0 0.25rem', color: 'var(--text-color)' }">No Promo Codes Created</h3>
+      <p [ngStyle]="{ margin: '0', fontSize: '0.9rem' }">Reward your buyers with percentage or flat rate discounts.</p>
+      <button (click)="openAddModal()" [ngStyle]="{
+        marginTop: '1rem', background: 'var(--primary-color, #6366f1)', color: '#fff',
+        border: 'none', borderRadius: '8px', padding: '0.5rem 1rem', cursor: 'pointer'
+      }">+ Create First Promo</button>
+    </div>
+
+    <table *ngIf="!loading() && filteredPromos().length > 0" [ngStyle]="{ width: '100%', borderCollapse: 'collapse', fontSize: '0.92rem' }">
+      <thead>
+        <tr [ngStyle]="{ borderBottom: '2px solid var(--card-border-primary)', textAlign: 'left', color: 'var(--text-color-secondary)' }">
+          <th [ngStyle]="{ padding: '0.75rem 1rem' }">Code</th>
+          <th [ngStyle]="{ padding: '0.75rem 1rem' }">Discount Benefit</th>
+          <th [ngStyle]="{ padding: '0.75rem 1rem' }">Min Order / Cap</th>
+          <th [ngStyle]="{ padding: '0.75rem 1rem' }">Usage / Limit</th>
+          <th [ngStyle]="{ padding: '0.75rem 1rem' }">Validity</th>
+          <th [ngStyle]="{ padding: '0.75rem 1rem' }">Status</th>
+          <th [ngStyle]="{ padding: '0.75rem 1rem', textAlign: 'right' }">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of filteredPromos()" [ngStyle]="{ borderBottom: '1px solid var(--card-border-primary)', transition: 'background 0.15s ease' }">
+          <td [ngStyle]="{ padding: '0.85rem 1rem' }">
+            <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
+              <span [ngStyle]="{
+                fontFamily: 'monospace', fontWeight: '700', fontSize: '1rem',
+                background: 'rgba(99, 102, 241, 0.12)', color: '#4f46e5',
+                padding: '0.2rem 0.6rem', borderRadius: '6px', border: '1px dashed #6366f1'
+              }">{{ p.code }}</span>
+            </div>
+            <div *ngIf="p.description" [ngStyle]="{ fontSize: '0.8rem', color: 'var(--text-color-secondary)', marginTop: '0.25rem' }">
+              {{ p.description }}
+            </div>
+          </td>
+          <td [ngStyle]="{ padding: '0.85rem 1rem' }">
+            <span [ngStyle]="{ fontWeight: '700', fontSize: '0.95rem', color: '#16a34a' }">
+              {{ p.discountType === 'Percentage' ? (p.discountValue + '% OFF') : ('₹' + p.discountValue + ' FLAT OFF') }}
+            </span>
+          </td>
+          <td [ngStyle]="{ padding: '0.85rem 1rem', fontSize: '0.85rem' }">
+            <div>Min Order: <strong>₹{{ p.minOrderAmount || 0 }}</strong></div>
+            <div *ngIf="p.maxDiscountAmount" [ngStyle]="{ color: 'var(--text-color-secondary)' }">
+              Max Cap: ₹{{ p.maxDiscountAmount }}
+            </div>
+          </td>
+          <td [ngStyle]="{ padding: '0.85rem 1rem', fontSize: '0.85rem' }">
+            <span>{{ p.timesUsed || 0 }} used</span>
+            <span *ngIf="p.usageLimit > 0" [ngStyle]="{ color: 'var(--text-color-secondary)' }"> / {{ p.usageLimit }} limit</span>
+            <span *ngIf="!p.usageLimit" [ngStyle]="{ color: '#16a34a' }"> (Unlimited)</span>
+          </td>
+          <td [ngStyle]="{ padding: '0.85rem 1rem', fontSize: '0.8rem', color: 'var(--text-color-secondary)' }">
+            <div>Until: <strong>{{ p.validUntil ? (p.validUntil | date:'mediumDate') : 'No expiry' }}</strong></div>
+          </td>
+          <td [ngStyle]="{ padding: '0.85rem 1rem' }">
+            <span [ngStyle]="{
+              display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+              padding: '0.2rem 0.55rem', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '600',
+              background: p.isActive ? 'rgba(34, 197, 94, 0.12)' : 'rgba(239, 68, 68, 0.12)',
+              color: p.isActive ? '#16a34a' : '#dc2626'
+            }">
+              <span [ngStyle]="{ width: '6px', height: '6px', borderRadius: '50%', background: p.isActive ? '#16a34a' : '#dc2626' }"></span>
+              {{ p.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+          <td [ngStyle]="{ padding: '0.85rem 1rem', textAlign: 'right' }">
+            <div [ngStyle]="{ display: 'inline-flex', gap: '0.5rem' }">
+              <button (click)="openEditModal(p)"
+                      title="Edit"
+                      [ngStyle]="{
+                        background: 'transparent', border: '1px solid var(--card-border-primary)',
+                        borderRadius: '6px', padding: '0.4rem 0.6rem', cursor: 'pointer',
+                        color: 'var(--text-color)'
+                      }">
+                <i class="pi pi-pencil"></i>
+              </button>
+              <button (click)="confirmDelete(p)"
+                      title="Delete"
+                      [ngStyle]="{
+                        background: 'transparent', border: '1px solid rgba(239, 68, 68, 0.3)',
+                        borderRadius: '6px', padding: '0.4rem 0.6rem', cursor: 'pointer',
+                        color: '#ef4444'
+                      }">
+                <i class="pi pi-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add / Edit Modal -->
+<div *ngIf="showModal()" [ngStyle]="{
+  position: 'fixed', inset: '0', zIndex: '1000',
+  background: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(3px)',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
+}">
+  <div [ngStyle]="{
+    background: 'var(--card-bg, #ffffff)', border: '1px solid var(--card-border-primary)',
+    borderRadius: '16px', width: '100%', maxWidth: '540px', padding: '1.5rem',
+    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)'
+  }">
+    <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }">
+      <h3 [ngStyle]="{ margin: '0', fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-color)' }">
+        {{ isEditMode() ? 'Edit Promo Code' : 'Create Promo Code' }}
+      </h3>
+      <button (click)="closeModal()" [ngStyle]="{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-color-secondary)', fontSize: '1.1rem' }">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="savePromo()" [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.9rem' }">
+      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }">
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.3rem' }">
+            Promo Code *
+          </label>
+          <input type="text"
+                 formControlName="code"
+                 placeholder="e.g. FESTIVE20"
+                 [readonly]="isEditMode()"
+                 [ngStyle]="{
+                   width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
+                   border: '1px solid var(--card-border-primary)',
+                   background: isEditMode() ? 'rgba(0,0,0,0.05)' : 'var(--input-bg, #ffffff)',
+                   color: 'var(--text-color)', textTransform: 'uppercase', fontWeight: 'bold'
+                 }" />
+        </div>
+
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.3rem' }">
+            Discount Type *
+          </label>
+          <select formControlName="discountType" [ngStyle]="{
+            width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
+            border: '1px solid var(--card-border-primary)', background: 'var(--input-bg, #ffffff)', color: 'var(--text-color)'
+          }">
+            <option value="Percentage">Percentage (% Off)</option>
+            <option value="FixedAmount">Fixed Amount (Flat ₹ Off)</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label [ngStyle]="{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.3rem' }">
+          Description
+        </label>
+        <input type="text"
+               formControlName="description"
+               placeholder="e.g. 10% off on all festive orders above Rs 1000"
+               [ngStyle]="{
+                 width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
+                 border: '1px solid var(--card-border-primary)',
+                 background: 'var(--input-bg, #ffffff)', color: 'var(--text-color)'
+               }" />
+      </div>
+
+      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }">
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.3rem' }">
+            Discount Value *
+          </label>
+          <input type="number"
+                 step="0.01"
+                 formControlName="discountValue"
+                 placeholder="10"
+                 [ngStyle]="{
+                   width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
+                   border: '1px solid var(--card-border-primary)',
+                   background: 'var(--input-bg, #ffffff)', color: 'var(--text-color)'
+                 }" />
+        </div>
+
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.3rem' }">
+            Min Order (₹)
+          </label>
+          <input type="number"
+                 step="0.01"
+                 formControlName="minOrderAmount"
+                 placeholder="0"
+                 [ngStyle]="{
+                   width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
+                   border: '1px solid var(--card-border-primary)',
+                   background: 'var(--input-bg, #ffffff)', color: 'var(--text-color)'
+                 }" />
+        </div>
+
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.3rem' }">
+            Max Cap (₹)
+          </label>
+          <input type="number"
+                 step="0.01"
+                 formControlName="maxDiscountAmount"
+                 placeholder="Optional"
+                 [ngStyle]="{
+                   width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
+                   border: '1px solid var(--card-border-primary)',
+                   background: 'var(--input-bg, #ffffff)', color: 'var(--text-color)'
+                 }" />
+        </div>
+      </div>
+
+      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }">
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.3rem' }">
+            Valid From
+          </label>
+          <input type="date"
+                 formControlName="validFrom"
+                 [ngStyle]="{
+                   width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
+                   border: '1px solid var(--card-border-primary)',
+                   background: 'var(--input-bg, #ffffff)', color: 'var(--text-color)'
+                 }" />
+        </div>
+
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.3rem' }">
+            Valid Until
+          </label>
+          <input type="date"
+                 formControlName="validUntil"
+                 [ngStyle]="{
+                   width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
+                   border: '1px solid var(--card-border-primary)',
+                   background: 'var(--input-bg, #ffffff)', color: 'var(--text-color)'
+                 }" />
+        </div>
+
+        <div>
+          <label [ngStyle]="{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)', marginBottom: '0.3rem' }">
+            Usage Limit
+          </label>
+          <input type="number"
+                 formControlName="usageLimit"
+                 placeholder="0 for unlim"
+                 [ngStyle]="{
+                   width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
+                   border: '1px solid var(--card-border-primary)',
+                   background: 'var(--input-bg, #ffffff)', color: 'var(--text-color)'
+                 }" />
+        </div>
+      </div>
+
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
+        <input type="checkbox" id="isActivePromo" formControlName="isActive" [ngStyle]="{ width: '16px', height: '16px', cursor: 'pointer' }" />
+        <label for="isActivePromo" [ngStyle]="{ fontSize: '0.9rem', color: 'var(--text-color)', cursor: 'pointer' }">
+          Active (Enabled for checkout)
+        </label>
+      </div>
+
+      <div [ngStyle]="{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem', borderTop: '1px solid var(--card-border-primary)', paddingTop: '1rem' }">
+        <button type="button" (click)="closeModal()" [ngStyle]="{
+          background: 'transparent', border: '1px solid var(--card-border-primary)',
+          borderRadius: '8px', padding: '0.6rem 1.25rem', cursor: 'pointer', color: 'var(--text-color)'
+        }">
+          Cancel
+        </button>
+        <button type="submit" [disabled]="saving()" [ngStyle]="{
+          background: 'var(--primary-color, #6366f1)', color: '#fff', border: 'none',
+          borderRadius: '8px', padding: '0.6rem 1.5rem', cursor: 'pointer', fontWeight: '600'
+        }">
+          {{ saving() ? 'Saving...' : 'Save Promo Code' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div *ngIf="promoToDelete()" [ngStyle]="{
+  position: 'fixed', inset: '0', zIndex: '1050',
+  background: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(3px)',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
+}">
+  <div [ngStyle]="{
+    background: 'var(--card-bg, #ffffff)', border: '1px solid var(--card-border-primary)',
+    borderRadius: '16px', width: '100%', maxWidth: '420px', padding: '1.5rem', textAlign: 'center'
+  }">
+    <i class="pi pi-exclamation-triangle" [ngStyle]="{ fontSize: '2.5rem', color: '#ef4444' }"></i>
+    <h3 [ngStyle]="{ margin: '0.75rem 0 0.5rem', color: 'var(--text-color)' }">Delete Promo Code?</h3>
+    <p [ngStyle]="{ fontSize: '0.9rem', color: 'var(--text-color-secondary)', margin: '0 0 1.25rem' }">
+      Are you sure you want to delete promo code <strong>{{ promoToDelete()?.code }}</strong>?
+    </p>
+
+    <div [ngStyle]="{ display: 'flex', justifyContent: 'center', gap: '0.75rem' }">
+      <button (click)="cancelDelete()" [ngStyle]="{
+        background: 'transparent', border: '1px solid var(--card-border-primary)',
+        borderRadius: '8px', padding: '0.55rem 1.25rem', cursor: 'pointer', color: 'var(--text-color)'
+      }">Cancel</button>
+      <button (click)="deletePromo()" [disabled]="saving()" [ngStyle]="{
+        background: '#ef4444', color: '#fff', border: 'none',
+        borderRadius: '8px', padding: '0.55rem 1.25rem', cursor: 'pointer', fontWeight: '600'
+      }">{{ saving() ? 'Deleting...' : 'Yes, Delete' }}</button>
+    </div>
+  </div>
+</div>

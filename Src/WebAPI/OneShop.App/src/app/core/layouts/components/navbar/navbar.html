@@ -11,6 +11,28 @@
     </div>
   </div>
 
+  <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '1rem', marginRight: 'clamp(80px, 12vw, 130px)' }">
+    <button (click)="openCart()"
+            type="button"
+            title="Shopping Cart & Segregated Checkout"
+            [ngStyle]="{
+              background: 'rgba(5, 81, 126, 0.08)', border: '1px solid rgba(5, 81, 126, 0.25)',
+              borderRadius: '20px', padding: '0.4rem 0.85rem', display: 'flex', alignItems: 'center',
+              gap: '0.45rem', cursor: 'pointer', color: 'var(--navbar-text)', fontSize: '0.85rem',
+              fontWeight: '700', transition: 'all 0.2s ease'
+            }">
+      <i class="pi pi-shopping-bag" [ngStyle]="{ color: '#05517e', fontSize: '1rem' }"></i>
+      <span>Cart</span>
+      <span *ngIf="cartCount() > 0"
+            [ngStyle]="{
+              background: '#05517e', color: '#ffffff', borderRadius: '10px',
+              padding: '0.1rem 0.45rem', fontSize: '0.72rem', fontWeight: '800'
+            }">
+        {{ cartCount() }}
+      </span>
+    </button>
+  </div>
+
   <div [ngStyle]="{
        position: 'absolute',
        right: 'clamp(0.5rem, 2vw, 1.5rem)',

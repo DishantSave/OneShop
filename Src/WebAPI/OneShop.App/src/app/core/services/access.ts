@@ -26,6 +26,18 @@ export class Access {
   }
 
   hasAccess(screenKey: string): boolean {
+    const userStr = localStorage.getItem('userDetails');
+    if (userStr) {
+      try {
+        const u = JSON.parse(userStr);
+        if (u.isMainAccount) return true;
+      } catch {}
+    }
+
+    if (!localStorage.getItem('screenAccess')) {
+      return true;
+    }
+
     const target = this.normalize(screenKey);
     const permission = this.screenAccess.find(
       item => this.normalize(item.screen?.screen ?? '') === target

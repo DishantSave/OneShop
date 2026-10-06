@@ -33,6 +33,14 @@ public static class MutationRegistrationExtension
         //Users
         builder.AddTypeExtension<UserMutation>();
 
+        //Orders
+        builder.AddTypeExtension<OrderMutation>();
+
+        //Taxes, Promos & User Addresses
+        builder.AddTypeExtension<TaxMutation>();
+        builder.AddTypeExtension<PromoCodeMutation>();
+        builder.AddTypeExtension<UserAddressMutation>();
+
         return builder;
     }
 }

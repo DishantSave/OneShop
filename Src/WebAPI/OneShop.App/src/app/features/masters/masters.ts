@@ -18,6 +18,8 @@ export class Masters implements OnInit {
     { label: 'Warehouse', icon: 'pi pi-server', route: 'warehouse', screenKey: 'CompanyMaster' },
     { label: 'Colour', icon: 'pi pi-palette', route: 'colour', screenKey: 'CompanyMaster' },
     { label: 'Size', icon: 'pi pi-tags', route: 'size', screenKey: 'CompanyMaster' },
+    { label: 'Tax Structure', icon: 'pi pi-percentage', route: 'tax', screenKey: 'CompanyMaster' },
+    { label: 'Discounts & Promos', icon: 'pi pi-ticket', route: 'discounts', screenKey: 'CompanyMaster' },
     { label: 'Customer', icon: 'pi pi-users', route: 'customers', screenKey: 'CustomerMaster' }
   ];
 
