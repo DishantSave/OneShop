@@ -1,4 +1,4 @@
-﻿using Application.Interfaces.GraphQLService;
+using Application.Interfaces.GraphQLService;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -10,7 +10,12 @@ public sealed class JwtTokenService(IConfiguration configuration) : IJwtTokenSer
 {
     private readonly IConfiguration _configuration = configuration;
 
-    public string GenerateToken(string accountId, string userId, string userName)
+    public string GenerateToken(
+        string accountId,
+        string userId,
+        string userName,
+        bool isCustomerAccount = false,
+        bool isSellerAccount = false)
     {
         var secretKey = _configuration["Jwt:SecretKey"]
             ?? throw new InvalidOperationException(
@@ -32,6 +37,8 @@ public sealed class JwtTokenService(IConfiguration configuration) : IJwtTokenSer
             new Claim(JwtRegisteredClaimNames.Sub, userId),
             new Claim("account_id", accountId),
             new Claim("user_name", userName),
+            new Claim("is_customer", isCustomerAccount ? "true" : "false"),
+            new Claim("is_seller", isSellerAccount ? "true" : "false"),
             new Claim("token_type", "api"),
             new Claim(
                 JwtRegisteredClaimNames.Jti,

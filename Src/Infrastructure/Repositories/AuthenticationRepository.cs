@@ -67,6 +67,7 @@ public class AuthenticationRepository(IHttpContextAccessor httpContextAccessor, 
         string contact,
         string country,
         bool isTestAccount,
+        string? vendorType = null,
         CancellationToken cancellationToken = default)
     {
         using IDbConnection db = new SqlConnection(GetConnectionString());
@@ -95,9 +96,9 @@ public class AuthenticationRepository(IHttpContextAccessor httpContextAccessor, 
 
             string insertCredentialSql = @"
                 INSERT INTO dbo.AccountCredential 
-                (UserName, UserId, Password, ApiTokenKey, IsCustomerAccount, IsSellerAccount, Company, ProfilePicture, Email, Contact, Country, IsTestAccount, DateCreated, DateModified)
+                (UserName, UserId, Password, ApiTokenKey, IsCustomerAccount, IsSellerAccount, Company, ProfilePicture, Email, Contact, Country, IsTestAccount, VendorType, DateCreated, DateModified)
                 VALUES 
-                (@UserName, @UserId, @Password, @ApiTokenKey, @IsCustomerAccount, @IsSellerAccount, @Company, @ProfilePicture, @Email, @Contact, @Country, @IsTestAccount, @DateCreated, @DateModified);";
+                (@UserName, @UserId, @Password, @ApiTokenKey, @IsCustomerAccount, @IsSellerAccount, @Company, @ProfilePicture, @Email, @Contact, @Country, @IsTestAccount, @VendorType, @DateCreated, @DateModified);";
 
             var insertCredCmd = new CommandDefinition(insertCredentialSql,
                                                       new
@@ -114,6 +115,7 @@ public class AuthenticationRepository(IHttpContextAccessor httpContextAccessor, 
                                                           Contact = contact,
                                                           Country = country,
                                                           IsTestAccount = isTestAccount,
+                                                          VendorType = vendorType,
                                                           DateCreated = userCreationTime,
                                                           DateModified = userCreationTime
                                                       },
@@ -217,7 +219,7 @@ public class AuthenticationRepository(IHttpContextAccessor httpContextAccessor, 
             SELECT sa.AccountId, sa.SubUserId, sa.UserName, sa.Password,
                    sa.IsCustomerAccount, sa.IsSellerAccount, sa.Company, sa.ProfilePicture,
                    sa.Email, sa.Contact, sa.Country, sa.IsTestAccount, sa.Designation,
-                   sa.Department, sa.IsActive, sa.DateCreated, acs.SubscriptionType
+                   sa.Department, sa.VendorType, sa.IsActive, sa.DateCreated, acs.SubscriptionType
             FROM dbo.SubAccountCredential AS sa
             LEFT JOIN dbo.AccountSubscription AS acs ON sa.AccountId = acs.AccountId
             WHERE UPPER(sa.UserName) = UPPER(@UserName);";
@@ -259,7 +261,12 @@ public class AuthenticationRepository(IHttpContextAccessor httpContextAccessor, 
         string subUserId = (string)subAccount.SubUserId;
         string subUserName = (string)subAccount.UserName;
 
-        var token = _jwtTokenService.GenerateToken(accountId, subUserId, subUserName);
+        var token = _jwtTokenService.GenerateToken(
+            accountId,
+            subUserId,
+            subUserName,
+            (bool)subAccount.IsCustomerAccount,
+            (bool)subAccount.IsSellerAccount);
 
         string getAuditSql = @"
             SELECT UserName, Field, Description, DateModified
@@ -317,7 +324,8 @@ public class AuthenticationRepository(IHttpContextAccessor httpContextAccessor, 
             SubscriptionType = subscriptionType,
             IsMainAccount = false,
             Designation = (string?)subAccount.Designation,
-            Department = (string?)subAccount.Department
+            Department = (string?)subAccount.Department,
+            VendorType = (string?)subAccount.VendorType
         };
 
         return new AuthenticationPayload
@@ -335,7 +343,7 @@ public class AuthenticationRepository(IHttpContextAccessor httpContextAccessor, 
 
         string getUserDetails = @"SELECT ac.UserName, ac.UserId, ac.AccountId, ac.ApiTokenKey AS ApiToken,
                                          ac.IsCustomerAccount, ac.IsSellerAccount, ac.Company, ac.ProfilePicture,
-                                         ac.Email, ac.Contact, ac.Country, ac.IsTestAccount, ac.DateCreated AS Created,
+                                         ac.Email, ac.Contact, ac.Country, ac.IsTestAccount, ac.VendorType, ac.DateCreated AS Created,
                                          acs.SubscriptionType
                                   FROM dbo.AccountCredential AS ac
                                   INNER JOIN AccountSubscription AS acs ON ac.AccountId = acs.AccountId
@@ -349,7 +357,9 @@ public class AuthenticationRepository(IHttpContextAccessor httpContextAccessor, 
         var token = _jwtTokenService.GenerateToken(
             user.AccountId,
             user.UserId,
-            user.UserName);
+            user.UserName,
+            user.IsCustomerAccount,
+            user.IsSellerAccount);
 
         user.ApiToken = token;
         user.IsMainAccount = true;

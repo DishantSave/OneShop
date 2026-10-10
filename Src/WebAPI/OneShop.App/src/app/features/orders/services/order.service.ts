@@ -1,11 +1,11 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { Apollo, gql } from 'apollo-angular';
 import { firstValueFrom } from 'rxjs';
-import { Order, OrderInput, BatchOrderInput } from '../models/order.model';
+import { Order, OrderInput, BatchOrderInput, UpdateOrderDetailsInput, AddOrderTimelineCommentInput, OrderAuditTrail } from '../models/order.model';
 
 export const GET_ORDERS = gql`
-  query GetOrders($companyCode: String, $status: String, $locationCode: String, $channel: String) {
-    orders(companyCode: $companyCode, status: $status, locationCode: $locationCode, channel: $channel) {
+  query GetOrders($companyCode: String, $status: String, $locationCode: String, $channel: String, $createdBy: String) {
+    orders(companyCode: $companyCode, status: $status, locationCode: $locationCode, channel: $channel, createdBy: $createdBy) {
       sequence
       accountId
       companyCode
@@ -52,6 +52,17 @@ export const GET_ORDERS = gql`
         unitPrice
         totalPrice
         dateAdded
+      }
+      auditTrail {
+        sequence
+        actionType
+        field
+        oldValue
+        newValue
+        description
+        dateModified
+        modifiedBy
+        userRole
       }
     }
   }
@@ -107,6 +118,17 @@ export const GET_ORDER_BY_ID = gql`
         totalPrice
         dateAdded
       }
+      auditTrail {
+        sequence
+        actionType
+        field
+        oldValue
+        newValue
+        description
+        dateModified
+        modifiedBy
+        userRole
+      }
     }
   }
 `;
@@ -132,8 +154,26 @@ export const CREATE_BATCH_ORDERS = gql`
 `;
 
 export const UPDATE_ORDER_STATUS = gql`
-  mutation UpdateOrderStatus($companyCode: String!, $orderId: String!, $status: String!) {
-    updateOrderStatus(companyCode: $companyCode, orderId: $orderId, status: $status) {
+  mutation UpdateOrderStatus($companyCode: String!, $orderId: String!, $status: String!, $userRole: String) {
+    updateOrderStatus(companyCode: $companyCode, orderId: $orderId, status: $status, userRole: $userRole) {
+      success
+      message
+    }
+  }
+`;
+
+export const UPDATE_ORDER_DETAILS = gql`
+  mutation UpdateOrderDetails($input: UpdateOrderDetailsInput!) {
+    updateOrderDetails(input: $input) {
+      success
+      message
+    }
+  }
+`;
+
+export const ADD_ORDER_TIMELINE_COMMENT = gql`
+  mutation AddOrderTimelineComment($input: AddOrderTimelineCommentInput!) {
+    addOrderTimelineComment(input: $input) {
       success
       message
     }
@@ -159,7 +199,7 @@ export class OrderService {
   loading = signal<boolean>(false);
   error = signal<string | null>(null);
 
-  async list(companyCode?: string, status?: string, locationCode?: string, channel?: string): Promise<Order[]> {
+  async list(companyCode?: string, status?: string, locationCode?: string, channel?: string, createdBy?: string): Promise<Order[]> {
     this.loading.set(true);
     this.error.set(null);
 
@@ -171,7 +211,8 @@ export class OrderService {
             companyCode: companyCode || null,
             status: status || null,
             locationCode: locationCode || null,
-            channel: channel || null
+            channel: channel || null,
+            createdBy: createdBy || null
           },
           fetchPolicy: 'network-only'
         })
@@ -231,11 +272,11 @@ export class OrderService {
     return payload;
   }
 
-  async updateStatus(companyCode: string, orderId: string, status: string): Promise<{ success: boolean; message: string }> {
+  async updateStatus(companyCode: string, orderId: string, status: string, userRole?: string): Promise<{ success: boolean; message: string }> {
     const result = await firstValueFrom(
       this.apollo.mutate<{ updateOrderStatus: { success: boolean; message: string } }>({
         mutation: UPDATE_ORDER_STATUS,
-        variables: { companyCode, orderId, status }
+        variables: { companyCode, orderId, status, userRole: userRole || null }
       })
     );
 
@@ -245,6 +286,30 @@ export class OrderService {
         prev.map(o => o.orderId === orderId && o.companyCode === companyCode ? { ...o, status } : o)
       );
     }
+    return payload;
+  }
+
+  async updateDetails(input: UpdateOrderDetailsInput): Promise<{ success: boolean; message: string }> {
+    const result = await firstValueFrom(
+      this.apollo.mutate<{ updateOrderDetails: { success: boolean; message: string } }>({
+        mutation: UPDATE_ORDER_DETAILS,
+        variables: { input }
+      })
+    );
+
+    const payload = result?.data?.updateOrderDetails ?? { success: false, message: 'No response from server.' };
+    return payload;
+  }
+
+  async addTimelineComment(input: AddOrderTimelineCommentInput): Promise<{ success: boolean; message: string }> {
+    const result = await firstValueFrom(
+      this.apollo.mutate<{ addOrderTimelineComment: { success: boolean; message: string } }>({
+        mutation: ADD_ORDER_TIMELINE_COMMENT,
+        variables: { input }
+      })
+    );
+
+    const payload = result?.data?.addOrderTimelineComment ?? { success: false, message: 'No response from server.' };
     return payload;
   }
 
@@ -263,3 +328,4 @@ export class OrderService {
     return payload;
   }
 }
+

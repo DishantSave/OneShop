@@ -10,28 +10,30 @@ public class WarehouseService(IWarehouseRepository warehouseRepository, ICompany
     private readonly IWarehouseRepository _warehouseRepository = warehouseRepository;
     private readonly ICompanyRepository _companyRepository = companyRepository;
 
-    public async Task<IEnumerable<WarehouseDto>> GetWarehousesAsync(string accountId, string? companyCode = null, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<WarehouseDto>> GetWarehousesAsync(string accountId, string? companyCode = null, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
-        var warehouseDetails = (await _warehouseRepository.GetAllWarehousesAsync(accountId, companyCode, cancellationToken)).ToList();
-        var warehouseAuditDetails = await _warehouseRepository.GetAllWarehousesAuditDetailsAsync(accountId, companyCode, cancellationToken);
-
-        var auditLookup = warehouseAuditDetails.ToLookup(wa => $"{wa.CompanyCode}:{wa.WarehouseCode}");
-
-        foreach (var wh in warehouseDetails)
+        var warehouseDetails = (await _warehouseRepository.GetAllWarehousesAsync(accountId, companyCode, isCustomer, cancellationToken)).ToList();
+        
+        if (!isCustomer)
         {
-            var key = $"{wh.CompanyCode}:{wh.Code}";
-            wh.Audit.AddRange(auditLookup[key]);
+            var warehouseAuditDetails = await _warehouseRepository.GetAllWarehousesAuditDetailsAsync(accountId, companyCode, cancellationToken);
+            var auditLookup = warehouseAuditDetails.ToLookup(wa => $"{wa.CompanyCode}:{wa.WarehouseCode}");
+            foreach (var wh in warehouseDetails)
+            {
+                var key = $"{wh.CompanyCode}:{wh.Code}";
+                wh.Audit.AddRange(auditLookup[key]);
+            }
         }
 
         return warehouseDetails;
     }
 
-    public async Task<WarehouseDto?> GetWarehouseByCodeAsync(string accountId, string companyCode, string code, CancellationToken cancellationToken = default)
+    public async Task<WarehouseDto?> GetWarehouseByCodeAsync(string accountId, string companyCode, string code, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(accountId) || string.IsNullOrWhiteSpace(companyCode) || string.IsNullOrWhiteSpace(code))
+        if (string.IsNullOrWhiteSpace(companyCode) || string.IsNullOrWhiteSpace(code))
             return null;
 
-        return await _warehouseRepository.GetWarehouseByCodeAsync(accountId, companyCode.Trim().ToUpper(), code.Trim().ToUpper(), cancellationToken);
+        return await _warehouseRepository.GetWarehouseByCodeAsync(accountId, companyCode.Trim().ToUpper(), code.Trim().ToUpper(), isCustomer, cancellationToken);
     }
 
     public async Task<bool> CheckWarehouseCodeExistsAsync(string accountId, string companyCode, string code, CancellationToken cancellationToken = default)

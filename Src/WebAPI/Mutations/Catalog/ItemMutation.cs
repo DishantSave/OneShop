@@ -1,6 +1,7 @@
 using Application.DTOs.Catalog.Item;
 using Application.GraphQL.InputModels;
 using Application.GraphQL.Payloads;
+using Application.Interfaces.DataService;
 using Application.Interfaces.GraphQLService;
 using HotChocolate.Authorization;
 using System.Security.Claims;
@@ -17,10 +18,16 @@ public class ItemMutation
         ItemInput input,
         ClaimsPrincipal user,
         [Service] IItemService itemService,
+        [Service] IUserRoleResolver userRoleResolver,
         CancellationToken cancellationToken)
     {
         try
         {
+            if (await userRoleResolver.IsCustomerAsync(user, cancellationToken))
+            {
+                return new ItemPayload { Success = false, Message = "Customer accounts are not authorized to create catalog items." };
+            }
+
             var accountId = user.FindFirst("account_id")?.Value
                 ?? throw new GraphQLException("AccountId not found in token.");
 
@@ -74,10 +81,16 @@ public class ItemMutation
         ItemInput input,
         ClaimsPrincipal user,
         [Service] IItemService itemService,
+        [Service] IUserRoleResolver userRoleResolver,
         CancellationToken cancellationToken)
     {
         try
         {
+            if (await userRoleResolver.IsCustomerAsync(user, cancellationToken))
+            {
+                return new ItemPayload { Success = false, Message = "Customer accounts are not authorized to edit catalog items." };
+            }
+
             var accountId = user.FindFirst("account_id")?.Value
                 ?? throw new GraphQLException("AccountId not found in token.");
 
@@ -132,10 +145,16 @@ public class ItemMutation
         [GraphQLName("itemNumber")] string itemNumber,
         ClaimsPrincipal user,
         [Service] IItemService itemService,
+        [Service] IUserRoleResolver userRoleResolver,
         CancellationToken cancellationToken)
     {
         try
         {
+            if (await userRoleResolver.IsCustomerAsync(user, cancellationToken))
+            {
+                return new ItemPayload { Success = false, Message = "Customer accounts are not authorized to delete catalog items." };
+            }
+
             var accountId = user.FindFirst("account_id")?.Value
                 ?? throw new GraphQLException("AccountId not found in token.");
 

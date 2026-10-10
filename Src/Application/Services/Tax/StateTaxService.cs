@@ -9,11 +9,11 @@ public class StateTaxService(IStateTaxRepository repository) : IStateTaxService
 {
     private readonly IStateTaxRepository _repository = repository;
 
-    public Task<IEnumerable<StateTaxDto>> GetStateTaxesAsync(string accountId, string? countryCode = "IN", CancellationToken cancellationToken = default)
-        => _repository.GetStateTaxesAsync(accountId, countryCode, cancellationToken);
+    public Task<IEnumerable<StateTaxDto>> GetStateTaxesAsync(string accountId, string? countryCode = "IN", bool isCustomer = false, CancellationToken cancellationToken = default)
+        => _repository.GetStateTaxesAsync(accountId, countryCode, isCustomer, cancellationToken);
 
-    public Task<StateTaxDto?> GetStateTaxByCodeAsync(string accountId, string stateCode, string? countryCode = "IN", CancellationToken cancellationToken = default)
-        => _repository.GetStateTaxByCodeAsync(accountId, stateCode, countryCode, cancellationToken);
+    public Task<StateTaxDto?> GetStateTaxByCodeAsync(string accountId, string stateCode, string? countryCode = "IN", bool isCustomer = false, CancellationToken cancellationToken = default)
+        => _repository.GetStateTaxByCodeAsync(accountId, stateCode, countryCode, isCustomer, cancellationToken);
 
     public Task<StateTaxPayload> SaveStateTaxAsync(StateTaxRequest request, CancellationToken cancellationToken = default)
         => _repository.SaveStateTaxAsync(request, cancellationToken);

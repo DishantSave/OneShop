@@ -10,7 +10,7 @@ public class SubAccountDto
     public string? Department { get; init; }
     public bool IsCustomerAccount { get; init; }
     public bool IsSellerAccount { get; init; }
-    public required string Company { get; init; }
+    public string? Company { get; init; }
     public string? ProfilePicture { get; init; }
     public required string Email { get; init; }
     public required string Contact { get; init; }
@@ -22,4 +22,5 @@ public class SubAccountDto
     public List<SubAccountScreenAccessDto> ScreenAccess { get; set; } = [];
     public List<SubAccountAuditTrailDto> Audit { get; set; } = [];
     public List<SubAccountAuditTrailDto> AuditTrail => Audit;
+    public string? VendorType { get; init; }
 }

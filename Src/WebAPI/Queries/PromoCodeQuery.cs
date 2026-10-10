@@ -1,5 +1,6 @@
 using Application.DTOs.Discounts;
 using Application.GraphQL.Payloads;
+using Application.Interfaces.DataService;
 using Application.Interfaces.GraphQLService;
 using HotChocolate.Authorization;
 using System.Security.Claims;
@@ -15,13 +16,16 @@ public class PromoCodeQuery
     public async Task<IEnumerable<PromoCodeDto>> GetPromoCodesAsync(
         [GraphQLName("activeOnly")] bool? activeOnly,
         [Service] IPromoCodeService promoService,
+        [Service] IUserRoleResolver userRoleResolver,
         ClaimsPrincipal user,
         CancellationToken cancellationToken)
     {
         var accountId = user.FindFirst("account_id")?.Value
             ?? throw new GraphQLException("AccountId not found in token.");
 
-        return await promoService.GetPromoCodesAsync(accountId, activeOnly, cancellationToken);
+        var isCustomer = await userRoleResolver.IsCustomerAsync(user, cancellationToken);
+
+        return await promoService.GetPromoCodesAsync(accountId, activeOnly, isCustomer, cancellationToken);
     }
 
     [Authorize]
@@ -30,13 +34,16 @@ public class PromoCodeQuery
     public async Task<PromoCodeDto?> GetPromoCodeByCodeAsync(
         [GraphQLName("code")] string code,
         [Service] IPromoCodeService promoService,
+        [Service] IUserRoleResolver userRoleResolver,
         ClaimsPrincipal user,
         CancellationToken cancellationToken)
     {
         var accountId = user.FindFirst("account_id")?.Value
             ?? throw new GraphQLException("AccountId not found in token.");
 
-        return await promoService.GetPromoCodeByCodeAsync(accountId, code, cancellationToken);
+        var isCustomer = await userRoleResolver.IsCustomerAsync(user, cancellationToken);
+
+        return await promoService.GetPromoCodeByCodeAsync(accountId, code, isCustomer, cancellationToken);
     }
 
     [Authorize]
@@ -46,13 +53,16 @@ public class PromoCodeQuery
         [GraphQLName("code")] string code,
         [GraphQLName("subTotal")] decimal subTotal,
         [Service] IPromoCodeService promoService,
+        [Service] IUserRoleResolver userRoleResolver,
         ClaimsPrincipal user,
         CancellationToken cancellationToken)
     {
         var accountId = user.FindFirst("account_id")?.Value
             ?? throw new GraphQLException("AccountId not found in token.");
 
-        var res = await promoService.ValidatePromoCodeAsync(accountId, code, subTotal, cancellationToken);
+        var isCustomer = await userRoleResolver.IsCustomerAsync(user, cancellationToken);
+
+        var res = await promoService.ValidatePromoCodeAsync(accountId, code, subTotal, isCustomer, cancellationToken);
         return new ValidatePromoPayload
         {
             Success = res.IsValid,

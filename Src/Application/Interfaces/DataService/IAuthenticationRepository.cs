@@ -1,4 +1,4 @@
-﻿using Application.GraphQL.Payloads;
+using Application.GraphQL.Payloads;
 
 namespace Application.Interfaces.DataService;
 
@@ -19,6 +19,7 @@ public interface IAuthenticationRepository
         string contact,
         string country,
         bool isTestAccount,
+        string? vendorType = null,
         CancellationToken cancellationToken = default);
     Task<AuthenticationPayload> AuthenticateUserAsync(string userName, string password, CancellationToken cancellationToken = default);
 }

@@ -28,6 +28,7 @@ import { ItemForm } from './features/item/item-form/item-form';
 import { InventoryMaster } from './features/inventory/inventory-master/inventory-master';
 import { InventoryList } from './features/inventory/inventory-list/inventory-list';
 import { mainAccountGuard } from './core/guards/main-account.guard';
+import { screenGuard } from './core/guards/screen.guard';
 import { DashboardHome } from './features/dashboard-home/dashboard-home';
 import { OrderMaster } from './features/orders/order-master/order-master';
 import { OrderList } from './features/orders/order-list/order-list';
@@ -83,6 +84,7 @@ export const routes: Routes = [
       {
         path: 'masters',
         component: Masters,
+        canActivate: [screenGuard('CompanyMaster')],
         children: [
           {
             path: '',
@@ -115,6 +117,7 @@ export const routes: Routes = [
           {
             path: 'warehouse',
             component: WarehouseMaster,
+            canActivate: [screenGuard('Warehouse', '/dashboard/masters')],
             children: [
               { path: '', component: WarehouseList },
               { path: 'new', component: WarehouseForm },
@@ -149,6 +152,7 @@ export const routes: Routes = [
       {
         path: 'items',
         component: ItemMaster,
+        canActivate: [screenGuard('Items')],
         children: [
           { path: '', component: ItemList },
           { path: 'new', component: ItemForm },
@@ -158,6 +162,7 @@ export const routes: Routes = [
       {
         path: 'inventory',
         component: InventoryMaster,
+        canActivate: [screenGuard('Inventory')],
         children: [
           { path: '', component: InventoryList }
         ]

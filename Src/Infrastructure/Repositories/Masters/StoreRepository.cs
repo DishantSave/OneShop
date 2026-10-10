@@ -24,7 +24,7 @@ public class StoreRepository(IHttpContextAccessor httpContextAccessor) : IStoreR
         throw new InvalidOperationException("Tenant context could not be resolved for this request.");
     }
 
-    public async Task<IEnumerable<StoreDto>> GetAllStoresAsync(string accountId, string? companyCode = null, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<StoreDto>> GetAllStoresAsync(string accountId, string? companyCode = null, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
         using IDbConnection db = new SqlConnection(GetConnectionString());
         const string sql = @"
@@ -35,13 +35,13 @@ public class StoreRepository(IHttpContextAccessor httpContextAccessor) : IStoreR
                    s.IsActive, s.OriginalIsActive, s.DateCreated
             FROM dbo.Store AS s
             INNER JOIN dbo.Company AS c ON s.AccountId = c.AccountId AND s.CompanyCode = c.Code
-            WHERE s.AccountId = @AccountId
+            WHERE (@IsCustomer = 0 AND s.AccountId = @AccountId OR @IsCustomer = 1 AND s.IsActive = 1)
               AND (@CompanyCode IS NULL OR UPPER(s.CompanyCode) = UPPER(@CompanyCode))
             ORDER BY s.CompanyCode ASC, s.Code ASC";
 
         var command = new CommandDefinition(
             sql,
-            new { AccountId = accountId, CompanyCode = companyCode },
+            new { AccountId = accountId, CompanyCode = companyCode, IsCustomer = isCustomer ? 1 : 0 },
             cancellationToken: cancellationToken);
 
         return await db.QueryAsync<StoreDto>(command);
@@ -65,7 +65,7 @@ public class StoreRepository(IHttpContextAccessor httpContextAccessor) : IStoreR
         return await db.QueryAsync<StoreAuditTrailDto>(command);
     }
 
-    public async Task<StoreDto?> GetStoreByCodeAsync(string accountId, string companyCode, string storeCode, CancellationToken cancellationToken = default)
+    public async Task<StoreDto?> GetStoreByCodeAsync(string accountId, string companyCode, string storeCode, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
         using IDbConnection db = new SqlConnection(GetConnectionString());
 
@@ -77,34 +77,37 @@ public class StoreRepository(IHttpContextAccessor httpContextAccessor) : IStoreR
                    s.IsActive, s.OriginalIsActive, s.DateCreated
             FROM dbo.Store AS s
             INNER JOIN dbo.Company AS c ON s.AccountId = c.AccountId AND s.CompanyCode = c.Code
-            WHERE s.AccountId = @AccountId
+            WHERE (@IsCustomer = 0 AND s.AccountId = @AccountId OR @IsCustomer = 1)
               AND UPPER(s.CompanyCode) = UPPER(@CompanyCode)
               AND UPPER(s.Code) = UPPER(@Code)";
 
         var storeCmd = new CommandDefinition(
             getStoreSql,
-            new { AccountId = accountId, CompanyCode = companyCode, Code = storeCode },
+            new { AccountId = accountId, CompanyCode = companyCode, Code = storeCode, IsCustomer = isCustomer ? 1 : 0 },
             cancellationToken: cancellationToken);
 
         var store = await db.QueryFirstOrDefaultAsync<StoreDto>(storeCmd);
         if (store == null)
             return null;
 
-        const string getAuditSql = @"
-            SELECT Sequence, AccountId, CompanyCode, StoreCode, Field, Description, DateModified, ModifiedBy
-            FROM dbo.StoreAuditTrail
-            WHERE AccountId = @AccountId
-              AND UPPER(CompanyCode) = UPPER(@CompanyCode)
-              AND UPPER(StoreCode) = UPPER(@Code)
-            ORDER BY DateModified DESC, Sequence DESC";
+        if (!isCustomer)
+        {
+            const string getAuditSql = @"
+                SELECT Sequence, AccountId, CompanyCode, StoreCode, Field, Description, DateModified, ModifiedBy
+                FROM dbo.StoreAuditTrail
+                WHERE AccountId = @AccountId
+                  AND UPPER(CompanyCode) = UPPER(@CompanyCode)
+                  AND UPPER(StoreCode) = UPPER(@Code)
+                ORDER BY DateModified DESC, Sequence DESC";
 
-        var auditCmd = new CommandDefinition(
-            getAuditSql,
-            new { AccountId = accountId, CompanyCode = companyCode, Code = storeCode },
-            cancellationToken: cancellationToken);
+            var auditCmd = new CommandDefinition(
+                getAuditSql,
+                new { AccountId = accountId, CompanyCode = companyCode, Code = storeCode },
+                cancellationToken: cancellationToken);
 
-        var auditTrail = (await db.QueryAsync<StoreAuditTrailDto>(auditCmd)).ToList();
-        store.Audit = auditTrail;
+            var auditTrail = (await db.QueryAsync<StoreAuditTrailDto>(auditCmd)).ToList();
+            store.Audit = auditTrail;
+        }
 
         return store;
     }
@@ -515,7 +518,7 @@ public class StoreRepository(IHttpContextAccessor httpContextAccessor) : IStoreR
 
     private async Task<StorePayload> FetchStoreDetails(string accountId, string companyCode, string storeCode, CancellationToken cancellationToken)
     {
-        var store = await GetStoreByCodeAsync(accountId, companyCode, storeCode, cancellationToken);
+        var store = await GetStoreByCodeAsync(accountId, companyCode, storeCode, isCustomer: false, cancellationToken);
         if (store == null)
         {
             return new StorePayload

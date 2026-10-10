@@ -24,7 +24,7 @@ public class CollectionRepository(IHttpContextAccessor httpContextAccessor) : IC
         throw new InvalidOperationException("Tenant context could not be resolved for this request.");
     }
 
-    public async Task<IEnumerable<CollectionDto>> GetAllCollectionsAsync(string accountId, string? companyCode = null, string? channel = null, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<CollectionDto>> GetAllCollectionsAsync(string accountId, string? companyCode = null, string? channel = null, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
         using IDbConnection db = new SqlConnection(GetConnectionString());
         const string sql = @"
@@ -32,20 +32,20 @@ public class CollectionRepository(IHttpContextAccessor httpContextAccessor) : IC
                    col.Description, col.Season, col.Channel, col.BannerImage, col.IsActive, col.DateCreated
             FROM dbo.Collection AS col
             INNER JOIN dbo.Company AS c ON col.AccountId = c.AccountId AND col.CompanyCode = c.Code
-            WHERE col.AccountId = @AccountId
+            WHERE (@IsCustomer = 0 AND col.AccountId = @AccountId OR @IsCustomer = 1 AND col.IsActive = 1)
               AND (@CompanyCode IS NULL OR UPPER(col.CompanyCode) = UPPER(@CompanyCode))
               AND (@Channel IS NULL OR col.Channel = @Channel OR col.Channel = 'Both')
             ORDER BY col.CompanyCode ASC, col.Code ASC";
 
         var command = new CommandDefinition(
             sql,
-            new { AccountId = accountId, CompanyCode = companyCode, Channel = channel },
+            new { AccountId = accountId, CompanyCode = companyCode, Channel = channel, IsCustomer = isCustomer ? 1 : 0 },
             cancellationToken: cancellationToken);
 
         return await db.QueryAsync<CollectionDto>(command);
     }
 
-    public async Task<CollectionDto?> GetCollectionByCodeAsync(string accountId, string companyCode, string code, CancellationToken cancellationToken = default)
+    public async Task<CollectionDto?> GetCollectionByCodeAsync(string accountId, string companyCode, string code, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
         using IDbConnection db = new SqlConnection(GetConnectionString());
         const string sql = @"
@@ -53,13 +53,13 @@ public class CollectionRepository(IHttpContextAccessor httpContextAccessor) : IC
                    col.Description, col.Season, col.Channel, col.BannerImage, col.IsActive, col.DateCreated
             FROM dbo.Collection AS col
             INNER JOIN dbo.Company AS c ON col.AccountId = c.AccountId AND col.CompanyCode = c.Code
-            WHERE col.AccountId = @AccountId
+            WHERE (@IsCustomer = 0 AND col.AccountId = @AccountId OR @IsCustomer = 1)
               AND UPPER(col.CompanyCode) = UPPER(@CompanyCode)
               AND UPPER(col.Code) = UPPER(@Code)";
 
         var command = new CommandDefinition(
             sql,
-            new { AccountId = accountId, CompanyCode = companyCode, Code = code },
+            new { AccountId = accountId, CompanyCode = companyCode, Code = code, IsCustomer = isCustomer ? 1 : 0 },
             cancellationToken: cancellationToken);
 
         return await db.QueryFirstOrDefaultAsync<CollectionDto>(command);

@@ -14,6 +14,21 @@ export interface OrderItem {
   dateAdded?: string;
 }
 
+export interface OrderAuditTrail {
+  sequence?: number;
+  accountId: string;
+  companyCode: string;
+  orderId: string;
+  actionType: 'Created' | 'StatusChanged' | 'DetailsUpdated' | 'CommentAdded';
+  field?: string;
+  oldValue?: string;
+  newValue?: string;
+  description: string;
+  dateModified: string;
+  modifiedBy: string;
+  userRole?: string;
+}
+
 export interface Order {
   sequence?: number;
   accountId?: string;
@@ -48,6 +63,31 @@ export interface Order {
   shippingState?: string;
   promoCode?: string;
   items?: OrderItem[];
+  auditTrail?: OrderAuditTrail[];
+  canModify?: boolean;
+}
+
+export interface UpdateOrderDetailsInput {
+  companyCode: string;
+  orderId: string;
+  customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  shippingAddress?: string;
+  shippingState?: string;
+  shipVia?: string;
+  deliveryPartner?: string;
+  pickupLocationCode?: string;
+  pickupLocationName?: string;
+  notes?: string;
+  userRole?: string;
+}
+
+export interface AddOrderTimelineCommentInput {
+  companyCode: string;
+  orderId: string;
+  comment: string;
+  userRole?: string;
 }
 
 export interface OrderItemInput {

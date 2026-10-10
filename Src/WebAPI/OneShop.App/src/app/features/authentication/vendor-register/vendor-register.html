@@ -112,27 +112,102 @@
 
                 <div class="flex flex-column gap-1">
                   <label for="company" class="text-sm font-semibold text-color">Company / Store Name *</label>
-                  <input pInputText class="w-full" id="company" [(ngModel)]="company" placeholder="Enter store name" />
+                  <input pInputText class="w-full" id="company" [(ngModel)]="company" placeholder="e.g. Apex Global Merchants" />
                 </div>
 
                 <div class="flex flex-column gap-2 mt-2">
-                  <label class="text-sm font-semibold text-color">Target Audience Channels (Select at least one)</label>
-                  <div class="flex gap-4">
-                    <div class="flex align-items-center gap-2">
-                      <p-checkbox [(ngModel)]="isCustomerB2C" [binary]="true" (onChange)="onVendorTypeChange()" inputId="vB2c"></p-checkbox>
-                      <label for="vB2c" class="text-sm cursor-pointer">B2C</label>
+                  <label class="text-sm font-semibold text-color">Operating Model / Target Audience *</label>
+                  <div class="text-xs text-color-secondary mb-1">Select your fulfillment &amp; operational structure:</div>
+
+                  <!-- Operating Model Selection Cards -->
+                  <div class="flex flex-column gap-2">
+                    <!-- B2C Card -->
+                    <div (click)="selectedVendorType = 'B2C'"
+                         [ngStyle]="{
+                           border: selectedVendorType === 'B2C' ? '2px solid #05517e' : '1px solid var(--surface-border, #cbd5e1)',
+                           background: selectedVendorType === 'B2C' ? 'rgba(5, 81, 126, 0.08)' : 'var(--surface-card, #ffffff)',
+                           borderRadius: '12px', padding: '0.85rem 1rem', cursor: 'pointer', transition: 'all 0.2s ease'
+                         }"
+                         class="flex align-items-start gap-3">
+                      <div [ngStyle]="{
+                             width: '32px', height: '32px', borderRadius: '8px',
+                             background: selectedVendorType === 'B2C' ? '#05517e' : '#e2e8f0',
+                             color: selectedVendorType === 'B2C' ? '#ffffff' : '#64748b',
+                             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                           }">
+                        <i class="pi pi-shopping-bag"></i>
+                      </div>
+                      <div class="flex-grow-1">
+                        <div class="flex align-items-center justify-content-between">
+                          <span class="font-bold text-sm text-color">B2C Retailer</span>
+                          <span *ngIf="selectedVendorType === 'B2C'" class="text-primary text-xs font-bold"><i class="pi pi-check-circle"></i> Selected</span>
+                        </div>
+                        <p class="text-xs text-color-secondary m-0 mt-1">
+                          Direct-to-consumer sales via stores and courier partners. <i>(Warehouse management omitted)</i>
+                        </p>
+                      </div>
                     </div>
-                    <div class="flex align-items-center gap-2">
-                      <p-checkbox [(ngModel)]="isCustomerB2B" [binary]="true" (onChange)="onVendorTypeChange()" inputId="vB2b"></p-checkbox>
-                      <label for="vB2b" class="text-sm cursor-pointer">B2B</label>
+
+                    <!-- B2B Card -->
+                    <div (click)="selectedVendorType = 'B2B'"
+                         [ngStyle]="{
+                           border: selectedVendorType === 'B2B' ? '2px solid #05517e' : '1px solid var(--surface-border, #cbd5e1)',
+                           background: selectedVendorType === 'B2B' ? 'rgba(5, 81, 126, 0.08)' : 'var(--surface-card, #ffffff)',
+                           borderRadius: '12px', padding: '0.85rem 1rem', cursor: 'pointer', transition: 'all 0.2s ease'
+                         }"
+                         class="flex align-items-start gap-3">
+                      <div [ngStyle]="{
+                             width: '32px', height: '32px', borderRadius: '8px',
+                             background: selectedVendorType === 'B2B' ? '#05517e' : '#e2e8f0',
+                             color: selectedVendorType === 'B2B' ? '#ffffff' : '#64748b',
+                             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                           }">
+                        <i class="pi pi-truck"></i>
+                      </div>
+                      <div class="flex-grow-1">
+                        <div class="flex align-items-center justify-content-between">
+                          <span class="font-bold text-sm text-color">B2B Wholesaler</span>
+                          <span *ngIf="selectedVendorType === 'B2B'" class="text-primary text-xs font-bold"><i class="pi pi-check-circle"></i> Selected</span>
+                        </div>
+                        <p class="text-xs text-color-secondary m-0 mt-1">
+                          Bulk distribution orders, central warehouse logistics &amp; freight carriers (ShipVia).
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- Both Card -->
+                    <div (click)="selectedVendorType = 'Both'"
+                         [ngStyle]="{
+                           border: selectedVendorType === 'Both' ? '2px solid #05517e' : '1px solid var(--surface-border, #cbd5e1)',
+                           background: selectedVendorType === 'Both' ? 'rgba(5, 81, 126, 0.08)' : 'var(--surface-card, #ffffff)',
+                           borderRadius: '12px', padding: '0.85rem 1rem', cursor: 'pointer', transition: 'all 0.2s ease'
+                         }"
+                         class="flex align-items-start gap-3">
+                      <div [ngStyle]="{
+                             width: '32px', height: '32px', borderRadius: '8px',
+                             background: selectedVendorType === 'Both' ? '#05517e' : '#e2e8f0',
+                             color: selectedVendorType === 'Both' ? '#ffffff' : '#64748b',
+                             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                           }">
+                        <i class="pi pi-globe"></i>
+                      </div>
+                      <div class="flex-grow-1">
+                        <div class="flex align-items-center justify-content-between">
+                          <span class="font-bold text-sm text-color">Omnichannel (Both B2B &amp; B2C)</span>
+                          <span *ngIf="selectedVendorType === 'Both'" class="text-primary text-xs font-bold"><i class="pi pi-check-circle"></i> Selected</span>
+                        </div>
+                        <p class="text-xs text-color-secondary m-0 mt-1">
+                          Complete hybrid operations: Retail store direct delivery &amp; wholesale distribution warehouses.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <!-- Fixed Button Layout -->
-                <div class="flex gap-2 mt-4 w-full">
+                <div class="flex gap-2 mt-3 w-full">
                   <p-button label="Back" icon="pi pi-arrow-left" styleClass="p-button-outlined w-full" class="flex-1" (onClick)="prevStep()"></p-button>
-                  <p-button label="Next Step" icon="pi pi-arrow-right" iconPos="right" styleClass="w-full" class="flex-1" (onClick)="nextStep()"></p-button>
+                  <p-button label="Next Step: Security" icon="pi pi-arrow-right" iconPos="right" styleClass="w-full" class="flex-1" (onClick)="nextStep()"></p-button>
                 </div>
               </div>
 

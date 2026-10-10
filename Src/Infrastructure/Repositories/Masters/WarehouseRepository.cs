@@ -24,7 +24,7 @@ public class WarehouseRepository(IHttpContextAccessor httpContextAccessor) : IWa
         throw new InvalidOperationException("Tenant context could not be resolved for this request.");
     }
 
-    public async Task<IEnumerable<WarehouseDto>> GetAllWarehousesAsync(string accountId, string? companyCode = null, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<WarehouseDto>> GetAllWarehousesAsync(string accountId, string? companyCode = null, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
         using IDbConnection db = new SqlConnection(GetConnectionString());
         const string sql = @"
@@ -34,19 +34,19 @@ public class WarehouseRepository(IHttpContextAccessor httpContextAccessor) : IWa
                    w.IsTestWarehouse, w.IsActive, w.DateCreated
             FROM dbo.Warehouse AS w
             INNER JOIN dbo.Company AS c ON w.AccountId = c.AccountId AND w.CompanyCode = c.Code
-            WHERE w.AccountId = @AccountId
+            WHERE (@IsCustomer = 0 AND w.AccountId = @AccountId OR @IsCustomer = 1 AND w.IsActive = 1)
               AND (@CompanyCode IS NULL OR UPPER(w.CompanyCode) = UPPER(@CompanyCode))
             ORDER BY w.CompanyCode ASC, w.Code ASC";
 
         var command = new CommandDefinition(
             sql,
-            new { AccountId = accountId, CompanyCode = companyCode },
+            new { AccountId = accountId, CompanyCode = companyCode, IsCustomer = isCustomer ? 1 : 0 },
             cancellationToken: cancellationToken);
 
         return await db.QueryAsync<WarehouseDto>(command);
     }
 
-    public async Task<WarehouseDto?> GetWarehouseByCodeAsync(string accountId, string companyCode, string code, CancellationToken cancellationToken = default)
+    public async Task<WarehouseDto?> GetWarehouseByCodeAsync(string accountId, string companyCode, string code, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
         using IDbConnection db = new SqlConnection(GetConnectionString());
         const string sql = @"
@@ -56,31 +56,34 @@ public class WarehouseRepository(IHttpContextAccessor httpContextAccessor) : IWa
                    w.IsTestWarehouse, w.IsActive, w.DateCreated
             FROM dbo.Warehouse AS w
             INNER JOIN dbo.Company AS c ON w.AccountId = c.AccountId AND w.CompanyCode = c.Code
-            WHERE w.AccountId = @AccountId
+            WHERE (@IsCustomer = 0 AND w.AccountId = @AccountId OR @IsCustomer = 1)
               AND UPPER(w.CompanyCode) = UPPER(@CompanyCode)
               AND UPPER(w.Code) = UPPER(@Code)";
 
         var command = new CommandDefinition(
             sql,
-            new { AccountId = accountId, CompanyCode = companyCode, Code = code },
+            new { AccountId = accountId, CompanyCode = companyCode, Code = code, IsCustomer = isCustomer ? 1 : 0 },
             cancellationToken: cancellationToken);
 
         var warehouse = await db.QueryFirstOrDefaultAsync<WarehouseDto>(command);
         if (warehouse == null) return null;
 
-        const string getAuditSql = @"
-            SELECT Sequence, AccountId, CompanyCode, WarehouseCode, Field, Description, DateModified, ModifiedBy
-            FROM dbo.WarehouseAuditTrail
-            WHERE AccountId = @AccountId AND UPPER(CompanyCode) = UPPER(@CompanyCode) AND UPPER(WarehouseCode) = UPPER(@Code)
-            ORDER BY DateModified DESC, Sequence DESC";
+        if (!isCustomer)
+        {
+            const string getAuditSql = @"
+                SELECT Sequence, AccountId, CompanyCode, WarehouseCode, Field, Description, DateModified, ModifiedBy
+                FROM dbo.WarehouseAuditTrail
+                WHERE AccountId = @AccountId AND UPPER(CompanyCode) = UPPER(@CompanyCode) AND UPPER(WarehouseCode) = UPPER(@Code)
+                ORDER BY DateModified DESC, Sequence DESC";
 
-        var auditCmd = new CommandDefinition(
-            getAuditSql,
-            new { AccountId = accountId, CompanyCode = companyCode, Code = code },
-            cancellationToken: cancellationToken);
+            var auditCmd = new CommandDefinition(
+                getAuditSql,
+                new { AccountId = accountId, CompanyCode = companyCode, Code = code },
+                cancellationToken: cancellationToken);
 
-        var auditTrail = (await db.QueryAsync<WarehouseAuditTrailDto>(auditCmd)).ToList();
-        warehouse.Audit = auditTrail;
+            var auditTrail = (await db.QueryAsync<WarehouseAuditTrailDto>(auditCmd)).ToList();
+            warehouse.Audit = auditTrail;
+        }
 
         return warehouse;
     }

@@ -1,4 +1,4 @@
-﻿namespace Application.DTOs.Auth;
+namespace Application.DTOs.Auth;
 
 public record RegisterRequest(
     string UserName,
@@ -11,5 +11,6 @@ public record RegisterRequest(
     string Email,
     string Contact,
     string Country,
-    bool IsTestAccount = false
+    bool IsTestAccount = false,
+    string? VendorType = null
 );

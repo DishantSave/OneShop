@@ -1,4 +1,5 @@
 using Application.DTOs.Order;
+using Application.GraphQL.InputModels;
 using Application.GraphQL.Payloads;
 using Application.Interfaces.DataService;
 using Application.Interfaces.GraphQLService;
@@ -10,17 +11,25 @@ public class OrderService(IOrderRepository orderRepository, ICompanyRepository c
     private readonly IOrderRepository _orderRepository = orderRepository;
     private readonly ICompanyRepository _companyRepository = companyRepository;
 
-    public async Task<IEnumerable<OrderDto>> GetOrdersAsync(string accountId, string? companyCode = null, string? status = null, string? locationCode = null, string? channel = null, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<OrderDto>> GetOrdersAsync(string accountId, string? companyCode = null, string? status = null, string? locationCode = null, string? channel = null, string? createdBy = null, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
-        return await _orderRepository.GetOrdersAsync(accountId, companyCode, status, locationCode, channel, cancellationToken);
+        return await _orderRepository.GetOrdersAsync(accountId, companyCode, status, locationCode, channel, createdBy, isCustomer, cancellationToken);
     }
 
-    public async Task<OrderDto?> GetOrderByIdAsync(string accountId, string companyCode, string orderId, CancellationToken cancellationToken = default)
+    public async Task<OrderDto?> GetOrderByIdAsync(string accountId, string companyCode, string orderId, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(accountId) || string.IsNullOrWhiteSpace(companyCode) || string.IsNullOrWhiteSpace(orderId))
             return null;
 
-        return await _orderRepository.GetOrderByIdAsync(accountId, companyCode.Trim().ToUpper(), orderId.Trim().ToUpper(), cancellationToken);
+        return await _orderRepository.GetOrderByIdAsync(accountId, companyCode.Trim().ToUpper(), orderId.Trim().ToUpper(), isCustomer, cancellationToken);
+    }
+
+    public async Task<IEnumerable<OrderAuditTrailDto>> GetOrderAuditTrailAsync(string accountId, string companyCode, string orderId, bool isCustomer = false, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(accountId) || string.IsNullOrWhiteSpace(companyCode) || string.IsNullOrWhiteSpace(orderId))
+            return [];
+
+        return await _orderRepository.GetOrderAuditTrailAsync(accountId, companyCode.Trim().ToUpper(), orderId.Trim().ToUpper(), isCustomer, cancellationToken);
     }
 
     public async Task<OrderPayload> CreateOrderAsync(OrderRequest request, CancellationToken cancellationToken = default)
@@ -29,7 +38,7 @@ public class OrderService(IOrderRepository orderRepository, ICompanyRepository c
         if (string.IsNullOrWhiteSpace(companyCode))
             return new OrderPayload { Success = false, Message = "Company code is required." };
 
-        if (!await _companyRepository.ExistsByCompanyCodeAsync(request.AccountId, companyCode, cancellationToken))
+        if (!await _companyRepository.ExistsByCompanyCodeAsync(request.AccountId, companyCode, isCustomer: true, cancellationToken))
             return new OrderPayload { Success = false, Message = $"Company [{companyCode}] does not exist." };
 
         if (string.IsNullOrWhiteSpace(request.LocationCode))
@@ -84,12 +93,28 @@ public class OrderService(IOrderRepository orderRepository, ICompanyRepository c
         return await _orderRepository.CreateBatchOrdersTransactionAsync(normalizedRequests, cancellationToken);
     }
 
-    public async Task<OrderPayload> UpdateOrderStatusAsync(string accountId, string companyCode, string orderId, string status, string userName, CancellationToken cancellationToken = default)
+    public async Task<OrderPayload> UpdateOrderDetailsAsync(string accountId, UpdateOrderDetailsInput input, string userName, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(accountId) || string.IsNullOrWhiteSpace(input.CompanyCode) || string.IsNullOrWhiteSpace(input.OrderId))
+            return new OrderPayload { Success = false, Message = "Invalid order identifier." };
+
+        return await _orderRepository.UpdateOrderDetailsAsync(accountId, input, userName, cancellationToken);
+    }
+
+    public async Task<OrderPayload> AddOrderTimelineCommentAsync(string accountId, AddOrderTimelineCommentInput input, string userName, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(accountId) || string.IsNullOrWhiteSpace(input.CompanyCode) || string.IsNullOrWhiteSpace(input.OrderId))
+            return new OrderPayload { Success = false, Message = "Invalid order identifier." };
+
+        return await _orderRepository.AddOrderTimelineCommentAsync(accountId, input, userName, cancellationToken);
+    }
+
+    public async Task<OrderPayload> UpdateOrderStatusAsync(string accountId, string companyCode, string orderId, string status, string userName, string? userRole = null, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(accountId) || string.IsNullOrWhiteSpace(companyCode) || string.IsNullOrWhiteSpace(orderId))
             return new OrderPayload { Success = false, Message = "Invalid order identifier." };
 
-        return await _orderRepository.UpdateOrderStatusAsync(accountId, companyCode.Trim().ToUpper(), orderId.Trim().ToUpper(), status, userName, cancellationToken);
+        return await _orderRepository.UpdateOrderStatusAsync(accountId, companyCode.Trim().ToUpper(), orderId.Trim().ToUpper(), status, userName, userRole, cancellationToken);
     }
 
     public async Task<OrderPayload> DeleteOrderAsync(string accountId, string companyCode, string orderId, string userName, CancellationToken cancellationToken = default)

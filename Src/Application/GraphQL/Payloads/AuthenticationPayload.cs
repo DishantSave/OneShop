@@ -17,6 +17,15 @@ public class AuthenticationPayload
         {
             if (!Success) return null;
             if (_accessibleScreens != null) return _accessibleScreens;
+            if (UserDetails?.IsCustomerAccount == true && !UserDetails.IsSellerAccount)
+            {
+                return
+                [
+                    new FeatureAccessibility(new(Screen.Dashboard, 1, false), true, false, false, false),
+                    new FeatureAccessibility(new(Screen.Orders, 0, true), true, true, false, false),
+                    new FeatureAccessibility(new(Screen.Settings, 0, true), true, true, true, false)
+                ];
+            }
             return SubscriptionScreensAccess.GetScreens(UserDetails?.SubscriptionType ?? SubscriptionType.Basic);
         }
         init => _accessibleScreens = value;

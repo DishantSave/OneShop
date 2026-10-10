@@ -87,6 +87,9 @@ export class Login implements OnInit {
             email
             company
             subscriptionType
+            vendorType
+            isCustomerAccount
+            isSellerAccount
           }
           accessibleScreens {
             screen {
@@ -145,10 +148,11 @@ export class Login implements OnInit {
       },
       error: (err) => {
         console.error('Authentication mutation error:', err);
+        const detailMsg = err?.message || err?.error?.message || 'Failed to connect to the server. Please try again.';
         this.messageService.add({
           severity: 'error',
-          summary: 'Network Error',
-          detail: 'Failed to connect to the server. Please try again.',
+          summary: 'Authentication Error',
+          detail: detailMsg,
           life: 4000
         });
       }

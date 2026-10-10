@@ -5,8 +5,8 @@ namespace Application.Interfaces.DataService;
 
 public interface IStoreRepository
 {
-    Task<IEnumerable<StoreDto>> GetAllStoresAsync(string accountId, string? companyCode = null, CancellationToken cancellationToken = default);
-    Task<StoreDto?> GetStoreByCodeAsync(string accountId, string companyCode, string storeCode, CancellationToken cancellationToken = default);
+    Task<IEnumerable<StoreDto>> GetAllStoresAsync(string accountId, string? companyCode = null, bool isCustomer = false, CancellationToken cancellationToken = default);
+    Task<StoreDto?> GetStoreByCodeAsync(string accountId, string companyCode, string storeCode, bool isCustomer = false, CancellationToken cancellationToken = default);
     Task<IEnumerable<StoreAuditTrailDto>> GetAllStoresAuditDetailsAsync(string accountId, string? companyCode = null, CancellationToken cancellationToken = default);
     Task<bool> ExistsByStoreCodeAsync(string accountId, string companyCode, string storeCode, CancellationToken cancellationToken = default);
     Task<StorePayload> RegisterStoreTransactionAsync(

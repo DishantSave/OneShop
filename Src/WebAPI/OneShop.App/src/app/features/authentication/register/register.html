@@ -43,7 +43,7 @@
 
               <div class="text-center mb-4">
                 <h2 class="text-2xl font-bold mb-1">Create Customer Account</h2>
-                <p class="text-color-secondary text-sm">Step {{ currentStep }} of 3</p>
+                <p class="text-color-secondary text-sm">Step {{ currentStep }} of 2 &bull; Shop &amp; Order Directly</p>
               </div>
 
               <!-- STEP 1: Basic Identity & Contacts -->
@@ -104,40 +104,11 @@
                   </div>
                 </div>
 
-                <p-button label="Next Step" icon="pi pi-arrow-right" iconPos="right" styleClass="w-full mt-2" (onClick)="nextStep()"></p-button>
+                <p-button label="Next Step: Account Security" icon="pi pi-arrow-right" iconPos="right" styleClass="w-full mt-2" (onClick)="nextStep()"></p-button>
               </div>
 
-              <!-- STEP 2: Company & Target Audience Channels -->
+              <!-- STEP 2: Security & Passwords -->
               <div *ngIf="currentStep === 2" class="flex flex-column gap-3">
-
-                <div class="flex flex-column gap-1">
-                  <label for="company" class="text-sm font-semibold text-color">Company / Store Name (Optional)</label>
-                  <input pInputText class="w-full" id="company" [(ngModel)]="company" placeholder="Enter company name if applicable" />
-                </div>
-
-                <div class="flex flex-column gap-2 mt-2">
-                  <label class="text-sm font-semibold text-color">Target Audience Channels (Select at least one)</label>
-                  <div class="flex gap-4">
-                    <div class="flex align-items-center gap-2">
-                      <p-checkbox [(ngModel)]="isCustomerB2C" [binary]="true" (onChange)="onCustomerTypeChange()" inputId="b2cCheck"></p-checkbox>
-                      <label for="b2cCheck" class="text-sm cursor-pointer">B2C Customer</label>
-                    </div>
-                    <div class="flex align-items-center gap-2">
-                      <p-checkbox [(ngModel)]="isCustomerB2B" [binary]="true" (onChange)="onCustomerTypeChange()" inputId="b2bCheck"></p-checkbox>
-                      <label for="b2bCheck" class="text-sm cursor-pointer">B2B Customer</label>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Fixed Button Layout -->
-                <div class="flex gap-2 mt-4 w-full">
-                  <p-button label="Back" icon="pi pi-arrow-left" styleClass="p-button-outlined w-full" class="flex-1" (onClick)="prevStep()"></p-button>
-                  <p-button label="Next Step" icon="pi pi-arrow-right" iconPos="right" styleClass="w-full" class="flex-1" (onClick)="nextStep()"></p-button>
-                </div>
-              </div>
-
-              <!-- STEP 3: Security & Passwords -->
-              <div *ngIf="currentStep === 3" class="flex flex-column gap-3">
 
                 <div class="flex flex-column gap-1">
                   <label for="password" class="text-sm font-semibold text-color">Password *</label>
@@ -154,10 +125,10 @@
                   <label for="testAccount" class="text-sm cursor-pointer">Mark as Test Account</label>
                 </div>
 
-                <!-- Fixed Button Layout -->
+                <!-- Navigation Buttons -->
                 <div class="flex gap-2 mt-2 w-full">
                   <p-button label="Back" icon="pi pi-arrow-left" styleClass="p-button-outlined w-full" class="flex-1" (onClick)="prevStep()"></p-button>
-                  <p-button label="Register User" icon="pi pi-check" styleClass="w-full" class="flex-1" (onClick)="onSubmit()"></p-button>
+                  <p-button label="Complete Registration" icon="pi pi-check" styleClass="w-full" class="flex-1" (onClick)="onSubmit()"></p-button>
                 </div>
               </div>
 
@@ -166,7 +137,7 @@
                 <div class="flex justify-content-center align-items-center gap-2">
                   <a routerLink="/login" class="text-primary font-semibold text-sm cursor-pointer">Sign In</a>
                   <span class="text-color-secondary">|</span>
-                  <a routerLink="/register/vendor" class="text-primary font-semibold text-sm cursor-pointer">Register as Seller</a>
+                  <a routerLink="/register/vendor" class="text-primary font-semibold text-sm cursor-pointer">Register as Seller / Vendor</a>
                 </div>
               </div>
 

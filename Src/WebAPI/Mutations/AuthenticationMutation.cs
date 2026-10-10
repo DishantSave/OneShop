@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Auth;
+using Application.DTOs.Auth;
 using Application.GraphQL.InputModels;
 using Application.GraphQL.Payloads;
 using Application.Interfaces.GraphQLService;
@@ -31,7 +31,8 @@ public class AuthenticationMutation
                 input.Email,
                 input.Contact,
                 input.Country,
-                input.IsTestAccount
+                input.IsTestAccount,
+                input.VendorType
             );
 
             return await registerService.ExecuteAsync(request, cancellationToken);

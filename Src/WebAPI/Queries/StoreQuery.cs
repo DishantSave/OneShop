@@ -1,4 +1,5 @@
 using Application.DTOs.Masters.Store;
+using Application.Interfaces.DataService;
 using Application.Interfaces.GraphQLService;
 using HotChocolate.Authorization;
 using System.Security.Claims;
@@ -14,13 +15,16 @@ public class StoreQuery
     public async Task<IEnumerable<StoreDto>> GetStoresAsync(
         [GraphQLName("companyCode")] string? companyCode,
         [Service] IStoreService storeService,
+        [Service] IUserRoleResolver userRoleResolver,
         ClaimsPrincipal user,
         CancellationToken cancellationToken)
     {
         var accountId = user.FindFirst("account_id")?.Value
             ?? throw new GraphQLException("AccountId not found in token.");
 
-        return await storeService.GetStoresAsync(accountId, companyCode, cancellationToken);
+        var isCustomer = await userRoleResolver.IsCustomerAsync(user, cancellationToken);
+
+        return await storeService.GetStoresAsync(accountId, companyCode, isCustomer, cancellationToken);
     }
 
     [Authorize]
@@ -30,13 +34,16 @@ public class StoreQuery
         [GraphQLName("companyCode")] string companyCode,
         [GraphQLName("code")] string code,
         [Service] IStoreService storeService,
+        [Service] IUserRoleResolver userRoleResolver,
         ClaimsPrincipal user,
         CancellationToken cancellationToken)
     {
         var accountId = user.FindFirst("account_id")?.Value
             ?? throw new GraphQLException("AccountId not found in token.");
 
-        return await storeService.GetStoreByCodeAsync(accountId, companyCode, code, cancellationToken);
+        var isCustomer = await userRoleResolver.IsCustomerAsync(user, cancellationToken);
+
+        return await storeService.GetStoreByCodeAsync(accountId, companyCode, code, isCustomer, cancellationToken);
     }
 
     [Authorize]

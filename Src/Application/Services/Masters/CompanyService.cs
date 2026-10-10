@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Masters.Company;
+using Application.DTOs.Masters.Company;
 using Application.GraphQL.Payloads;
 using Application.Interfaces.DataService;
 using Application.Interfaces.GraphQLService;
@@ -9,28 +9,35 @@ public class CompanyService(ICompanyRepository companyRepository) : ICompanyServ
 {
     readonly ICompanyRepository _companyRepository = companyRepository;
 
-    public async Task<IEnumerable<CompanyDto>> GetCompaniesAsync(string accountId, CancellationToken cancellationToken = default)
+    public Task<IEnumerable<CompanyDto>> GetCompaniesAsync(string accountId, CancellationToken cancellationToken = default)
+        => GetCompaniesAsync(accountId, isCustomer: false, cancellationToken);
+
+    public async Task<IEnumerable<CompanyDto>> GetCompaniesAsync(string accountId, bool isCustomer, CancellationToken cancellationToken = default)
     {
-        var companyDetails = await _companyRepository.GetAllCompaniesAsync(accountId, cancellationToken);
+        var companyDetails = await _companyRepository.GetAllCompaniesAsync(accountId, isCustomer, cancellationToken);
 
-        var companyAuditDetails = await _companyRepository.GetAllCompaniesAuditDetailsAsync(accountId, cancellationToken);
-
-        var auditLookup = companyAuditDetails.ToLookup(ca => ca.Code);
-
-        foreach (var details in companyDetails)
+        if (!isCustomer)
         {
-            details.Audit.AddRange(auditLookup[details.Code]);
+            var companyAuditDetails = await _companyRepository.GetAllCompaniesAuditDetailsAsync(accountId, cancellationToken);
+            var auditLookup = companyAuditDetails.ToLookup(ca => ca.Code);
+            foreach (var details in companyDetails)
+            {
+                details.Audit.AddRange(auditLookup[details.Code]);
+            }
         }
 
         return companyDetails;
     }
 
-    public async Task<CompanyDto?> GetCompanyByCodeAsync(string accountId, string companyCode, CancellationToken cancellationToken = default)
+    public Task<CompanyDto?> GetCompanyByCodeAsync(string accountId, string companyCode, CancellationToken cancellationToken = default)
+        => GetCompanyByCodeAsync(accountId, companyCode, isCustomer: false, cancellationToken);
+
+    public async Task<CompanyDto?> GetCompanyByCodeAsync(string accountId, string companyCode, bool isCustomer, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(accountId) || string.IsNullOrWhiteSpace(companyCode))
+        if (string.IsNullOrWhiteSpace(companyCode))
             return null;
 
-        return await _companyRepository.GetCompanyByCodeAsync(accountId, companyCode.Trim().ToUpper(), cancellationToken);
+        return await _companyRepository.GetCompanyByCodeAsync(accountId, companyCode.Trim().ToUpper(), isCustomer, cancellationToken);
     }
 
     public async Task<bool> CheckCompanyCodeExistsAsync(string accountId, string companyCode, CancellationToken cancellationToken = default)

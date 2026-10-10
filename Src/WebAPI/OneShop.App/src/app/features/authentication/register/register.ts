@@ -70,12 +70,8 @@ export class Register implements OnInit {
   contact = '';
   country: CountryDto | null = null;
   selectedIsdCode: CountryDto | null = null;
-  company = '';
-
   isCustomerAccount = true;
   isSellerAccount = false;
-  isCustomerB2C = true;
-  isCustomerB2B = false;
   isTestAccount = false;
 
   countries: CountryDto[] = [];
@@ -174,12 +170,6 @@ export class Register implements OnInit {
 
   onUsernameInput() {
     this.usernameSubject.next(this.userName);
-  }
-
-  onCustomerTypeChange() {
-    if (!this.isCustomerB2C && !this.isCustomerB2B) {
-      this.isCustomerB2C = true;
-    }
   }
 
   nextStep() {
@@ -357,14 +347,15 @@ export class Register implements OnInit {
     const inputPayload = {
       userName: this.userName.trim(),
       password: this.password,
-      company: this.company ? this.company.trim() : null,
+      company: null,
       profilePicture: null,
       email: this.email,
       contact: `${this.selectedIsdCode?.isdCode || ''} ${this.contact}`.trim(),
       country: this.country?.countryCode || '',
-      isCustomerAccount: this.isCustomerAccount,
-      isSellerAccount: this.isSellerAccount,
-      isTestAccount: this.isTestAccount
+      isCustomerAccount: true,
+      isSellerAccount: false,
+      isTestAccount: this.isTestAccount,
+      vendorType: null
     };
 
     this.apollo.mutate<{ registerUser: { success: boolean; message: string; userDetails?: any; accessibleScreens?: any[] } }>({
@@ -404,10 +395,11 @@ export class Register implements OnInit {
       },
       error: (err) => {
         console.error('Registration mutation error:', err);
+        const detailMsg = err?.message || err?.error?.message || 'Failed to connect to the server. Please try again.';
         this.messageService.add({
           severity: 'error',
-          summary: 'Network Error',
-          detail: 'Failed to connect to the server. Please try again.',
+          summary: 'Registration Error',
+          detail: detailMsg,
           life: 4000
         });
       }

@@ -52,6 +52,10 @@ public record OrderDto
     public string? ShippingState { get; init; }
     public string? PromoCode { get; init; }
     public List<OrderItemDto> Items { get; init; } = [];
+    public List<OrderAuditTrailDto> AuditTrail { get; init; } = [];
+    public bool CanModify => !string.Equals(Status, "Shipped", StringComparison.OrdinalIgnoreCase) &&
+                             !string.Equals(Status, "Delivered", StringComparison.OrdinalIgnoreCase) &&
+                             !string.Equals(Status, "Cancelled", StringComparison.OrdinalIgnoreCase);
 }
 
 

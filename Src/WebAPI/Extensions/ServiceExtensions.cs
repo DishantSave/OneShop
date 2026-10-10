@@ -74,6 +74,7 @@ public static class ServiceExtensions
         services.AddScoped<IStateTaxRepository, Infrastructure.Repositories.Masters.StateTaxRepository>();
         services.AddScoped<IPromoCodeRepository, Infrastructure.Repositories.Discounts.PromoCodeRepository>();
         services.AddScoped<IUserAddressRepository, Infrastructure.Repositories.Address.UserAddressRepository>();
+        services.AddScoped<IUserRoleResolver, Infrastructure.Services.UserRoleResolver>();
         // Data Layer Dependencies ends...
 
         /***************************************************************************************************************/

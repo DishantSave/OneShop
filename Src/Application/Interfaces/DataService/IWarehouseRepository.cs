@@ -5,8 +5,8 @@ namespace Application.Interfaces.DataService;
 
 public interface IWarehouseRepository
 {
-    Task<IEnumerable<WarehouseDto>> GetAllWarehousesAsync(string accountId, string? companyCode = null, CancellationToken cancellationToken = default);
-    Task<WarehouseDto?> GetWarehouseByCodeAsync(string accountId, string companyCode, string code, CancellationToken cancellationToken = default);
+    Task<IEnumerable<WarehouseDto>> GetAllWarehousesAsync(string accountId, string? companyCode = null, bool isCustomer = false, CancellationToken cancellationToken = default);
+    Task<WarehouseDto?> GetWarehouseByCodeAsync(string accountId, string companyCode, string code, bool isCustomer = false, CancellationToken cancellationToken = default);
     Task<IEnumerable<WarehouseAuditTrailDto>> GetAllWarehousesAuditDetailsAsync(string accountId, string? companyCode = null, CancellationToken cancellationToken = default);
     Task<bool> ExistsByWarehouseCodeAsync(string accountId, string companyCode, string code, CancellationToken cancellationToken = default);
     Task<WarehousePayload> RegisterWarehouseTransactionAsync(WarehouseRequest request, CancellationToken cancellationToken = default);

@@ -145,12 +145,10 @@ public class OrderMutation
     }
 
     [Authorize]
-    [GraphQLName("updateOrderStatus")]
-    [GraphQLDescription("Update the status of an order (e.g. Confirmed, Shipped, Delivered, Cancelled).")]
-    public async Task<OrderPayload> UpdateOrderStatusAsync(
-        [GraphQLName("companyCode")] string companyCode,
-        [GraphQLName("orderId")] string orderId,
-        [GraphQLName("status")] string status,
+    [GraphQLName("updateOrderDetails")]
+    [GraphQLDescription("Update limited, relevant details of an order (Customer info, Shipping address, State, Logistics/Carriers, Notes). Locked if status is Shipped/Delivered/Cancelled.")]
+    public async Task<OrderPayload> UpdateOrderDetailsAsync(
+        [GraphQLName("input")] UpdateOrderDetailsInput input,
         ClaimsPrincipal user,
         [Service] IOrderService orderService,
         CancellationToken cancellationToken)
@@ -163,7 +161,60 @@ public class OrderMutation
             var userName = user.FindFirst("user_name")?.Value
                 ?? throw new GraphQLException("User Name not found in token.");
 
-            return await orderService.UpdateOrderStatusAsync(accountId, companyCode, orderId, status, userName, cancellationToken);
+            return await orderService.UpdateOrderDetailsAsync(accountId, input, userName, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            return new OrderPayload { Success = false, Message = $"Failed to update order details: {ex.Message}" };
+        }
+    }
+
+    [Authorize]
+    [GraphQLName("addOrderTimelineComment")]
+    [GraphQLDescription("Add a timeline note or comment to the order audit trail.")]
+    public async Task<OrderPayload> AddOrderTimelineCommentAsync(
+        [GraphQLName("input")] AddOrderTimelineCommentInput input,
+        ClaimsPrincipal user,
+        [Service] IOrderService orderService,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var accountId = user.FindFirst("account_id")?.Value
+                ?? throw new GraphQLException("AccountId not found in token.");
+
+            var userName = user.FindFirst("user_name")?.Value
+                ?? throw new GraphQLException("User Name not found in token.");
+
+            return await orderService.AddOrderTimelineCommentAsync(accountId, input, userName, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            return new OrderPayload { Success = false, Message = $"Failed to add timeline comment: {ex.Message}" };
+        }
+    }
+
+    [Authorize]
+    [GraphQLName("updateOrderStatus")]
+    [GraphQLDescription("Update the status of an order (e.g. Confirmed, Processing, Shipped, Delivered, Cancelled).")]
+    public async Task<OrderPayload> UpdateOrderStatusAsync(
+        [GraphQLName("companyCode")] string companyCode,
+        [GraphQLName("orderId")] string orderId,
+        [GraphQLName("status")] string status,
+        [GraphQLName("userRole")] string? userRole,
+        ClaimsPrincipal user,
+        [Service] IOrderService orderService,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var accountId = user.FindFirst("account_id")?.Value
+                ?? throw new GraphQLException("AccountId not found in token.");
+
+            var userName = user.FindFirst("user_name")?.Value
+                ?? throw new GraphQLException("User Name not found in token.");
+
+            return await orderService.UpdateOrderStatusAsync(accountId, companyCode, orderId, status, userName, userRole, cancellationToken);
         }
         catch (Exception ex)
         {

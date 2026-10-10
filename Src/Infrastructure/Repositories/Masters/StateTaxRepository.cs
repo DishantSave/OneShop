@@ -24,35 +24,35 @@ public class StateTaxRepository(IHttpContextAccessor httpContextAccessor) : ISta
         throw new InvalidOperationException("Tenant context could not be resolved for this request.");
     }
 
-    public async Task<IEnumerable<StateTaxDto>> GetStateTaxesAsync(string accountId, string? countryCode = "IN", CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<StateTaxDto>> GetStateTaxesAsync(string accountId, string? countryCode = "IN", bool isCustomer = false, CancellationToken cancellationToken = default)
     {
         using IDbConnection db = new SqlConnection(GetConnectionString());
         const string sql = @"
             SELECT Sequence, AccountId, CountryCode, StateCode, StateName, TaxRate, TaxType, IsActive, DateCreated, DateModified, CreatedBy
             FROM dbo.StateTax
-            WHERE AccountId = @AccountId
+            WHERE (@IsCustomer = 0 AND AccountId = @AccountId OR @IsCustomer = 1 AND IsActive = 1)
               AND (@CountryCode IS NULL OR UPPER(CountryCode) = UPPER(@CountryCode))
             ORDER BY StateName ASC;";
 
         return await db.QueryAsync<StateTaxDto>(new CommandDefinition(
             sql,
-            new { AccountId = accountId, CountryCode = countryCode },
+            new { AccountId = accountId, CountryCode = countryCode, IsCustomer = isCustomer ? 1 : 0 },
             cancellationToken: cancellationToken));
     }
 
-    public async Task<StateTaxDto?> GetStateTaxByCodeAsync(string accountId, string stateCode, string? countryCode = "IN", CancellationToken cancellationToken = default)
+    public async Task<StateTaxDto?> GetStateTaxByCodeAsync(string accountId, string stateCode, string? countryCode = "IN", bool isCustomer = false, CancellationToken cancellationToken = default)
     {
         using IDbConnection db = new SqlConnection(GetConnectionString());
         const string sql = @"
             SELECT TOP 1 Sequence, AccountId, CountryCode, StateCode, StateName, TaxRate, TaxType, IsActive, DateCreated, DateModified, CreatedBy
             FROM dbo.StateTax
-            WHERE AccountId = @AccountId
+            WHERE (@IsCustomer = 0 AND AccountId = @AccountId OR @IsCustomer = 1)
               AND (UPPER(StateCode) = UPPER(@StateCode) OR UPPER(StateName) = UPPER(@StateCode))
               AND (@CountryCode IS NULL OR UPPER(CountryCode) = UPPER(@CountryCode));";
 
         return await db.QueryFirstOrDefaultAsync<StateTaxDto>(new CommandDefinition(
             sql,
-            new { AccountId = accountId, StateCode = stateCode.Trim(), CountryCode = countryCode },
+            new { AccountId = accountId, StateCode = stateCode.Trim(), CountryCode = countryCode, IsCustomer = isCustomer ? 1 : 0 },
             cancellationToken: cancellationToken));
     }
 
@@ -100,7 +100,7 @@ public class StateTaxRepository(IHttpContextAccessor httpContextAccessor) : ISta
             },
             cancellationToken: cancellationToken));
 
-        var updated = await GetStateTaxByCodeAsync(request.AccountId, request.StateCode, request.CountryCode, cancellationToken);
+        var updated = await GetStateTaxByCodeAsync(request.AccountId, request.StateCode, request.CountryCode, isCustomer: false, cancellationToken);
 
         return new StateTaxPayload
         {

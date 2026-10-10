@@ -53,11 +53,35 @@ export class DashboardLayout implements OnInit {
 
     this.access.reload();
 
+    const isCustomer = this.userDetails?.isCustomerAccount && !this.userDetails?.isSellerAccount;
+
     this.sidebarItems = this.allNavItems
       .filter(i => this.access.hasAnyAccess(i.screenKeys))
-      .map(({ label, route, icon }) => ({ label, route, icon }));
+      .map(({ label, route, icon }) => {
+        let displayLabel = label;
+        let displayIcon = icon;
+        if (isCustomer) {
+          if (route === '/dashboard') {
+            displayLabel = 'Catalog & Shop';
+            displayIcon = 'pi pi-th-large';
+          }
+          if (route === '/dashboard/items') {
+            displayLabel = 'Products Catalog';
+            displayIcon = 'pi pi-box';
+          }
+          if (route === '/dashboard/orders') {
+            displayLabel = 'My Orders';
+            displayIcon = 'pi pi-shopping-bag';
+          }
+          if (route === '/dashboard/settings') {
+            displayLabel = 'Addresses & Profile';
+            displayIcon = 'pi pi-map-marker';
+          }
+        }
+        return { label: displayLabel, route, icon: displayIcon };
+      });
 
-    this.tabItems = this.allTabItems
+    this.tabItems = isCustomer ? [] : this.allTabItems
       .filter(i => this.access.hasAccess(i.screenKey))
       .map(({ label, route }) => ({ label, route }));
 

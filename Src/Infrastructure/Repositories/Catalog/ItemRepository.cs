@@ -24,7 +24,7 @@ public class ItemRepository(IHttpContextAccessor httpContextAccessor) : IItemRep
         throw new InvalidOperationException("Tenant context could not be resolved for this request.");
     }
 
-    public async Task<IEnumerable<ItemDto>> GetAllItemsAsync(string accountId, string? companyCode = null, string? salesChannel = null, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<ItemDto>> GetAllItemsAsync(string accountId, string? companyCode = null, string? salesChannel = null, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
         using IDbConnection db = new SqlConnection(GetConnectionString());
         const string sql = @"
@@ -34,20 +34,20 @@ public class ItemRepository(IHttpContextAccessor httpContextAccessor) : IItemRep
                    i.IsActive, i.DateCreated
             FROM dbo.Item AS i
             INNER JOIN dbo.Company AS c ON i.AccountId = c.AccountId AND i.CompanyCode = c.Code
-            WHERE i.AccountId = @AccountId
+            WHERE (@IsCustomer = 0 AND i.AccountId = @AccountId OR @IsCustomer = 1 AND i.IsActive = 1)
               AND (@CompanyCode IS NULL OR UPPER(i.CompanyCode) = UPPER(@CompanyCode))
               AND (@SalesChannel IS NULL OR i.SalesChannel = @SalesChannel OR i.SalesChannel = 'Both')
             ORDER BY i.CompanyCode ASC, i.ItemNumber ASC";
 
         var command = new CommandDefinition(
             sql,
-            new { AccountId = accountId, CompanyCode = companyCode, SalesChannel = salesChannel },
+            new { AccountId = accountId, CompanyCode = companyCode, SalesChannel = salesChannel, IsCustomer = isCustomer ? 1 : 0 },
             cancellationToken: cancellationToken);
 
         return await db.QueryAsync<ItemDto>(command);
     }
 
-    public async Task<ItemDto?> GetItemByNumberAsync(string accountId, string companyCode, string itemNumber, CancellationToken cancellationToken = default)
+    public async Task<ItemDto?> GetItemByNumberAsync(string accountId, string companyCode, string itemNumber, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
         using IDbConnection db = new SqlConnection(GetConnectionString());
         const string sql = @"
@@ -57,13 +57,13 @@ public class ItemRepository(IHttpContextAccessor httpContextAccessor) : IItemRep
                    i.IsActive, i.DateCreated
             FROM dbo.Item AS i
             INNER JOIN dbo.Company AS c ON i.AccountId = c.AccountId AND i.CompanyCode = c.Code
-            WHERE i.AccountId = @AccountId
+            WHERE (@IsCustomer = 0 AND i.AccountId = @AccountId OR @IsCustomer = 1)
               AND UPPER(i.CompanyCode) = UPPER(@CompanyCode)
               AND UPPER(i.ItemNumber) = UPPER(@ItemNumber)";
 
         var command = new CommandDefinition(
             sql,
-            new { AccountId = accountId, CompanyCode = companyCode, ItemNumber = itemNumber },
+            new { AccountId = accountId, CompanyCode = companyCode, ItemNumber = itemNumber, IsCustomer = isCustomer ? 1 : 0 },
             cancellationToken: cancellationToken);
 
         return await db.QueryFirstOrDefaultAsync<ItemDto>(command);

@@ -42,6 +42,18 @@ export class DashboardHome implements OnInit {
   selectedCatalogFilter = signal<string>('ALL');
   selectedCompanyFilter = signal<string>('ALL');
   selectedChannelFilter = signal<string>('ALL');
+  // Segmented Wholesale vs Retail Filter
+  activeChannelSegment = signal<'ALL' | 'B2C' | 'B2B'>('ALL');
+  isCustomerUser = signal<boolean>(false);
+
+  wholesaleItemsCount = computed(() =>
+    this.items().filter(i => i.salesChannel?.toUpperCase() === 'B2B' || i.salesChannel?.toUpperCase() === 'BOTH').length
+  );
+
+  retailItemsCount = computed(() =>
+    this.items().filter(i => !i.salesChannel || i.salesChannel?.toUpperCase() === 'B2C' || i.salesChannel?.toUpperCase() === 'BOTH').length
+  );
+
   searchQuery = signal<string>('');
 
   // Per-item selection states
@@ -55,7 +67,15 @@ export class DashboardHome implements OnInit {
     const catalogCode = this.selectedCatalogFilter();
     const comp = this.selectedCompanyFilter();
     const ch = this.selectedChannelFilter();
+    const seg = this.activeChannelSegment();
     const q = this.searchQuery().trim().toLowerCase();
+
+    // Filter by Segmented Wholesale vs Retail
+    if (seg === 'B2C') {
+      result = result.filter(i => !i.salesChannel || i.salesChannel.toUpperCase() === 'B2C' || i.salesChannel.toUpperCase() === 'BOTH');
+    } else if (seg === 'B2B') {
+      result = result.filter(i => i.salesChannel && (i.salesChannel.toUpperCase() === 'B2B' || i.salesChannel.toUpperCase() === 'BOTH'));
+    }
 
     // Filter by Catalog / Collection
     if (catalogCode !== 'ALL') {
@@ -73,7 +93,7 @@ export class DashboardHome implements OnInit {
       result = result.filter(i => i.companyCode.toUpperCase() === comp.toUpperCase());
     }
 
-    // Filter by Sales Channel
+    // Filter by Sales Channel Dropdown (if selected)
     if (ch !== 'ALL') {
       result = result.filter(i => i.salesChannel?.toUpperCase() === ch.toUpperCase() || i.salesChannel?.toUpperCase() === 'BOTH');
     }
@@ -99,11 +119,23 @@ export class DashboardHome implements OnInit {
   segregatedCount = computed(() => this.cartService.segregatedGroups().length);
 
   ngOnInit() {
+    const userStr = localStorage.getItem('userDetails');
+    if (userStr) {
+      try {
+        const u = JSON.parse(userStr);
+        this.isCustomerUser.set(u.isCustomerAccount === true && !u.isSellerAccount);
+      } catch {}
+    }
+
     this.collectionService.list().catch(console.error);
     this.itemService.list().catch(console.error);
     this.companyService.list().catch(console.error);
     this.storeService.list().catch(console.error);
     this.warehouseService.list().catch(console.error);
+  }
+
+  setChannelSegment(segment: 'ALL' | 'B2C' | 'B2B') {
+    this.activeChannelSegment.set(segment);
   }
 
   selectCatalog(catalogCode: string) {

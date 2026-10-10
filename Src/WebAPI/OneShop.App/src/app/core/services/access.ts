@@ -26,10 +26,24 @@ export class Access {
   }
 
   hasAccess(screenKey: string): boolean {
+    const target = this.normalize(screenKey);
     const userStr = localStorage.getItem('userDetails');
     if (userStr) {
       try {
         const u = JSON.parse(userStr);
+
+        // CUSTOMER PERSONA: Customers have access to Catalog/Dashboard, Items (view-only), Orders, Settings
+        if (u.isCustomerAccount && !u.isSellerAccount) {
+          return target === 'dashboard' || target === 'items' || target === 'itemmaster' || target === 'orders' || target === 'settings';
+        }
+
+        // VENDOR B2C PERSONA: B2C vendors do NOT have access to Warehouse screens
+        if (u.isSellerAccount && (u.vendorType === 'B2C' || u.vendorType === 'b2c')) {
+          if (target === 'warehouse' || target === 'warehousemaster') {
+            return false;
+          }
+        }
+
         if (u.isMainAccount) return true;
       } catch {}
     }
@@ -38,7 +52,6 @@ export class Access {
       return true;
     }
 
-    const target = this.normalize(screenKey);
     const permission = this.screenAccess.find(
       item => this.normalize(item.screen?.screen ?? '') === target
     );

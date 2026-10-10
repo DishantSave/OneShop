@@ -1,4 +1,4 @@
-﻿namespace Application.GraphQL.InputModels;
+namespace Application.GraphQL.InputModels;
 
 public record RegisterInput(
     string UserName,
@@ -10,5 +10,6 @@ public record RegisterInput(
     string Country,
     bool IsCustomerAccount,
     bool IsSellerAccount,
-    bool IsTestAccount = false
+    bool IsTestAccount = false,
+    string? VendorType = null
 );

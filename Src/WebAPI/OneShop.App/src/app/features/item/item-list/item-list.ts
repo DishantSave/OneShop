@@ -71,6 +71,15 @@ export class ItemList implements OnInit {
   });
 
   permissions = computed(() => {
+    const userStr = localStorage.getItem('userDetails');
+    if (userStr) {
+      try {
+        const u = JSON.parse(userStr);
+        if (u.isCustomerAccount && !u.isSellerAccount) {
+          return { canView: true, canCreate: false, canEdit: false, canDelete: false };
+        }
+      } catch {}
+    }
     const raw = localStorage.getItem('screenAccess');
     if (!raw) return { canView: true, canCreate: true, canEdit: true, canDelete: true };
     try {

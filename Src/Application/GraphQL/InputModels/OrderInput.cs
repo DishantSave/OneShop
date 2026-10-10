@@ -42,3 +42,28 @@ public class BatchOrderInput
 {
     public List<OrderInput> Orders { get; set; } = [];
 }
+
+public class UpdateOrderDetailsInput
+{
+    public string CompanyCode { get; set; } = string.Empty;
+    public string OrderId { get; set; } = string.Empty;
+    public string? CustomerName { get; set; }
+    public string? CustomerEmail { get; set; }
+    public string? CustomerPhone { get; set; }
+    public string? ShippingAddress { get; set; }
+    public string? ShippingState { get; set; }
+    public string? ShipVia { get; set; }
+    public string? DeliveryPartner { get; set; }
+    public string? PickupLocationCode { get; set; }
+    public string? PickupLocationName { get; set; }
+    public string? Notes { get; set; }
+    public string? UserRole { get; set; }
+}
+
+public class AddOrderTimelineCommentInput
+{
+    public string CompanyCode { get; set; } = string.Empty;
+    public string OrderId { get; set; } = string.Empty;
+    public string Comment { get; set; } = string.Empty;
+    public string? UserRole { get; set; }
+}

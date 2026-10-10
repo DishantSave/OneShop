@@ -1,4 +1,5 @@
 using Application.DTOs.Tax;
+using Application.Interfaces.DataService;
 using Application.Interfaces.GraphQLService;
 using HotChocolate.Authorization;
 using System.Security.Claims;
@@ -14,13 +15,16 @@ public class TaxQuery
     public async Task<IEnumerable<StateTaxDto>> GetStateTaxesAsync(
         [GraphQLName("countryCode")] string? countryCode,
         [Service] IStateTaxService taxService,
+        [Service] IUserRoleResolver userRoleResolver,
         ClaimsPrincipal user,
         CancellationToken cancellationToken)
     {
         var accountId = user.FindFirst("account_id")?.Value
             ?? throw new GraphQLException("AccountId not found in token.");
 
-        return await taxService.GetStateTaxesAsync(accountId, countryCode ?? "IN", cancellationToken);
+        var isCustomer = await userRoleResolver.IsCustomerAsync(user, cancellationToken);
+
+        return await taxService.GetStateTaxesAsync(accountId, countryCode ?? "IN", isCustomer, cancellationToken);
     }
 
     [Authorize]
@@ -30,12 +34,15 @@ public class TaxQuery
         [GraphQLName("stateCode")] string stateCode,
         [GraphQLName("countryCode")] string? countryCode,
         [Service] IStateTaxService taxService,
+        [Service] IUserRoleResolver userRoleResolver,
         ClaimsPrincipal user,
         CancellationToken cancellationToken)
     {
         var accountId = user.FindFirst("account_id")?.Value
             ?? throw new GraphQLException("AccountId not found in token.");
 
-        return await taxService.GetStateTaxByCodeAsync(accountId, stateCode, countryCode ?? "IN", cancellationToken);
+        var isCustomer = await userRoleResolver.IsCustomerAsync(user, cancellationToken);
+
+        return await taxService.GetStateTaxByCodeAsync(accountId, stateCode, countryCode ?? "IN", isCustomer, cancellationToken);
     }
 }

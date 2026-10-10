@@ -10,28 +10,30 @@ public class StoreService(IStoreRepository storeRepository, ICompanyRepository c
     private readonly IStoreRepository _storeRepository = storeRepository;
     private readonly ICompanyRepository _companyRepository = companyRepository;
 
-    public async Task<IEnumerable<StoreDto>> GetStoresAsync(string accountId, string? companyCode = null, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<StoreDto>> GetStoresAsync(string accountId, string? companyCode = null, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
-        var storeDetails = (await _storeRepository.GetAllStoresAsync(accountId, companyCode, cancellationToken)).ToList();
-        var storeAuditDetails = await _storeRepository.GetAllStoresAuditDetailsAsync(accountId, companyCode, cancellationToken);
-
-        var auditLookup = storeAuditDetails.ToLookup(sa => $"{sa.CompanyCode}:{sa.StoreCode}");
-
-        foreach (var store in storeDetails)
+        var storeDetails = (await _storeRepository.GetAllStoresAsync(accountId, companyCode, isCustomer, cancellationToken)).ToList();
+        
+        if (!isCustomer)
         {
-            var key = $"{store.CompanyCode}:{store.Code}";
-            store.Audit.AddRange(auditLookup[key]);
+            var storeAuditDetails = await _storeRepository.GetAllStoresAuditDetailsAsync(accountId, companyCode, cancellationToken);
+            var auditLookup = storeAuditDetails.ToLookup(sa => $"{sa.CompanyCode}:{sa.StoreCode}");
+            foreach (var store in storeDetails)
+            {
+                var key = $"{store.CompanyCode}:{store.Code}";
+                store.Audit.AddRange(auditLookup[key]);
+            }
         }
 
         return storeDetails;
     }
 
-    public async Task<StoreDto?> GetStoreByCodeAsync(string accountId, string companyCode, string storeCode, CancellationToken cancellationToken = default)
+    public async Task<StoreDto?> GetStoreByCodeAsync(string accountId, string companyCode, string storeCode, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(accountId) || string.IsNullOrWhiteSpace(companyCode) || string.IsNullOrWhiteSpace(storeCode))
+        if (string.IsNullOrWhiteSpace(companyCode) || string.IsNullOrWhiteSpace(storeCode))
             return null;
 
-        return await _storeRepository.GetStoreByCodeAsync(accountId, companyCode.Trim().ToUpper(), storeCode.Trim().ToUpper(), cancellationToken);
+        return await _storeRepository.GetStoreByCodeAsync(accountId, companyCode.Trim().ToUpper(), storeCode.Trim().ToUpper(), isCustomer, cancellationToken);
     }
 
     public async Task<bool> CheckStoreCodeExistsAsync(string accountId, string companyCode, string storeCode, CancellationToken cancellationToken = default)

@@ -24,7 +24,7 @@ public class PromoCodeRepository(IHttpContextAccessor httpContextAccessor) : IPr
         throw new InvalidOperationException("Tenant context could not be resolved for this request.");
     }
 
-    public async Task<IEnumerable<PromoCodeDto>> GetPromoCodesAsync(string accountId, bool? activeOnly = null, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<PromoCodeDto>> GetPromoCodesAsync(string accountId, bool? activeOnly = null, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
         using IDbConnection db = new SqlConnection(GetConnectionString());
         const string sql = @"
@@ -32,17 +32,17 @@ public class PromoCodeRepository(IHttpContextAccessor httpContextAccessor) : IPr
                    MinOrderAmount, MaxDiscountAmount, ValidFrom, ValidUntil, UsageLimit,
                    TimesUsed, IsActive, DateCreated, CreatedBy
             FROM dbo.PromoCode
-            WHERE AccountId = @AccountId
+            WHERE (@IsCustomer = 0 AND AccountId = @AccountId OR @IsCustomer = 1 AND IsActive = 1)
               AND (@ActiveOnly IS NULL OR IsActive = @ActiveOnly)
             ORDER BY DateCreated DESC;";
 
         return await db.QueryAsync<PromoCodeDto>(new CommandDefinition(
             sql,
-            new { AccountId = accountId, ActiveOnly = activeOnly },
+            new { AccountId = accountId, ActiveOnly = activeOnly, IsCustomer = isCustomer ? 1 : 0 },
             cancellationToken: cancellationToken));
     }
 
-    public async Task<PromoCodeDto?> GetPromoCodeByCodeAsync(string accountId, string code, CancellationToken cancellationToken = default)
+    public async Task<PromoCodeDto?> GetPromoCodeByCodeAsync(string accountId, string code, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
         using IDbConnection db = new SqlConnection(GetConnectionString());
         const string sql = @"
@@ -50,12 +50,12 @@ public class PromoCodeRepository(IHttpContextAccessor httpContextAccessor) : IPr
                          MinOrderAmount, MaxDiscountAmount, ValidFrom, ValidUntil, UsageLimit,
                          TimesUsed, IsActive, DateCreated, CreatedBy
             FROM dbo.PromoCode
-            WHERE AccountId = @AccountId
+            WHERE (@IsCustomer = 0 AND AccountId = @AccountId OR @IsCustomer = 1)
               AND UPPER(Code) = UPPER(@Code);";
 
         return await db.QueryFirstOrDefaultAsync<PromoCodeDto>(new CommandDefinition(
             sql,
-            new { AccountId = accountId, Code = code.Trim() },
+            new { AccountId = accountId, Code = code.Trim(), IsCustomer = isCustomer ? 1 : 0 },
             cancellationToken: cancellationToken));
     }
 
@@ -107,7 +107,7 @@ public class PromoCodeRepository(IHttpContextAccessor httpContextAccessor) : IPr
             },
             cancellationToken: cancellationToken));
 
-        var updated = await GetPromoCodeByCodeAsync(request.AccountId, request.Code, cancellationToken);
+        var updated = await GetPromoCodeByCodeAsync(request.AccountId, request.Code, isCustomer: false, cancellationToken);
 
         return new PromoCodePayload
         {
@@ -137,9 +137,9 @@ public class PromoCodeRepository(IHttpContextAccessor httpContextAccessor) : IPr
         return new PromoCodePayload { Success = false, Message = $"Promo code [{code}] was not found." };
     }
 
-    public async Task<PromoValidationResultDto> ValidatePromoCodeAsync(string accountId, string code, decimal orderSubTotal, CancellationToken cancellationToken = default)
+    public async Task<PromoValidationResultDto> ValidatePromoCodeAsync(string accountId, string code, decimal orderSubTotal, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
-        var promo = await GetPromoCodeByCodeAsync(accountId, code, cancellationToken);
+        var promo = await GetPromoCodeByCodeAsync(accountId, code, isCustomer, cancellationToken);
         if (promo == null)
         {
             return new PromoValidationResultDto

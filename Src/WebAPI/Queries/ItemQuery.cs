@@ -1,4 +1,5 @@
 using Application.DTOs.Catalog.Item;
+using Application.Interfaces.DataService;
 using Application.Interfaces.GraphQLService;
 using HotChocolate.Authorization;
 using System.Security.Claims;
@@ -15,13 +16,16 @@ public class ItemQuery
         [GraphQLName("companyCode")] string? companyCode,
         [GraphQLName("salesChannel")] string? salesChannel,
         [Service] IItemService itemService,
+        [Service] IUserRoleResolver userRoleResolver,
         ClaimsPrincipal user,
         CancellationToken cancellationToken)
     {
         var accountId = user.FindFirst("account_id")?.Value
             ?? throw new GraphQLException("AccountId not found in token.");
 
-        return await itemService.GetItemsAsync(accountId, companyCode, salesChannel, cancellationToken);
+        var isCustomer = await userRoleResolver.IsCustomerAsync(user, cancellationToken);
+
+        return await itemService.GetItemsAsync(accountId, companyCode, salesChannel, isCustomer, cancellationToken);
     }
 
     [Authorize]
@@ -31,13 +35,16 @@ public class ItemQuery
         [GraphQLName("companyCode")] string companyCode,
         [GraphQLName("itemNumber")] string itemNumber,
         [Service] IItemService itemService,
+        [Service] IUserRoleResolver userRoleResolver,
         ClaimsPrincipal user,
         CancellationToken cancellationToken)
     {
         var accountId = user.FindFirst("account_id")?.Value
             ?? throw new GraphQLException("AccountId not found in token.");
 
-        return await itemService.GetItemByNumberAsync(accountId, companyCode, itemNumber, cancellationToken);
+        var isCustomer = await userRoleResolver.IsCustomerAsync(user, cancellationToken);
+
+        return await itemService.GetItemByNumberAsync(accountId, companyCode, itemNumber, isCustomer, cancellationToken);
     }
 
     [Authorize]

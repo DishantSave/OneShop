@@ -12,9 +12,10 @@ import { TaxService } from '../../tax/services/tax.service';
 import { PromoService } from '../../discounts/services/promo.service';
 import { AddressService } from '../../settings/services/address.service';
 import { PromoValidationResult } from '../../discounts/models/promo.model';
-import { Order, OrderItem, OrderInput, OrderItemInput } from '../models/order.model';
+import { Order, OrderItem, OrderInput, OrderItemInput, UpdateOrderDetailsInput, OrderAuditTrail } from '../models/order.model';
 import { Item } from '../../item/models/item.model';
 import { Access } from '../../../core/services/access';
+import { Account } from '../../../core/services/account';
 
 @Component({
   selector: 'app-order-list',
@@ -36,6 +37,39 @@ export class OrderList implements OnInit {
   private fb = inject(FormBuilder);
   private router = inject(Router);
   private access = inject(Access);
+  private account = inject(Account);
+
+  // User & Persona Detection
+  currentUser = signal<any>(null);
+
+  isCustomer = computed(() => {
+    const u = this.currentUser();
+    if (!u) return false;
+    return u.isCustomerAccount === true;
+  });
+
+  isMaster = computed(() => {
+    const u = this.currentUser();
+    if (!u) return true; // Default to Master in admin / staff session
+    if (this.isCustomer()) return false;
+    if (u.isMainAccount === true || !!u.subscriptionType) return true;
+    const dept = (u.department || '').toLowerCase();
+    const desig = (u.designation || '').toLowerCase();
+    return !dept.includes('support') && !desig.includes('support');
+  });
+
+  isSupport = computed(() => {
+    const u = this.currentUser();
+    if (!u) return true;
+    if (this.isCustomer()) return false;
+    return true; // Any non-customer portal staff has support privileges
+  });
+
+  userRoleLabel = computed(() => {
+    if (this.isCustomer()) return 'Customer';
+    if (this.isMaster()) return 'Master Admin';
+    return 'Support Specialist';
+  });
 
   // Data signals
   orders = this.orderService.orders;
@@ -57,13 +91,33 @@ export class OrderList implements OnInit {
   selectedStatusFilter = signal<string>('ALL');
   selectedChannelFilter = signal<string>('ALL');
   searchQuery = signal<string>('');
+  showMyOrdersOnly = signal<boolean>(false);
 
-  // Modals
+  // Modals & Details View
   showCreateOrderModal = signal<boolean>(false);
   showDetailsModal = signal<boolean>(false);
   selectedOrderForDetails = signal<Order | null>(null);
   orderToDelete = signal<Order | null>(null);
   savingOrder = signal<boolean>(false);
+
+  // Shopify-Style Order Modification & Timeline State
+  isEditMode = signal<boolean>(false);
+  savingEdit = signal<boolean>(false);
+  newTimelineComment = signal<string>('');
+  submittingComment = signal<boolean>(false);
+
+  // Edit Order Form (Limited, relevant fields)
+  editOrderForm = this.fb.group({
+    customerName: [''],
+    customerEmail: [''],
+    customerPhone: [''],
+    shippingAddress: ['', Validators.required],
+    shippingState: [''],
+    shipVia: ['Road Freight'],
+    deliveryPartner: ['Delhivery'],
+    pickupLocationCode: [''],
+    notes: ['']
+  });
 
   // Create Order Form State
   createOrderForm = this.fb.group({
@@ -128,6 +182,18 @@ export class OrderList implements OnInit {
     const channel = this.selectedChannelFilter();
     const q = this.searchQuery().trim().toLowerCase();
 
+    // End-User scoping: Customers only see their own orders. Master/Support see all or toggled to My Orders
+    if (this.isCustomer() || this.showMyOrdersOnly()) {
+      const u = this.currentUser();
+      const curEmail = (u?.email || '').trim().toLowerCase();
+      const curUser = (u?.userName || '').trim().toLowerCase();
+      list = list.filter(o =>
+        (o.createdBy && (o.createdBy.toLowerCase() === curUser || o.createdBy.toLowerCase() === curEmail)) ||
+        (o.customerEmail && curEmail && o.customerEmail.toLowerCase() === curEmail) ||
+        (o.customerName && curUser && o.customerName.toLowerCase().includes(curUser))
+      );
+    }
+
     if (comp !== 'ALL') {
       list = list.filter(o => o.companyCode.toUpperCase() === comp.toUpperCase());
     }
@@ -151,7 +217,7 @@ export class OrderList implements OnInit {
 
   // KPI Stats
   orderStats = computed(() => {
-    const list = this.orders();
+    const list = this.filteredOrders();
     const totalCount = list.length;
     const pendingCount = list.filter(o => o.status.toLowerCase() === 'pending').length;
     const processingCount = list.filter(o => ['confirmed', 'processing'].includes(o.status.toLowerCase())).length;
@@ -186,6 +252,12 @@ export class OrderList implements OnInit {
   });
 
   ngOnInit() {
+    const user = this.account.getUserDetails();
+    this.currentUser.set(user);
+    if (this.isCustomer()) {
+      this.showMyOrdersOnly.set(true);
+    }
+
     this.refreshData();
     this.taxService.loadTaxes();
     this.promoService.loadPromoCodes(true);
@@ -193,9 +265,20 @@ export class OrderList implements OnInit {
   }
 
   refreshData() {
-    this.orderService.list().catch(err => {
+    const createdByFilter = (this.isCustomer() || this.showMyOrdersOnly())
+      ? (this.currentUser()?.email || this.currentUser()?.userName || undefined)
+      : undefined;
+
+    this.orderService.list(undefined, undefined, undefined, undefined, createdByFilter).catch(err => {
       this.toast.add({ severity: 'error', summary: 'Error', detail: err.message || 'Failed to fetch orders.' });
     });
+  }
+
+  toggleMyOrdersOnly(val?: boolean) {
+    if (this.isCustomer()) return; // End users always restricted to own orders
+    const newVal = val !== undefined ? val : !this.showMyOrdersOnly();
+    this.showMyOrdersOnly.set(newVal);
+    this.refreshData();
   }
 
   goToDashboard() {
@@ -495,29 +578,275 @@ export class OrderList implements OnInit {
     }
   }
 
-  openOrderDetails(order: Order) {
+  async openOrderDetails(order: Order) {
     this.selectedOrderForDetails.set(order);
+    this.isEditMode.set(false);
+    this.newTimelineComment.set('');
+    this.populateEditForm(order);
     this.showDetailsModal.set(true);
+
+    // Asynchronously fetch complete order details with fresh audit trail
+    try {
+      const fullOrder = await this.orderService.getById(order.companyCode, order.orderId);
+      if (fullOrder) {
+        this.selectedOrderForDetails.set(fullOrder);
+        this.populateEditForm(fullOrder);
+      }
+    } catch (err) {
+      console.error('Error fetching complete order details:', err);
+    }
   }
 
   closeOrderDetails() {
     this.showDetailsModal.set(false);
     this.selectedOrderForDetails.set(null);
+    this.isEditMode.set(false);
+  }
+
+  populateEditForm(order: Order) {
+    this.editOrderForm.reset({
+      customerName: order.customerName || '',
+      customerEmail: order.customerEmail || '',
+      customerPhone: order.customerPhone || '',
+      shippingAddress: order.shippingAddress || '',
+      shippingState: order.shippingState || '',
+      shipVia: order.shipVia || 'Road Freight',
+      deliveryPartner: order.deliveryPartner || 'Delhivery',
+      pickupLocationCode: order.pickupLocationCode || '',
+      notes: order.notes || ''
+    });
+  }
+
+  isOrderLocked(order: Order | null): boolean {
+    if (!order) return true;
+    const s = (order.status || '').toLowerCase();
+    return s === 'shipped' || s === 'delivered' || s === 'cancelled';
+  }
+
+  canUserEditOrder(order: Order | null): boolean {
+    if (!order) return false;
+    if (this.isOrderLocked(order)) return false;
+    return !this.isCustomer();
+  }
+
+  async openEditOrder(order: Order) {
+    if (this.isOrderLocked(order)) {
+      this.toast.add({
+        severity: 'warn',
+        summary: 'Order Locked',
+        detail: `Orders marked as ${order.status} cannot be modified.`
+      });
+      return;
+    }
+    await this.openOrderDetails(order);
+    this.isEditMode.set(true);
+  }
+
+  toggleEditMode() {
+    const o = this.selectedOrderForDetails();
+    if (!o) return;
+
+    if (this.isEditMode()) {
+      this.isEditMode.set(false);
+      this.populateEditForm(o);
+    } else {
+      if (this.isOrderLocked(o)) {
+        this.toast.add({
+          severity: 'warn',
+          summary: 'Order Locked',
+          detail: `Orders marked as ${o.status} cannot be modified.`
+        });
+        return;
+      }
+      if (!this.canUserEditOrder(o)) {
+        this.toast.add({
+          severity: 'warn',
+          summary: 'Access Restricted',
+          detail: 'Only Support Specialists and Master Admins are authorized to modify orders.'
+        });
+        return;
+      }
+      this.populateEditForm(o);
+      this.isEditMode.set(true);
+    }
+  }
+
+  onSelectSavedAddressForEdit(event: Event) {
+    const addrId = (event.target as HTMLSelectElement).value;
+    if (!addrId) return;
+
+    const addr = this.userAddresses().find(a => a.addressId === addrId);
+    if (addr) {
+      const fullAddress = `${addr.addressLine1}${addr.addressLine2 ? ', ' + addr.addressLine2 : ''}, ${addr.city}, ${addr.state} - ${addr.postalCode}, ${addr.country}`;
+      this.editOrderForm.patchValue({
+        customerName: addr.contactName,
+        customerPhone: addr.phone || '',
+        shippingAddress: fullAddress,
+        shippingState: addr.state
+      });
+    }
+  }
+
+  async saveEditedDetails() {
+    const order = this.selectedOrderForDetails();
+    if (!order) return;
+
+    if (this.isOrderLocked(order)) {
+      this.toast.add({
+        severity: 'error',
+        summary: 'Order Locked',
+        detail: `Cannot modify order because its status is ${order.status}.`
+      });
+      return;
+    }
+
+    if (!this.canUserEditOrder(order)) {
+      this.toast.add({
+        severity: 'error',
+        summary: 'Permission Denied',
+        detail: 'You do not have permission to modify this order.'
+      });
+      return;
+    }
+
+    if (this.editOrderForm.invalid) {
+      this.editOrderForm.markAllAsTouched();
+      this.toast.add({
+        severity: 'warn',
+        summary: 'Required Fields Missing',
+        detail: 'Please provide a valid shipping address.'
+      });
+      return;
+    }
+
+    const raw = this.editOrderForm.getRawValue();
+    const pickupWh = this.warehouses().find(w => w.code.toUpperCase() === (raw.pickupLocationCode || '').toUpperCase());
+
+    const input: UpdateOrderDetailsInput = {
+      companyCode: order.companyCode,
+      orderId: order.orderId,
+      customerName: raw.customerName?.trim() || undefined,
+      customerEmail: raw.customerEmail?.trim() || undefined,
+      customerPhone: raw.customerPhone?.trim() || undefined,
+      shippingAddress: raw.shippingAddress?.trim() || undefined,
+      shippingState: raw.shippingState?.trim() || undefined,
+      shipVia: order.locationType === 'Warehouse' ? (raw.shipVia?.trim() || undefined) : undefined,
+      deliveryPartner: order.locationType === 'Store' ? (raw.deliveryPartner?.trim() || undefined) : undefined,
+      pickupLocationCode: order.locationType === 'Store' ? (raw.pickupLocationCode?.trim() || undefined) : undefined,
+      pickupLocationName: order.locationType === 'Store' ? (pickupWh ? `${pickupWh.name} (${pickupWh.code})` : undefined) : undefined,
+      notes: raw.notes?.trim() || undefined,
+      userRole: this.userRoleLabel()
+    };
+
+    this.savingEdit.set(true);
+    try {
+      const res = await this.orderService.updateDetails(input);
+      if (res.success) {
+        this.toast.add({ severity: 'success', summary: 'Order Updated', detail: res.message });
+        this.isEditMode.set(false);
+
+        // Fetch refreshed order with updated fields and fresh audit trail records
+        const fresh = await this.orderService.getById(order.companyCode, order.orderId);
+        if (fresh) {
+          this.selectedOrderForDetails.set(fresh);
+          this.populateEditForm(fresh);
+        }
+        await this.refreshData();
+      } else {
+        this.toast.add({ severity: 'error', summary: 'Update Failed', detail: res.message });
+      }
+    } catch (err: any) {
+      this.toast.add({ severity: 'error', summary: 'Error', detail: err.message || 'Failed to update order details.' });
+    } finally {
+      this.savingEdit.set(false);
+    }
+  }
+
+  async postTimelineComment() {
+    const order = this.selectedOrderForDetails();
+    if (!order) return;
+
+    const comment = this.newTimelineComment().trim();
+    if (!comment) {
+      this.toast.add({ severity: 'warn', summary: 'Empty Note', detail: 'Please enter a note or comment to post.' });
+      return;
+    }
+
+    this.submittingComment.set(true);
+    try {
+      const res = await this.orderService.addTimelineComment({
+        companyCode: order.companyCode,
+        orderId: order.orderId,
+        comment: comment,
+        userRole: this.userRoleLabel()
+      });
+
+      if (res.success) {
+        this.toast.add({ severity: 'success', summary: 'Note Added', detail: 'Timeline event recorded.' });
+        this.newTimelineComment.set('');
+
+        const fresh = await this.orderService.getById(order.companyCode, order.orderId);
+        if (fresh) {
+          this.selectedOrderForDetails.set(fresh);
+        }
+      } else {
+        this.toast.add({ severity: 'error', summary: 'Failed to Post', detail: res.message });
+      }
+    } catch (err: any) {
+      this.toast.add({ severity: 'error', summary: 'Error', detail: err.message || 'Failed to post timeline comment.' });
+    } finally {
+      this.submittingComment.set(false);
+    }
   }
 
   async changeOrderStatus(order: Order, newStatus: string) {
+    if (!order || !newStatus) return;
+    if ((order.status || '').toLowerCase() === newStatus.toLowerCase()) return;
+
+    if (this.isOrderLocked(order)) {
+      this.toast.add({
+        severity: 'warn',
+        summary: 'Order Locked',
+        detail: `Cannot change status because order is permanently locked as ${order.status}.`
+      });
+      return;
+    }
+
     try {
-      const res = await this.orderService.updateStatus(order.companyCode, order.orderId, newStatus);
+      const res = await this.orderService.updateStatus(order.companyCode, order.orderId, newStatus, this.userRoleLabel());
       if (res.success) {
-        this.toast.add({ severity: 'success', summary: 'Status Updated', detail: res.message });
-        if (this.selectedOrderForDetails()?.orderId === order.orderId) {
-          this.selectedOrderForDetails.update(o => o ? { ...o, status: newStatus } : null);
+        this.toast.add({ severity: 'success', summary: 'Status Updated', detail: `Order ${order.orderId} moved to ${newStatus}.` });
+
+        // Update local list signal immediately so master screen reflects change
+        this.orders.update(prev =>
+          prev.map(o => o.orderId === order.orderId && o.companyCode === order.companyCode ? { ...o, status: newStatus } : o)
+        );
+
+        const fresh = await this.orderService.getById(order.companyCode, order.orderId);
+        if (fresh && this.selectedOrderForDetails()?.orderId === order.orderId) {
+          this.selectedOrderForDetails.set(fresh);
+          this.populateEditForm(fresh);
         }
       } else {
         this.toast.add({ severity: 'error', summary: 'Update Failed', detail: res.message });
       }
     } catch (err: any) {
       this.toast.add({ severity: 'error', summary: 'Error', detail: err.message || 'Failed to update order status.' });
+    }
+  }
+
+  getAuditActionBadge(actionType: string): { bg: string; color: string; border: string; icon: string; label: string } {
+    switch ((actionType || '').toLowerCase()) {
+      case 'create':
+        return { bg: 'rgba(16, 185, 129, 0.12)', color: '#10b981', border: 'rgba(16, 185, 129, 0.3)', icon: 'pi pi-check-circle', label: 'Order Created' };
+      case 'statuschange':
+        return { bg: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6', border: 'rgba(59, 130, 246, 0.3)', icon: 'pi pi-sync', label: 'Status Change' };
+      case 'update':
+        return { bg: 'rgba(139, 92, 246, 0.12)', color: '#8b5cf6', border: 'rgba(139, 92, 246, 0.3)', icon: 'pi pi-pencil', label: 'Detail Modified' };
+      case 'comment':
+        return { bg: 'rgba(245, 158, 11, 0.12)', color: '#f59e0b', border: 'rgba(245, 158, 11, 0.3)', icon: 'pi pi-comment', label: 'Support Note' };
+      default:
+        return { bg: 'rgba(107, 114, 128, 0.12)', color: '#6b7280', border: 'rgba(107, 114, 128, 0.3)', icon: 'pi pi-info-circle', label: 'Event' };
     }
   }
 
@@ -550,7 +879,7 @@ export class OrderList implements OnInit {
   }
 
   getStatusBadgeColor(status: string): { bg: string; color: string; border: string } {
-    switch (status.toLowerCase()) {
+    switch ((status || '').toLowerCase()) {
       case 'confirmed':
         return { bg: 'rgba(59, 130, 246, 0.12)', color: '#3b82f6', border: 'rgba(59, 130, 246, 0.3)' };
       case 'processing':
@@ -568,6 +897,6 @@ export class OrderList implements OnInit {
   }
 
   isSegregatedSubOrder(orderId: string): boolean {
-    return orderId.includes('.');
+    return (orderId || '').includes('.');
   }
 }

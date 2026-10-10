@@ -10,32 +10,43 @@ public class ItemService(IItemRepository itemRepository, ICompanyRepository comp
     private readonly IItemRepository _itemRepository = itemRepository;
     private readonly ICompanyRepository _companyRepository = companyRepository;
 
-    public async Task<IEnumerable<ItemDto>> GetItemsAsync(string accountId, string? companyCode = null, string? salesChannel = null, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<ItemDto>> GetItemsAsync(string accountId, string? companyCode = null, string? salesChannel = null, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
-        var items = (await _itemRepository.GetAllItemsAsync(accountId, companyCode, salesChannel, cancellationToken)).ToList();
-        var audits = await _itemRepository.GetAllItemsAuditDetailsAsync(accountId, companyCode, cancellationToken);
-        var auditLookup = audits.ToLookup(a => $"{a.CompanyCode}:{a.ItemNumber}");
+        var items = (await _itemRepository.GetAllItemsAsync(accountId, companyCode, salesChannel, isCustomer, cancellationToken)).ToList();
+        
+        ILookup<string, ItemAuditTrailDto>? auditLookup = null;
+        if (!isCustomer)
+        {
+            var audits = await _itemRepository.GetAllItemsAuditDetailsAsync(accountId, companyCode, cancellationToken);
+            auditLookup = audits.ToLookup(a => $"{a.CompanyCode}:{a.ItemNumber}");
+        }
 
         foreach (var item in items)
         {
-            var key = $"{item.CompanyCode}:{item.ItemNumber}";
-            item.Audit.AddRange(auditLookup[key]);
-            var variants = await _itemRepository.GetItemVariantsAsync(accountId, item.CompanyCode, item.ItemNumber, cancellationToken);
+            if (auditLookup != null)
+            {
+                var key = $"{item.CompanyCode}:{item.ItemNumber}";
+                item.Audit.AddRange(auditLookup[key]);
+            }
+
+            var itemOwnerAccountId = !string.IsNullOrWhiteSpace(item.AccountId) ? item.AccountId : accountId;
+            var variants = await _itemRepository.GetItemVariantsAsync(itemOwnerAccountId, item.CompanyCode, item.ItemNumber, cancellationToken);
             item.Variants = variants.ToList();
         }
 
         return items;
     }
 
-    public async Task<ItemDto?> GetItemByNumberAsync(string accountId, string companyCode, string itemNumber, CancellationToken cancellationToken = default)
+    public async Task<ItemDto?> GetItemByNumberAsync(string accountId, string companyCode, string itemNumber, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(accountId) || string.IsNullOrWhiteSpace(companyCode) || string.IsNullOrWhiteSpace(itemNumber))
+        if (string.IsNullOrWhiteSpace(companyCode) || string.IsNullOrWhiteSpace(itemNumber))
             return null;
 
-        var item = await _itemRepository.GetItemByNumberAsync(accountId, companyCode.Trim().ToUpper(), itemNumber.Trim().ToUpper(), cancellationToken);
+        var item = await _itemRepository.GetItemByNumberAsync(accountId, companyCode.Trim().ToUpper(), itemNumber.Trim().ToUpper(), isCustomer, cancellationToken);
         if (item != null)
         {
-            var variants = await _itemRepository.GetItemVariantsAsync(accountId, companyCode.Trim().ToUpper(), itemNumber.Trim().ToUpper(), cancellationToken);
+            var itemOwnerAccountId = !string.IsNullOrWhiteSpace(item.AccountId) ? item.AccountId : accountId;
+            var variants = await _itemRepository.GetItemVariantsAsync(itemOwnerAccountId, companyCode.Trim().ToUpper(), itemNumber.Trim().ToUpper(), cancellationToken);
             item.Variants = variants.ToList();
         }
 

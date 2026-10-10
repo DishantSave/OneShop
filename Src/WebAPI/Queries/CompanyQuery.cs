@@ -1,4 +1,5 @@
-﻿using Application.DTOs.Masters.Company;
+using Application.DTOs.Masters.Company;
+using Application.Interfaces.DataService;
 using Application.Interfaces.GraphQLService;
 using HotChocolate.Authorization;
 using System.Security.Claims;
@@ -13,13 +14,16 @@ public class CompanyQuery
     [GraphQLDescription("Get all companies for the current account.")]
     public async Task<IEnumerable<CompanyDto>> GetCompaniesAsync(
         [Service] ICompanyService companyService,
+        [Service] IUserRoleResolver userRoleResolver,
         ClaimsPrincipal user,
         CancellationToken cancellationToken)
     {
         var accountId = user.FindFirst("account_id")?.Value
             ?? throw new GraphQLException("AccountId not found in token.");
 
-        return await companyService.GetCompaniesAsync(accountId, cancellationToken);
+        var isCustomer = await userRoleResolver.IsCustomerAsync(user, cancellationToken);
+
+        return await companyService.GetCompaniesAsync(accountId, isCustomer, cancellationToken);
     }
 
     [Authorize]
@@ -28,13 +32,16 @@ public class CompanyQuery
     public async Task<CompanyDto?> GetCompanyAsync(
         [GraphQLName("code")] string code,
         [Service] ICompanyService companyService,
+        [Service] IUserRoleResolver userRoleResolver,
         ClaimsPrincipal user,
         CancellationToken cancellationToken)
     {
         var accountId = user.FindFirst("account_id")?.Value
             ?? throw new GraphQLException("AccountId not found in token.");
 
-        return await companyService.GetCompanyByCodeAsync(accountId, code, cancellationToken);
+        var isCustomer = await userRoleResolver.IsCustomerAsync(user, cancellationToken);
+
+        return await companyService.GetCompanyByCodeAsync(accountId, code, isCustomer, cancellationToken);
     }
 
     [Authorize]

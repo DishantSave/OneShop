@@ -10,26 +10,28 @@ public class CollectionService(ICollectionRepository collectionRepository, IComp
     private readonly ICollectionRepository _collectionRepository = collectionRepository;
     private readonly ICompanyRepository _companyRepository = companyRepository;
 
-    public async Task<IEnumerable<CollectionDto>> GetCollectionsAsync(string accountId, string? companyCode = null, string? channel = null, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<CollectionDto>> GetCollectionsAsync(string accountId, string? companyCode = null, string? channel = null, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
-        var collections = (await _collectionRepository.GetAllCollectionsAsync(accountId, companyCode, channel, cancellationToken)).ToList();
+        var collections = (await _collectionRepository.GetAllCollectionsAsync(accountId, companyCode, channel, isCustomer, cancellationToken)).ToList();
         foreach (var col in collections)
         {
-            var items = await _collectionRepository.GetCollectionItemsAsync(accountId, col.CompanyCode, col.Code, cancellationToken);
+            var colOwnerAccountId = !string.IsNullOrWhiteSpace(col.AccountId) ? col.AccountId : accountId;
+            var items = await _collectionRepository.GetCollectionItemsAsync(colOwnerAccountId, col.CompanyCode, col.Code, cancellationToken);
             col.Items = items.ToList();
         }
         return collections;
     }
 
-    public async Task<CollectionDto?> GetCollectionByCodeAsync(string accountId, string companyCode, string code, CancellationToken cancellationToken = default)
+    public async Task<CollectionDto?> GetCollectionByCodeAsync(string accountId, string companyCode, string code, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(accountId) || string.IsNullOrWhiteSpace(companyCode) || string.IsNullOrWhiteSpace(code))
+        if (string.IsNullOrWhiteSpace(companyCode) || string.IsNullOrWhiteSpace(code))
             return null;
 
-        var collection = await _collectionRepository.GetCollectionByCodeAsync(accountId, companyCode.Trim().ToUpper(), code.Trim().ToUpper(), cancellationToken);
+        var collection = await _collectionRepository.GetCollectionByCodeAsync(accountId, companyCode.Trim().ToUpper(), code.Trim().ToUpper(), isCustomer, cancellationToken);
         if (collection != null)
         {
-            var items = await _collectionRepository.GetCollectionItemsAsync(accountId, companyCode.Trim().ToUpper(), code.Trim().ToUpper(), cancellationToken);
+            var colOwnerAccountId = !string.IsNullOrWhiteSpace(collection.AccountId) ? collection.AccountId : accountId;
+            var items = await _collectionRepository.GetCollectionItemsAsync(colOwnerAccountId, companyCode.Trim().ToUpper(), code.Trim().ToUpper(), cancellationToken);
             collection.Items = items.ToList();
         }
         return collection;

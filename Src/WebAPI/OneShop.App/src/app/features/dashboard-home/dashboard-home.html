@@ -197,6 +197,133 @@
     </div>
   </div>
 
+  <!-- Wholesale vs Retail Operating Mode Segregation Strip -->
+  <div [ngStyle]="{
+         background: 'var(--card-bg, #ffffff)', border: '1px solid var(--border-color, #e2e8f0)',
+         borderRadius: '16px', padding: '0.85rem 1.25rem', display: 'flex', alignItems: 'center',
+         justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.85rem',
+         boxShadow: '0 2px 10px rgba(0, 0, 0, 0.03)'
+       }">
+    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.65rem' }">
+      <i class="pi pi-filter" [ngStyle]="{ color: '#05517e', fontSize: '1rem' }"></i>
+      <span [ngStyle]="{ fontSize: '0.85rem', fontWeight: '800', color: 'var(--text-color)', textTransform: 'uppercase', letterSpacing: '0.04em' }">
+        Sales Channel Viewpoint:
+      </span>
+    </div>
+
+    <!-- Segmented Tabs -->
+    <div [ngStyle]="{
+           display: 'flex', background: 'var(--input-bg, #f1f5f9)', borderRadius: '12px',
+           padding: '0.25rem', gap: '0.25rem', flexWrap: 'wrap'
+         }">
+      <!-- All Products Tab -->
+      <button type="button"
+              (click)="setChannelSegment('ALL')"
+              [ngStyle]="{
+                background: activeChannelSegment() === 'ALL' ? '#05517e' : 'transparent',
+                color: activeChannelSegment() === 'ALL' ? '#ffffff' : 'var(--text-color)',
+                border: 'none', padding: '0.55rem 1.15rem', borderRadius: '9px',
+                fontSize: '0.84rem', fontWeight: '700', cursor: 'pointer', transition: 'all 0.2s ease',
+                display: 'flex', alignItems: 'center', gap: '0.45rem'
+              }">
+        <i class="pi pi-th-large"></i>
+        <span>All Products</span>
+        <span [ngStyle]="{
+                background: activeChannelSegment() === 'ALL' ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.08)',
+                padding: '0.1rem 0.45rem', borderRadius: '10px', fontSize: '0.72rem', fontWeight: '800'
+              }">
+          {{ totalItemsCount() }}
+        </span>
+      </button>
+
+      <!-- Retail Store (B2C) Tab -->
+      <button type="button"
+              (click)="setChannelSegment('B2C')"
+              [ngStyle]="{
+                background: activeChannelSegment() === 'B2C' ? '#10b981' : 'transparent',
+                color: activeChannelSegment() === 'B2C' ? '#ffffff' : 'var(--text-color)',
+                border: 'none', padding: '0.55rem 1.15rem', borderRadius: '9px',
+                fontSize: '0.84rem', fontWeight: '700', cursor: 'pointer', transition: 'all 0.2s ease',
+                display: 'flex', alignItems: 'center', gap: '0.45rem'
+              }">
+        <i class="pi pi-shopping-bag"></i>
+        <span>Retail Products (B2C)</span>
+        <span [ngStyle]="{
+                background: activeChannelSegment() === 'B2C' ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.08)',
+                padding: '0.1rem 0.45rem', borderRadius: '10px', fontSize: '0.72rem', fontWeight: '800'
+              }">
+          {{ retailItemsCount() }}
+        </span>
+      </button>
+
+      <!-- Wholesale & Bulk (B2B) Tab -->
+      <button type="button"
+              (click)="setChannelSegment('B2B')"
+              [ngStyle]="{
+                background: activeChannelSegment() === 'B2B' ? '#6366f1' : 'transparent',
+                color: activeChannelSegment() === 'B2B' ? '#ffffff' : 'var(--text-color)',
+                border: 'none', padding: '0.55rem 1.15rem', borderRadius: '9px',
+                fontSize: '0.84rem', fontWeight: '700', cursor: 'pointer', transition: 'all 0.2s ease',
+                display: 'flex', alignItems: 'center', gap: '0.45rem'
+              }">
+        <i class="pi pi-briefcase"></i>
+        <span>Wholesale Products (B2B)</span>
+        <span [ngStyle]="{
+                background: activeChannelSegment() === 'B2B' ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.08)',
+                padding: '0.1rem 0.45rem', borderRadius: '10px', fontSize: '0.72rem', fontWeight: '800'
+              }">
+          {{ wholesaleItemsCount() }}
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Guidance Banner for Wholesale -->
+  <div *ngIf="activeChannelSegment() === 'B2B'"
+       [ngStyle]="{
+         background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(79, 70, 229, 0.12))',
+         border: '1px solid rgba(99, 102, 241, 0.35)', borderRadius: '12px', padding: '0.9rem 1.25rem',
+         display: 'flex', alignItems: 'center', gap: '0.85rem'
+       }">
+    <div [ngStyle]="{
+           width: '36px', height: '36px', borderRadius: '10px', background: '#6366f1',
+           color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+         }">
+      <i class="pi pi-truck" [ngStyle]="{ fontSize: '1.15rem' }"></i>
+    </div>
+    <div [ngStyle]="{ flex: 1 }">
+      <div [ngStyle]="{ fontWeight: '800', fontSize: '0.88rem', color: '#4338ca' }">
+        Wholesale &amp; Bulk Procurement Catalog
+      </div>
+      <div [ngStyle]="{ fontSize: '0.78rem', color: '#4338ca', opacity: '0.85' }">
+        Showing products designated for wholesale distribution and commercial bulk purchases. Special wholesale unit prices and minimum lot thresholds apply.
+      </div>
+    </div>
+  </div>
+
+  <!-- Guidance Banner for Retail -->
+  <div *ngIf="activeChannelSegment() === 'B2C'"
+       [ngStyle]="{
+         background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(5, 150, 105, 0.12))',
+         border: '1px solid rgba(16, 185, 129, 0.35)', borderRadius: '12px', padding: '0.9rem 1.25rem',
+         display: 'flex', alignItems: 'center', gap: '0.85rem'
+       }">
+    <div [ngStyle]="{
+           width: '36px', height: '36px', borderRadius: '10px', background: '#10b981',
+           color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+         }">
+      <i class="pi pi-shopping-bag" [ngStyle]="{ fontSize: '1.15rem' }"></i>
+    </div>
+    <div [ngStyle]="{ flex: 1 }">
+      <div [ngStyle]="{ fontWeight: '800', fontSize: '0.88rem', color: '#065f46' }">
+        Retail Consumer Direct Catalog
+      </div>
+      <div [ngStyle]="{ fontSize: '0.78rem', color: '#065f46', opacity: '0.85' }">
+        Showing consumer-ready retail products available for single unit orders and direct home courier delivery.
+      </div>
+    </div>
+  </div>
+
   <!-- Filter & Search Toolbar -->
   <div [ngStyle]="{
          background: 'var(--card-bg)', border: '1px solid var(--border-color)',
@@ -323,12 +450,34 @@
             {{ item.category }}
           </span>
 
-          <span [ngStyle]="{
-                  background: item.salesChannel === 'B2B' ? 'rgba(99, 102, 241, 0.12)' : (item.salesChannel === 'B2C' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(245, 158, 11, 0.12)'),
-                  color: item.salesChannel === 'B2B' ? '#6366f1' : (item.salesChannel === 'B2C' ? '#10b981' : '#f59e0b'),
-                  padding: '0.15rem 0.45rem', borderRadius: '4px', fontSize: '0.68rem', fontWeight: '700'
+          <span *ngIf="item.salesChannel === 'B2B'"
+                [ngStyle]="{
+                  background: 'rgba(99, 102, 241, 0.14)', color: '#4f46e5',
+                  padding: '0.2rem 0.55rem', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '800',
+                  display: 'flex', alignItems: 'center', gap: '0.25rem'
                 }">
-            {{ item.salesChannel || 'Both' }}
+            <i class="pi pi-briefcase" [ngStyle]="{ fontSize: '0.68rem' }"></i>
+            Wholesale
+          </span>
+
+          <span *ngIf="item.salesChannel === 'B2C'"
+                [ngStyle]="{
+                  background: 'rgba(16, 185, 129, 0.14)', color: '#059669',
+                  padding: '0.2rem 0.55rem', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '800',
+                  display: 'flex', alignItems: 'center', gap: '0.25rem'
+                }">
+            <i class="pi pi-shopping-bag" [ngStyle]="{ fontSize: '0.68rem' }"></i>
+            Retail
+          </span>
+
+          <span *ngIf="!item.salesChannel || item.salesChannel === 'Both'"
+                [ngStyle]="{
+                  background: 'rgba(245, 158, 11, 0.14)', color: '#d97706',
+                  padding: '0.2rem 0.55rem', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '800',
+                  display: 'flex', alignItems: 'center', gap: '0.25rem'
+                }">
+            <i class="pi pi-globe" [ngStyle]="{ fontSize: '0.68rem' }"></i>
+            Omnichannel
           </span>
         </div>
       </div>

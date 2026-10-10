@@ -7,11 +7,11 @@ public class UserDetailDto
     public required string UserName { get; init; }
     public required string UserId { get; init; }
     public required string AccountId { get; init; }
-    public required string ApiToken { get; set; }
+    public string? ApiToken { get; set; }
     public bool IsCustomerAccount { get; init; }
     public bool IsSellerAccount { get; init; }
-    public required string Company { get; init; }
-    public required string ProfilePicture { get; init; }
+    public string? Company { get; init; }
+    public string? ProfilePicture { get; init; }
     public required string Email { get; init; }
     public required string Contact { get; init; }
     public required string Country { get; init; }
@@ -22,4 +22,5 @@ public class UserDetailDto
     public bool IsMainAccount { get; set; } = true;
     public string? Designation { get; set; }
     public string? Department { get; set; }
+    public string? VendorType { get; init; }
 }

@@ -54,8 +54,7 @@ export class VendorRegister implements OnInit {
 
   isCustomerAccount = false;
   isSellerAccount = true; // Defaulted to true for vendors
-  isCustomerB2C = true;
-  isCustomerB2B = true;
+  selectedVendorType: 'B2C' | 'B2B' | 'Both' = 'Both';
   isTestAccount = false;
 
   countries: CountryDto[] = [];
@@ -154,12 +153,6 @@ export class VendorRegister implements OnInit {
 
   onUsernameInput() {
     this.usernameSubject.next(this.userName);
-  }
-
-  onVendorTypeChange() {
-    if (!this.isCustomerB2C && !this.isCustomerB2B) {
-      this.isCustomerB2C = true;
-    }
   }
 
   nextStep() {
@@ -326,6 +319,9 @@ export class VendorRegister implements OnInit {
             email
             company
             subscriptionType
+            vendorType
+            isCustomerAccount
+            isSellerAccount
           }
           accessibleScreens {
             screen {
@@ -350,9 +346,10 @@ export class VendorRegister implements OnInit {
       email: this.email,
       contact: `${this.selectedIsdCode?.isdCode || ''} ${this.contact}`.trim(),
       country: this.country?.countryCode || '',
-      isCustomerAccount: this.isCustomerAccount,
-      isSellerAccount: this.isSellerAccount,
-      isTestAccount: this.isTestAccount
+      isCustomerAccount: false,
+      isSellerAccount: true,
+      isTestAccount: this.isTestAccount,
+      vendorType: this.selectedVendorType
     };
 
     this.apollo.mutate<{ registerUser: { success: boolean; message: string; userDetails?: any; accessibleScreens?: any[] } }>({
@@ -388,10 +385,11 @@ export class VendorRegister implements OnInit {
       },
       error: (err) => {
         console.error('Registration mutation error:', err);
+        const detailMsg = err?.message || err?.error?.message || 'Failed to connect to the server. Please try again.';
         this.messageService.add({
           severity: 'error',
-          summary: 'Network Error',
-          detail: 'Failed to connect to the server. Please try again.',
+          summary: 'Registration Error',
+          detail: detailMsg,
           life: 4000
         });
       }

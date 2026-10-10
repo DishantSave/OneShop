@@ -5,8 +5,8 @@ namespace Application.Interfaces.DataService;
 
 public interface IItemRepository
 {
-    Task<IEnumerable<ItemDto>> GetAllItemsAsync(string accountId, string? companyCode = null, string? salesChannel = null, CancellationToken cancellationToken = default);
-    Task<ItemDto?> GetItemByNumberAsync(string accountId, string companyCode, string itemNumber, CancellationToken cancellationToken = default);
+    Task<IEnumerable<ItemDto>> GetAllItemsAsync(string accountId, string? companyCode = null, string? salesChannel = null, bool isCustomer = false, CancellationToken cancellationToken = default);
+    Task<ItemDto?> GetItemByNumberAsync(string accountId, string companyCode, string itemNumber, bool isCustomer = false, CancellationToken cancellationToken = default);
     Task<IEnumerable<ItemVariantDto>> GetItemVariantsAsync(string accountId, string companyCode, string itemNumber, CancellationToken cancellationToken = default);
     Task<IEnumerable<ItemAuditTrailDto>> GetAllItemsAuditDetailsAsync(string accountId, string? companyCode = null, CancellationToken cancellationToken = default);
     Task<bool> ExistsByItemNumberAsync(string accountId, string companyCode, string itemNumber, CancellationToken cancellationToken = default);

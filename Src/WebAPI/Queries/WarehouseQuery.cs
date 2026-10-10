@@ -1,4 +1,5 @@
 using Application.DTOs.Masters.Warehouse;
+using Application.Interfaces.DataService;
 using Application.Interfaces.GraphQLService;
 using HotChocolate.Authorization;
 using System.Security.Claims;
@@ -14,13 +15,16 @@ public class WarehouseQuery
     public async Task<IEnumerable<WarehouseDto>> GetWarehousesAsync(
         [GraphQLName("companyCode")] string? companyCode,
         [Service] IWarehouseService warehouseService,
+        [Service] IUserRoleResolver userRoleResolver,
         ClaimsPrincipal user,
         CancellationToken cancellationToken)
     {
         var accountId = user.FindFirst("account_id")?.Value
             ?? throw new GraphQLException("AccountId not found in token.");
 
-        return await warehouseService.GetWarehousesAsync(accountId, companyCode, cancellationToken);
+        var isCustomer = await userRoleResolver.IsCustomerAsync(user, cancellationToken);
+
+        return await warehouseService.GetWarehousesAsync(accountId, companyCode, isCustomer, cancellationToken);
     }
 
     [Authorize]
@@ -30,13 +34,16 @@ public class WarehouseQuery
         [GraphQLName("companyCode")] string companyCode,
         [GraphQLName("code")] string code,
         [Service] IWarehouseService warehouseService,
+        [Service] IUserRoleResolver userRoleResolver,
         ClaimsPrincipal user,
         CancellationToken cancellationToken)
     {
         var accountId = user.FindFirst("account_id")?.Value
             ?? throw new GraphQLException("AccountId not found in token.");
 
-        return await warehouseService.GetWarehouseByCodeAsync(accountId, companyCode, code, cancellationToken);
+        var isCustomer = await userRoleResolver.IsCustomerAsync(user, cancellationToken);
+
+        return await warehouseService.GetWarehouseByCodeAsync(accountId, companyCode, code, isCustomer, cancellationToken);
     }
 
     [Authorize]

@@ -1,4 +1,4 @@
-﻿using Application.DTOs.Auth;
+using Application.DTOs.Auth;
 using Application.GraphQL.Payloads;
 using Application.Interfaces.DataService;
 using Application.Interfaces.GraphQLService;
@@ -55,6 +55,7 @@ public class RegisterationService(IAuthenticationRepository userRepository) : IR
             request.Contact,
             request.Country,
             request.IsTestAccount,
+            request.VendorType,
             cancellationToken
         );
     }

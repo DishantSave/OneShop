@@ -1,6 +1,7 @@
 using Application.DTOs.Catalog.Collection;
 using Application.GraphQL.InputModels;
 using Application.GraphQL.Payloads;
+using Application.Interfaces.DataService;
 using Application.Interfaces.GraphQLService;
 using HotChocolate.Authorization;
 using System.Security.Claims;
@@ -17,10 +18,16 @@ public class CollectionMutation
         CollectionInput input,
         ClaimsPrincipal user,
         [Service] ICollectionService collectionService,
+        [Service] IUserRoleResolver userRoleResolver,
         CancellationToken cancellationToken)
     {
         try
         {
+            if (await userRoleResolver.IsCustomerAsync(user, cancellationToken))
+            {
+                return new CollectionPayload { Success = false, Message = "Customer accounts are not authorized to create collections." };
+            }
+
             var accountId = user.FindFirst("account_id")?.Value
                 ?? throw new GraphQLException("AccountId not found in token.");
 
@@ -63,10 +70,16 @@ public class CollectionMutation
         CollectionInput input,
         ClaimsPrincipal user,
         [Service] ICollectionService collectionService,
+        [Service] IUserRoleResolver userRoleResolver,
         CancellationToken cancellationToken)
     {
         try
         {
+            if (await userRoleResolver.IsCustomerAsync(user, cancellationToken))
+            {
+                return new CollectionPayload { Success = false, Message = "Customer accounts are not authorized to edit collections." };
+            }
+
             var accountId = user.FindFirst("account_id")?.Value
                 ?? throw new GraphQLException("AccountId not found in token.");
 
@@ -110,10 +123,16 @@ public class CollectionMutation
         [GraphQLName("code")] string code,
         ClaimsPrincipal user,
         [Service] ICollectionService collectionService,
+        [Service] IUserRoleResolver userRoleResolver,
         CancellationToken cancellationToken)
     {
         try
         {
+            if (await userRoleResolver.IsCustomerAsync(user, cancellationToken))
+            {
+                return new CollectionPayload { Success = false, Message = "Customer accounts are not authorized to delete collections." };
+            }
+
             var accountId = user.FindFirst("account_id")?.Value
                 ?? throw new GraphQLException("AccountId not found in token.");
 

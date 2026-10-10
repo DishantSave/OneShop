@@ -24,7 +24,10 @@ public class CompanyRepository(IHttpContextAccessor httpContextAccessor) : IComp
         throw new InvalidOperationException("Tenant context could not be resolved for this request.");
     }
 
-    public async Task<IEnumerable<CompanyDto>> GetAllCompaniesAsync(string accountId, CancellationToken cancellationToken = default)
+    public Task<IEnumerable<CompanyDto>> GetAllCompaniesAsync(string accountId, CancellationToken cancellationToken = default)
+        => GetAllCompaniesAsync(accountId, isCustomer: false, cancellationToken);
+
+    public async Task<IEnumerable<CompanyDto>> GetAllCompaniesAsync(string accountId, bool isCustomer, CancellationToken cancellationToken = default)
     {
         using IDbConnection db = new SqlConnection(GetConnectionString());
         string sql = @"SELECT c.Sequence, c.AccountId, c.Code, c.Name,
@@ -32,9 +35,10 @@ public class CompanyRepository(IHttpContextAccessor httpContextAccessor) : IComp
                               c.City, c.StateCode, c.CountryCode, c.PostalCode, c.Contact, c.Email, c.Website,
                               c.Logo, c.CurrencyCode, c.TimeZone, c.IsTestCompany, c.IsActive, c.DateCreated
                        FROM dbo.Company AS c
-                       WHERE c.AccountId = @AccountId";
+                       WHERE (@IsCustomer = 0 AND c.AccountId = @AccountId OR @IsCustomer = 1 AND c.IsActive = 1)
+                       ORDER BY c.Name ASC";
 
-        var command = new CommandDefinition(sql, new { AccountId = accountId }, cancellationToken: cancellationToken);
+        var command = new CommandDefinition(sql, new { AccountId = accountId, IsCustomer = isCustomer ? 1 : 0 }, cancellationToken: cancellationToken);
         return await db.QueryAsync<CompanyDto>(command);
     }
 
@@ -50,7 +54,10 @@ public class CompanyRepository(IHttpContextAccessor httpContextAccessor) : IComp
         return await db.QueryAsync<CompanyAuditTrailDto>(command);
     }
 
-    public async Task<CompanyDto?> GetCompanyByCodeAsync(string accountId, string companyCode, CancellationToken cancellationToken = default)
+    public Task<CompanyDto?> GetCompanyByCodeAsync(string accountId, string companyCode, CancellationToken cancellationToken = default)
+        => GetCompanyByCodeAsync(accountId, companyCode, isCustomer: false, cancellationToken);
+
+    public async Task<CompanyDto?> GetCompanyByCodeAsync(string accountId, string companyCode, bool isCustomer, CancellationToken cancellationToken = default)
     {
         using IDbConnection db = new SqlConnection(GetConnectionString());
 
@@ -59,35 +66,41 @@ public class CompanyRepository(IHttpContextAccessor httpContextAccessor) : IComp
                                          c.City, c.StateCode, c.CountryCode, c.PostalCode, c.Contact, c.Email, c.Website,
                                          c.Logo, c.CurrencyCode, c.TimeZone, c.IsTestCompany, c.IsActive, c.DateCreated
                                   FROM dbo.Company AS c
-                                  WHERE c.AccountId = @AccountId AND UPPER(c.Code) = UPPER(@Code)";
+                                  WHERE (@IsCustomer = 0 AND c.AccountId = @AccountId OR @IsCustomer = 1) AND UPPER(c.Code) = UPPER(@Code)";
 
         var getCompanyDetailsCmd = new CommandDefinition(getCompanyDetails,
-                                                 new { AccountId = accountId, Code = companyCode },
+                                                 new { AccountId = accountId, Code = companyCode, IsCustomer = isCustomer ? 1 : 0 },
                                                  cancellationToken: cancellationToken);
 
         var company = await db.QueryFirstOrDefaultAsync<CompanyDto>(getCompanyDetailsCmd);
         if (company == null)
             return null;
 
-        string getCompanyAuditTrailDetails = @"SELECT Sequence, AccountId, Code, Field, Description, DateModified, ModifiedBy
-                                                FROM dbo.CompanyAuditTrail
-                                                WHERE AccountId = @AccountId AND UPPER(Code) = UPPER(@Code)
-                                                ORDER BY DateModified DESC, Sequence DESC";
-        var getCompanyAuditTrailDetailsCmd = new CommandDefinition(getCompanyAuditTrailDetails,
-                                                 new { AccountId = accountId, Code = companyCode },
-                                                 cancellationToken: cancellationToken);
+        if (!isCustomer)
+        {
+            string getCompanyAuditTrailDetails = @"SELECT Sequence, AccountId, Code, Field, Description, DateModified, ModifiedBy
+                                                    FROM dbo.CompanyAuditTrail
+                                                    WHERE AccountId = @AccountId AND UPPER(Code) = UPPER(@Code)
+                                                    ORDER BY DateModified DESC, Sequence DESC";
+            var getCompanyAuditTrailDetailsCmd = new CommandDefinition(getCompanyAuditTrailDetails,
+                                                     new { AccountId = accountId, Code = companyCode },
+                                                     cancellationToken: cancellationToken);
 
-        var auditTrail = (await db.QueryAsync<CompanyAuditTrailDto>(getCompanyAuditTrailDetailsCmd)).ToList();
+            var auditTrail = (await db.QueryAsync<CompanyAuditTrailDto>(getCompanyAuditTrailDetailsCmd)).ToList();
 
-        company.Audit = auditTrail;
+            company.Audit = auditTrail;
+        }
         return company;
     }
 
-    public async Task<bool> ExistsByCompanyCodeAsync(string accountId, string companyCode, CancellationToken cancellationToken = default)
+    public Task<bool> ExistsByCompanyCodeAsync(string accountId, string companyCode, CancellationToken cancellationToken = default)
+        => ExistsByCompanyCodeAsync(accountId, companyCode, isCustomer: false, cancellationToken);
+
+    public async Task<bool> ExistsByCompanyCodeAsync(string accountId, string companyCode, bool isCustomer, CancellationToken cancellationToken = default)
     {
         using IDbConnection db = new SqlConnection(GetConnectionString());
-        string sql = "SELECT COUNT(1) FROM dbo.Company WHERE AccountId = @AccountId AND UPPER(Code) = UPPER(@Code)";
-        var command = new CommandDefinition(sql, new { AccountId = accountId, Code = companyCode }, cancellationToken: cancellationToken);
+        string sql = "SELECT COUNT(1) FROM dbo.Company WHERE (@IsCustomer = 0 AND AccountId = @AccountId OR @IsCustomer = 1) AND UPPER(Code) = UPPER(@Code)";
+        var command = new CommandDefinition(sql, new { AccountId = accountId, Code = companyCode, IsCustomer = isCustomer ? 1 : 0 }, cancellationToken: cancellationToken);
         var count = await db.ExecuteScalarAsync<int>(command);
         return count > 0;
     }
