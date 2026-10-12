@@ -34,19 +34,48 @@ public class OrderRepository(IHttpContextAccessor httpContextAccessor) : IOrderR
                    o.OrderId, o.ParentOrderId, o.Channel, o.LocationType, o.LocationCode,
                    COALESCE(wh.Name, st.Name, o.LocationCode) AS LocationName,
                    o.Status, o.PaymentStatus, o.CustomerName, o.CustomerEmail, o.CustomerPhone,
-                   o.ShippingAddress, o.TotalItems, o.SubTotal, o.Tax, o.ShippingCost, o.Discount, o.TotalAmount,
+                   o.ShippingAddress, o.TotalItems, o.SubTotal, o.Tax, o.OtherTax, o.ShippingCost, o.Discount, o.PlatformFee, o.TotalAmount,
                    o.Notes, o.OrderDate, o.DateCreated, o.CreatedBy,
                    o.ShipVia, o.DeliveryPartner, o.PickupLocationCode, o.PickupLocationName, o.ShippingState, o.PromoCode
             FROM dbo.Orders AS o
             INNER JOIN dbo.Company AS c ON o.AccountId = c.AccountId AND o.CompanyCode = c.Code
             LEFT JOIN dbo.Warehouse AS wh ON o.AccountId = wh.AccountId AND o.CompanyCode = wh.CompanyCode AND o.LocationCode = wh.Code AND o.LocationType = 'Warehouse'
             LEFT JOIN dbo.Store AS st ON o.AccountId = st.AccountId AND o.CompanyCode = st.CompanyCode AND o.LocationCode = st.Code AND o.LocationType = 'Store'
-            WHERE (@IsCustomer = 0 AND o.AccountId = @AccountId OR @IsCustomer = 1)
+            WHERE (@IsCustomer = 0 OR (@IsCustomer = 1 AND (
+                    (@CreatedBy IS NOT NULL AND (
+                        UPPER(o.CreatedBy) = UPPER(@CreatedBy) 
+                        OR (o.CustomerEmail IS NOT NULL AND UPPER(o.CustomerEmail) = UPPER(@CreatedBy))
+                    ))
+                    OR EXISTS (
+                        SELECT 1 FROM dbo.AccountCredential ac
+                        WHERE ac.AccountId = @AccountId
+                          AND (
+                              UPPER(o.CreatedBy) = UPPER(ac.UserName)
+                              OR (ac.Email IS NOT NULL AND UPPER(o.CreatedBy) = UPPER(ac.Email))
+                              OR (o.CustomerEmail IS NOT NULL AND (
+                                  UPPER(o.CustomerEmail) = UPPER(ac.Email)
+                                  OR UPPER(o.CustomerEmail) = UPPER(ac.UserName)
+                              ))
+                          )
+                    )
+                    OR EXISTS (
+                        SELECT 1 FROM dbo.SubAccountCredential sac
+                        WHERE sac.AccountId = @AccountId
+                          AND (
+                              UPPER(o.CreatedBy) = UPPER(sac.UserName)
+                              OR (sac.Email IS NOT NULL AND UPPER(o.CreatedBy) = UPPER(sac.Email))
+                              OR (o.CustomerEmail IS NOT NULL AND (
+                                  UPPER(o.CustomerEmail) = UPPER(sac.Email)
+                                  OR UPPER(o.CustomerEmail) = UPPER(sac.UserName)
+                              ))
+                          )
+                    )
+                  )))
               AND (@CompanyCode IS NULL OR UPPER(o.CompanyCode) = UPPER(@CompanyCode))
               AND (@Status IS NULL OR UPPER(o.Status) = UPPER(@Status))
               AND (@LocationCode IS NULL OR UPPER(o.LocationCode) = UPPER(@LocationCode))
               AND (@Channel IS NULL OR UPPER(o.Channel) = UPPER(@Channel) OR UPPER(o.Channel) = 'BOTH')
-              AND (@CreatedBy IS NULL OR UPPER(o.CreatedBy) = UPPER(@CreatedBy) OR (o.CustomerEmail IS NOT NULL AND UPPER(o.CustomerEmail) = UPPER(@CreatedBy)))
+              AND (@IsCustomer = 1 OR @CreatedBy IS NULL OR UPPER(o.CreatedBy) = UPPER(@CreatedBy) OR (o.CustomerEmail IS NOT NULL AND UPPER(o.CustomerEmail) = UPPER(@CreatedBy)))
             ORDER BY o.Sequence DESC;";
 
         var orders = (await db.QueryAsync<OrderDto>(new CommandDefinition(
@@ -58,15 +87,15 @@ public class OrderRepository(IHttpContextAccessor httpContextAccessor) : IOrderR
         {
             const string itemsSql = @"
                 SELECT oi.Sequence, oi.AccountId, oi.CompanyCode, oi.OrderId, oi.ItemNumber, oi.ItemName,
-                       oi.ColourCode, oi.SizeCode, oi.Sku, oi.Quantity, oi.UnitPrice, oi.TotalPrice, oi.DateAdded
+                       oi.ColourCode, oi.SizeCode, oi.Sku, oi.Quantity, oi.UnitPrice, oi.TotalPrice,
+                       oi.Tax, oi.ShippingCost, oi.Discount, oi.DateAdded
                 FROM dbo.OrderItem AS oi
-                WHERE (@IsCustomer = 0 AND oi.AccountId = @AccountId OR @IsCustomer = 1)
-                  AND oi.OrderId IN @OrderIds;";
+                WHERE oi.OrderId IN @OrderIds;";
 
             var orderIds = orders.Select(x => x.OrderId).Distinct().ToList();
             var allItems = (await db.QueryAsync<OrderItemDto>(new CommandDefinition(
                 itemsSql,
-                new { AccountId = accountId, OrderIds = orderIds, IsCustomer = isCustomer ? 1 : 0 },
+                new { OrderIds = orderIds },
                 cancellationToken: cancellationToken))).ToList();
 
             var itemsByOrder = allItems.GroupBy(x => $"{x.CompanyCode.ToUpper()}::{x.OrderId.ToUpper()}")
@@ -107,14 +136,13 @@ public class OrderRepository(IHttpContextAccessor httpContextAccessor) : IOrderR
         const string sql = @"
             SELECT Sequence, AccountId, CompanyCode, OrderId, ActionType, Field, OldValue, NewValue, Description, DateModified, ModifiedBy, UserRole
             FROM dbo.OrderAuditTrail
-            WHERE (@IsCustomer = 0 AND AccountId = @AccountId OR @IsCustomer = 1)
-              AND UPPER(CompanyCode) = UPPER(@CompanyCode)
+            WHERE UPPER(CompanyCode) = UPPER(@CompanyCode)
               AND UPPER(OrderId) = UPPER(@OrderId)
             ORDER BY DateModified DESC, Sequence DESC;";
 
         return await db.QueryAsync<OrderAuditTrailDto>(new CommandDefinition(
             sql,
-            new { AccountId = accountId, CompanyCode = companyCode.ToUpper(), OrderId = orderId.ToUpper(), IsCustomer = isCustomer ? 1 : 0 },
+            new { CompanyCode = companyCode.ToUpper(), OrderId = orderId.ToUpper() },
             cancellationToken: cancellationToken));
     }
 
@@ -124,14 +152,13 @@ public class OrderRepository(IHttpContextAccessor httpContextAccessor) : IOrderR
         const string sql = @"
             SELECT CASE WHEN EXISTS (
                 SELECT 1 FROM dbo.Orders
-                WHERE AccountId = @AccountId
-                  AND UPPER(CompanyCode) = UPPER(@CompanyCode)
+                WHERE UPPER(CompanyCode) = UPPER(@CompanyCode)
                   AND UPPER(OrderId) = UPPER(@OrderId)
             ) THEN 1 ELSE 0 END;";
 
         return await db.ExecuteScalarAsync<bool>(new CommandDefinition(
             sql,
-            new { AccountId = accountId, CompanyCode = companyCode.ToUpper(), OrderId = orderId.ToUpper() },
+            new { CompanyCode = companyCode.ToUpper(), OrderId = orderId.ToUpper() },
             cancellationToken: cancellationToken));
     }
 
@@ -155,21 +182,44 @@ public class OrderRepository(IHttpContextAccessor httpContextAccessor) : IOrderR
                 transaction,
                 cancellationToken: cancellationToken)) ?? request.AccountId;
 
+            decimal platformFee = request.PlatformFee;
+            if (platformFee <= 0)
+            {
+                const string getPlatformFeeSql = "SELECT TOP 1 CAST(ConfigValue AS DECIMAL(18,2)) FROM dbo.GlobalConfig WHERE ConfigKey = 'PlatformFee';";
+                var configuredFee = await db.ExecuteScalarAsync<decimal?>(new CommandDefinition(getPlatformFeeSql, transaction: transaction, cancellationToken: cancellationToken));
+                platformFee = configuredFee ?? 0.50m;
+            }
+
+            string? assignedDeliveryPartner = request.DeliveryPartner;
+            if (string.IsNullOrWhiteSpace(assignedDeliveryPartner))
+            {
+                const string getPartnerSql = @"
+                    SELECT TOP 1 PartnerName 
+                    FROM dbo.DeliveryPartner 
+                    WHERE UPPER(CompanyCode) = UPPER(@CompanyCode) AND IsActive = 1
+                    ORDER BY IsDefault DESC, Sequence ASC;";
+                assignedDeliveryPartner = await db.ExecuteScalarAsync<string?>(new CommandDefinition(
+                    getPartnerSql,
+                    new { CompanyCode = request.CompanyCode.ToUpper() },
+                    transaction: transaction,
+                    cancellationToken: cancellationToken)) ?? "Standard Delivery";
+            }
+
             var subTotal = request.Items.Sum(x => x.Quantity * x.UnitPrice);
             var totalItems = request.Items.Sum(x => x.Quantity);
-            var totalAmount = subTotal + request.Tax + request.ShippingCost - request.Discount;
+            var totalAmount = subTotal + request.Tax + request.OtherTax + request.ShippingCost + platformFee - request.Discount;
             if (totalAmount < 0) totalAmount = 0;
 
             const string insertOrderSql = @"
                 INSERT INTO dbo.Orders
                 (AccountId, CompanyCode, OrderId, ParentOrderId, Channel, LocationType, LocationCode,
                  Status, PaymentStatus, CustomerName, CustomerEmail, CustomerPhone, ShippingAddress,
-                 TotalItems, SubTotal, Tax, ShippingCost, Discount, TotalAmount, Notes, OrderDate, DateCreated, CreatedBy,
+                 TotalItems, SubTotal, Tax, OtherTax, ShippingCost, Discount, PlatformFee, TotalAmount, Notes, OrderDate, DateCreated, CreatedBy,
                  ShipVia, DeliveryPartner, PickupLocationCode, PickupLocationName, ShippingState, PromoCode)
                 VALUES
                 (@AccountId, @CompanyCode, @OrderId, @ParentOrderId, @Channel, @LocationType, @LocationCode,
                  @Status, @PaymentStatus, @CustomerName, @CustomerEmail, @CustomerPhone, @ShippingAddress,
-                 @TotalItems, @SubTotal, @Tax, @ShippingCost, @Discount, @TotalAmount, @Notes, SYSDATETIME(), SYSDATETIME(), @CreatedBy,
+                 @TotalItems, @SubTotal, @Tax, @OtherTax, @ShippingCost, @Discount, @PlatformFee, @TotalAmount, @Notes, SYSDATETIME(), SYSDATETIME(), @CreatedBy,
                  @ShipVia, @DeliveryPartner, @PickupLocationCode, @PickupLocationName, @ShippingState, @PromoCode);";
 
             await db.ExecuteAsync(new CommandDefinition(
@@ -192,13 +242,15 @@ public class OrderRepository(IHttpContextAccessor httpContextAccessor) : IOrderR
                     TotalItems = totalItems,
                     SubTotal = subTotal,
                     Tax = request.Tax,
+                    OtherTax = request.OtherTax,
                     ShippingCost = request.ShippingCost,
                     Discount = request.Discount,
+                    PlatformFee = platformFee,
                     TotalAmount = totalAmount,
                     Notes = request.Notes,
                     CreatedBy = request.UserName,
                     ShipVia = request.ShipVia,
-                    DeliveryPartner = request.DeliveryPartner,
+                    DeliveryPartner = assignedDeliveryPartner,
                     PickupLocationCode = request.PickupLocationCode?.ToUpper(),
                     PickupLocationName = request.PickupLocationName,
                     ShippingState = request.ShippingState,
@@ -222,9 +274,9 @@ public class OrderRepository(IHttpContextAccessor httpContextAccessor) : IOrderR
 
             const string insertItemSql = @"
                 INSERT INTO dbo.OrderItem
-                (AccountId, CompanyCode, OrderId, ItemNumber, ItemName, ColourCode, SizeCode, Sku, Quantity, UnitPrice, TotalPrice, DateAdded)
+                (AccountId, CompanyCode, OrderId, ItemNumber, ItemName, ColourCode, SizeCode, Sku, Quantity, UnitPrice, TotalPrice, Tax, ShippingCost, Discount, DateAdded)
                 VALUES
-                (@AccountId, @CompanyCode, @OrderId, @ItemNumber, @ItemName, @ColourCode, @SizeCode, @Sku, @Quantity, @UnitPrice, @TotalPrice, SYSDATETIME());";
+                (@AccountId, @CompanyCode, @OrderId, @ItemNumber, @ItemName, @ColourCode, @SizeCode, @Sku, @Quantity, @UnitPrice, @TotalPrice, @Tax, @ShippingCost, @Discount, SYSDATETIME());";
 
             foreach (var itm in request.Items)
             {
@@ -243,7 +295,10 @@ public class OrderRepository(IHttpContextAccessor httpContextAccessor) : IOrderR
                         Sku = itm.Sku,
                         Quantity = itm.Quantity,
                         UnitPrice = itm.UnitPrice,
-                        TotalPrice = itemTotal
+                        TotalPrice = itemTotal,
+                        Tax = itm.Tax,
+                        ShippingCost = itm.ShippingCost,
+                        Discount = itm.Discount
                     },
                     transaction,
                     cancellationToken: cancellationToken));
@@ -299,23 +354,27 @@ public class OrderRepository(IHttpContextAccessor httpContextAccessor) : IOrderR
         {
             var createdIds = new List<string>();
 
+            const string getPlatformFeeSql = "SELECT TOP 1 CAST(ConfigValue AS DECIMAL(18,2)) FROM dbo.GlobalConfig WHERE ConfigKey = 'PlatformFee';";
+            var configuredFee = await db.ExecuteScalarAsync<decimal?>(new CommandDefinition(getPlatformFeeSql, transaction: transaction, cancellationToken: cancellationToken));
+            decimal defaultPlatformFee = configuredFee ?? 0.50m;
+
             const string insertOrderSql = @"
                 INSERT INTO dbo.Orders
                 (AccountId, CompanyCode, OrderId, ParentOrderId, Channel, LocationType, LocationCode,
                  Status, PaymentStatus, CustomerName, CustomerEmail, CustomerPhone, ShippingAddress,
-                 TotalItems, SubTotal, Tax, ShippingCost, Discount, TotalAmount, Notes, OrderDate, DateCreated, CreatedBy,
+                 TotalItems, SubTotal, Tax, OtherTax, ShippingCost, Discount, PlatformFee, TotalAmount, Notes, OrderDate, DateCreated, CreatedBy,
                  ShipVia, DeliveryPartner, PickupLocationCode, PickupLocationName, ShippingState, PromoCode)
                 VALUES
                 (@AccountId, @CompanyCode, @OrderId, @ParentOrderId, @Channel, @LocationType, @LocationCode,
                  @Status, @PaymentStatus, @CustomerName, @CustomerEmail, @CustomerPhone, @ShippingAddress,
-                 @TotalItems, @SubTotal, @Tax, @ShippingCost, @Discount, @TotalAmount, @Notes, SYSDATETIME(), SYSDATETIME(), @CreatedBy,
+                 @TotalItems, @SubTotal, @Tax, @OtherTax, @ShippingCost, @Discount, @PlatformFee, @TotalAmount, @Notes, SYSDATETIME(), SYSDATETIME(), @CreatedBy,
                  @ShipVia, @DeliveryPartner, @PickupLocationCode, @PickupLocationName, @ShippingState, @PromoCode);";
 
             const string insertItemSql = @"
                 INSERT INTO dbo.OrderItem
-                (AccountId, CompanyCode, OrderId, ItemNumber, ItemName, ColourCode, SizeCode, Sku, Quantity, UnitPrice, TotalPrice, DateAdded)
+                (AccountId, CompanyCode, OrderId, ItemNumber, ItemName, ColourCode, SizeCode, Sku, Quantity, UnitPrice, TotalPrice, Tax, ShippingCost, Discount, DateAdded)
                 VALUES
-                (@AccountId, @CompanyCode, @OrderId, @ItemNumber, @ItemName, @ColourCode, @SizeCode, @Sku, @Quantity, @UnitPrice, @TotalPrice, SYSDATETIME());";
+                (@AccountId, @CompanyCode, @OrderId, @ItemNumber, @ItemName, @ColourCode, @SizeCode, @Sku, @Quantity, @UnitPrice, @TotalPrice, @Tax, @ShippingCost, @Discount, SYSDATETIME());";
 
             foreach (var req in requests)
             {
@@ -331,9 +390,25 @@ public class OrderRepository(IHttpContextAccessor httpContextAccessor) : IOrderR
                     transaction,
                     cancellationToken: cancellationToken)) ?? req.AccountId;
 
+                string? assignedDeliveryPartner = req.DeliveryPartner;
+                if (string.IsNullOrWhiteSpace(assignedDeliveryPartner))
+                {
+                    const string getPartnerSql = @"
+                        SELECT TOP 1 PartnerName 
+                        FROM dbo.DeliveryPartner 
+                        WHERE UPPER(CompanyCode) = UPPER(@CompanyCode) AND IsActive = 1
+                        ORDER BY IsDefault DESC, Sequence ASC;";
+                    assignedDeliveryPartner = await db.ExecuteScalarAsync<string?>(new CommandDefinition(
+                        getPartnerSql,
+                        new { CompanyCode = req.CompanyCode.ToUpper() },
+                        transaction: transaction,
+                        cancellationToken: cancellationToken)) ?? "Standard Delivery";
+                }
+
+                decimal platformFee = req.PlatformFee > 0 ? req.PlatformFee : defaultPlatformFee;
                 var subTotal = req.Items.Sum(x => x.Quantity * x.UnitPrice);
                 var totalItems = req.Items.Sum(x => x.Quantity);
-                var totalAmount = subTotal + req.Tax + req.ShippingCost - req.Discount;
+                var totalAmount = subTotal + req.Tax + req.OtherTax + req.ShippingCost + platformFee - req.Discount;
                 if (totalAmount < 0) totalAmount = 0;
 
                 await db.ExecuteAsync(new CommandDefinition(
@@ -356,13 +431,15 @@ public class OrderRepository(IHttpContextAccessor httpContextAccessor) : IOrderR
                         TotalItems = totalItems,
                         SubTotal = subTotal,
                         Tax = req.Tax,
+                        OtherTax = req.OtherTax,
                         ShippingCost = req.ShippingCost,
                         Discount = req.Discount,
+                        PlatformFee = platformFee,
                         TotalAmount = totalAmount,
                         Notes = req.Notes,
                         CreatedBy = req.UserName,
                         ShipVia = req.ShipVia,
-                        DeliveryPartner = req.DeliveryPartner,
+                        DeliveryPartner = assignedDeliveryPartner,
                         PickupLocationCode = req.PickupLocationCode?.ToUpper(),
                         PickupLocationName = req.PickupLocationName,
                         ShippingState = req.ShippingState,
@@ -401,7 +478,10 @@ public class OrderRepository(IHttpContextAccessor httpContextAccessor) : IOrderR
                             Sku = itm.Sku,
                             Quantity = itm.Quantity,
                             UnitPrice = itm.UnitPrice,
-                            TotalPrice = itemTotal
+                            TotalPrice = itemTotal,
+                            Tax = itm.Tax,
+                            ShippingCost = itm.ShippingCost,
+                            Discount = itm.Discount
                         },
                         transaction,
                         cancellationToken: cancellationToken));

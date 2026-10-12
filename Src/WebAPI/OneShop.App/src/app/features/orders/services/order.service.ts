@@ -25,8 +25,10 @@ export const GET_ORDERS = gql`
       totalItems
       subTotal
       tax
+      otherTax
       shippingCost
       discount
+      platformFee
       totalAmount
       notes
       orderDate
@@ -51,6 +53,9 @@ export const GET_ORDERS = gql`
         quantity
         unitPrice
         totalPrice
+        tax
+        shippingCost
+        discount
         dateAdded
       }
       auditTrail {
@@ -90,8 +95,10 @@ export const GET_ORDER_BY_ID = gql`
       totalItems
       subTotal
       tax
+      otherTax
       shippingCost
       discount
+      platformFee
       totalAmount
       notes
       orderDate
@@ -116,6 +123,9 @@ export const GET_ORDER_BY_ID = gql`
         quantity
         unitPrice
         totalPrice
+        tax
+        shippingCost
+        discount
         dateAdded
       }
       auditTrail {

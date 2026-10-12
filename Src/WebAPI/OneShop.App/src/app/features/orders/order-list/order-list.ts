@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { OrderService } from '../services/order.service';
 import { CompanyService } from '../../company/services/company.service';
@@ -16,6 +16,8 @@ import { Order, OrderItem, OrderInput, OrderItemInput, UpdateOrderDetailsInput, 
 import { Item } from '../../item/models/item.model';
 import { Access } from '../../../core/services/access';
 import { Account } from '../../../core/services/account';
+import { CartService } from '../services/cart.service';
+import { NotificationService } from '../../notifications/services/notification.service';
 
 @Component({
   selector: 'app-order-list',
@@ -32,20 +34,23 @@ export class OrderList implements OnInit {
   private taxService = inject(TaxService);
   private promoService = inject(PromoService);
   private addressService = inject(AddressService);
+  public cartService = inject(CartService);
+  public notifService = inject(NotificationService);
   private toast = inject(MessageService);
   private confirmService = inject(ConfirmationService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private access = inject(Access);
   private account = inject(Account);
 
   // User & Persona Detection
-  currentUser = signal<any>(null);
+  currentUser = signal<any>(this.account.getUserDetails());
 
   isCustomer = computed(() => {
     const u = this.currentUser();
     if (!u) return false;
-    return u.isCustomerAccount === true;
+    return u.isCustomerAccount === true && !u.isSellerAccount;
   });
 
   isMaster = computed(() => {
@@ -90,6 +95,7 @@ export class OrderList implements OnInit {
   selectedCompanyFilter = signal<string>('ALL');
   selectedStatusFilter = signal<string>('ALL');
   selectedChannelFilter = signal<string>('ALL');
+  customerStatusFilter = signal<'ALL' | 'ACTIVE' | 'DELIVERED' | 'CANCELLED'>('ALL');
   searchQuery = signal<string>('');
   showMyOrdersOnly = signal<boolean>(false);
 
@@ -187,11 +193,20 @@ export class OrderList implements OnInit {
       const u = this.currentUser();
       const curEmail = (u?.email || '').trim().toLowerCase();
       const curUser = (u?.userName || '').trim().toLowerCase();
-      list = list.filter(o =>
-        (o.createdBy && (o.createdBy.toLowerCase() === curUser || o.createdBy.toLowerCase() === curEmail)) ||
-        (o.customerEmail && curEmail && o.customerEmail.toLowerCase() === curEmail) ||
-        (o.customerName && curUser && o.customerName.toLowerCase().includes(curUser))
-      );
+      const cleanUser = curUser.replace(/\s+/g, '');
+
+      list = list.filter(o => {
+        const oCreatedBy = (o.createdBy || '').trim().toLowerCase();
+        const oCustEmail = (o.customerEmail || '').trim().toLowerCase();
+        const oCustName = (o.customerName || '').trim().toLowerCase();
+        const cleanCustName = oCustName.replace(/\s+/g, '');
+
+        return (
+          (curUser && oCreatedBy === curUser) ||
+          (curEmail && (oCreatedBy === curEmail || oCustEmail === curEmail)) ||
+          (cleanUser && cleanCustName && (cleanCustName.includes(cleanUser) || cleanUser.includes(cleanCustName)))
+        );
+      });
     }
 
     if (comp !== 'ALL') {
@@ -203,6 +218,19 @@ export class OrderList implements OnInit {
     if (channel !== 'ALL') {
       list = list.filter(o => o.channel.toUpperCase() === channel.toUpperCase() || o.channel.toUpperCase() === 'BOTH');
     }
+
+    // Customer-specific tabs filter (ALL, ACTIVE, DELIVERED, CANCELLED)
+    if (this.isCustomer()) {
+      const custTab = this.customerStatusFilter();
+      if (custTab === 'ACTIVE') {
+        list = list.filter(o => ['pending', 'confirmed', 'processing', 'shipped'].includes(o.status.toLowerCase()));
+      } else if (custTab === 'DELIVERED') {
+        list = list.filter(o => o.status.toLowerCase() === 'delivered');
+      } else if (custTab === 'CANCELLED') {
+        list = list.filter(o => o.status.toLowerCase() === 'cancelled');
+      }
+    }
+
     if (q) {
       list = list.filter(o =>
         o.orderId.toLowerCase().includes(q) ||
@@ -212,7 +240,13 @@ export class OrderList implements OnInit {
         (o.items && o.items.some(i => i.itemNumber.toLowerCase().includes(q) || i.itemName.toLowerCase().includes(q)))
       );
     }
-    return list;
+
+    // Always sort recent at the top
+    return [...list].sort((a, b) => {
+      const timeB = b.orderDate ? new Date(b.orderDate).getTime() : 0;
+      const timeA = a.orderDate ? new Date(a.orderDate).getTime() : 0;
+      return timeB - timeA;
+    });
   });
 
   // KPI Stats
@@ -256,17 +290,33 @@ export class OrderList implements OnInit {
     this.currentUser.set(user);
     if (this.isCustomer()) {
       this.showMyOrdersOnly.set(true);
+    } else {
+      this.showMyOrdersOnly.set(false);
     }
 
     this.refreshData();
     this.taxService.loadTaxes();
     this.promoService.loadPromoCodes(true);
     this.addressService.loadAddresses();
+
+    this.route.queryParams.subscribe(params => {
+      const targetOrderId = params['orderId'];
+      if (targetOrderId) {
+        this.searchQuery.set(targetOrderId);
+        setTimeout(() => {
+          const match = this.orders().find(o => o.orderId.toLowerCase() === targetOrderId.toLowerCase());
+          if (match) {
+            this.openOrderDetails(match);
+          }
+        }, 600);
+      }
+    });
   }
 
   refreshData() {
+    const u = this.currentUser();
     const createdByFilter = (this.isCustomer() || this.showMyOrdersOnly())
-      ? (this.currentUser()?.email || this.currentUser()?.userName || undefined)
+      ? (u?.userName || u?.email || undefined)
       : undefined;
 
     this.orderService.list(undefined, undefined, undefined, undefined, createdByFilter).catch(err => {
@@ -286,6 +336,17 @@ export class OrderList implements OnInit {
   }
 
   openCreateOrderModal() {
+    if (this.isCustomer()) {
+      this.toast.add({
+        severity: 'info',
+        summary: 'Order via Catalog & Cart',
+        detail: 'Customers can place orders by browsing the Catalog and checking out via Cart.',
+        life: 4000
+      });
+      this.router.navigate(['/dashboard']);
+      return;
+    }
+
     this.orderDraftItems.set([]);
     this.selectedItemForDraft.set(null);
     this.selectedSizeForDraft.set('ALL');
@@ -629,6 +690,61 @@ export class OrderList implements OnInit {
     return !this.isCustomer();
   }
 
+  canCustomerCancelOrder(order: Order | null): boolean {
+    if (!order || !order.status) return false;
+    const s = order.status.trim().toLowerCase();
+    return !['shipped', 'delivered', 'cancelled'].includes(s);
+  }
+
+  async cancelOrderAsCustomer(order: Order) {
+    if (!order) return;
+    if (!this.canCustomerCancelOrder(order)) {
+      this.toast.add({
+        severity: 'warn',
+        summary: 'Cannot Cancel',
+        detail: `Orders marked as ${order.status} cannot be cancelled.`
+      });
+      return;
+    }
+
+    this.confirmService.confirm({
+      message: `Are you sure you want to cancel Order #${order.orderId}?`,
+      header: 'Cancel Order Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      accept: async () => {
+        try {
+          const res = await this.orderService.updateStatus(order.companyCode, order.orderId, 'Cancelled', 'Customer');
+          if (res.success) {
+            this.toast.add({
+              severity: 'success',
+              summary: 'Order Cancelled',
+              detail: `Order #${order.orderId} has been successfully cancelled.`
+            });
+            this.refreshData();
+            if (this.selectedOrderForDetails()?.orderId === order.orderId) {
+              this.selectedOrderForDetails.update(cur => cur ? { ...cur, status: 'Cancelled' } : null);
+            }
+          } else {
+            this.toast.add({ severity: 'error', summary: 'Cancellation Failed', detail: res.message });
+          }
+        } catch (err: any) {
+          this.toast.add({ severity: 'error', summary: 'Error', detail: err.message || 'Failed to cancel order.' });
+        }
+      }
+    });
+  }
+
+  viewOrderInvoice(order: Order) {
+    if (!order) return;
+    this.closeOrderDetails();
+    this.router.navigate(['/dashboard/orders/success'], {
+      queryParams: {
+        orderId: order.orderId,
+        companyCode: order.companyCode
+      }
+    });
+  }
+
   async openEditOrder(order: Order) {
     if (this.isOrderLocked(order)) {
       this.toast.add({
@@ -898,5 +1014,152 @@ export class OrderList implements OnInit {
 
   isSegregatedSubOrder(orderId: string): boolean {
     return (orderId || '').includes('.');
+  }
+
+  // --- Customer Amazon-Style Orders Dashboard Helpers ---
+
+  setCustomerStatusFilter(filter: 'ALL' | 'ACTIVE' | 'DELIVERED' | 'CANCELLED') {
+    this.customerStatusFilter.set(filter);
+  }
+
+  getItemImage(itemNumber: string): string | null {
+    if (!itemNumber) return null;
+    const it = this.allItems().find(i => i.itemNumber.toUpperCase() === itemNumber.toUpperCase());
+    if (!it || !it.images) return null;
+    const parts = it.images.split(',');
+    return parts[0]?.trim() || null;
+  }
+
+  getEstimatedArrivalInfo(order: Order): { label: string; dateText: string; isProcessing: boolean; icon: string; color: string } {
+    const s = (order.status || '').toLowerCase();
+    if (s === 'delivered') {
+      const dateStr = order.orderDate ? new Date(order.orderDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : 'Delivered';
+      return {
+        label: 'Delivered',
+        dateText: `Delivered on ${dateStr}`,
+        isProcessing: false,
+        icon: 'pi pi-check-circle',
+        color: '#10b981'
+      };
+    }
+    if (s === 'cancelled') {
+      return {
+        label: 'Cancelled',
+        dateText: 'Order Cancelled',
+        isProcessing: false,
+        icon: 'pi pi-times-circle',
+        color: '#ef4444'
+      };
+    }
+    if (s === 'shipped') {
+      const baseDate = order.orderDate ? new Date(order.orderDate) : new Date();
+      const estDate = new Date(baseDate);
+      estDate.setDate(estDate.getDate() + 4);
+      const estStr = estDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+      const partner = order.deliveryPartner || order.shipVia || 'Express Courier';
+      return {
+        label: 'Shipped',
+        dateText: `Estimated Delivery: ${estStr} (Dispatched via ${partner})`,
+        isProcessing: false,
+        icon: 'pi pi-truck',
+        color: '#05517e'
+      };
+    }
+    // Pending, Confirmed, Processing (initial state before partner updates)
+    return {
+      label: 'Processing',
+      dateText: 'Processing (Estimated Delivery Pending Partner Dispatch)',
+      isProcessing: true,
+      icon: 'pi pi-clock',
+      color: '#f59e0b'
+    };
+  }
+
+  downloadOrderInvoice(order: Order) {
+    if (!order) return;
+    this.router.navigate(['/dashboard/orders/success'], {
+      queryParams: {
+        orderId: order.orderId,
+        companyCode: order.companyCode,
+        download: '1'
+      }
+    });
+  }
+
+  buyAgain(item: OrderItem, order: Order) {
+    const price = item.unitPrice || 0;
+    this.cartService.addToCart({
+      itemNumber: item.itemNumber,
+      itemName: item.itemName,
+      category: (item as any).category || 'Retail',
+      companyCode: order.companyCode,
+      companyName: order.companyName || order.companyCode,
+      sizeCode: item.sizeCode || 'ALL',
+      channel: 'B2C',
+      unitPrice: price,
+      b2cPrice: price,
+      quantity: 1,
+      locationType: (order.locationType as 'Store' | 'Warehouse') || 'Store',
+      locationCode: order.locationCode,
+      locationName: order.locationName || order.locationCode
+    });
+    this.toast.add({
+      severity: 'success',
+      summary: 'Added to Cart',
+      detail: `${item.itemName} (${item.sizeCode || 'Std'}) added to your cart!`,
+      life: 3000
+    });
+    this.cartService.openDrawer();
+  }
+
+  // Recommended Products for Customers
+  suggestedProducts = computed(() => {
+    const list = this.allItems();
+    if (!list || list.length === 0) return [];
+    const b2c = list.filter(i => !i.salesChannel || i.salesChannel.toUpperCase() === 'B2C' || i.salesChannel.toUpperCase() === 'BOTH');
+    return (b2c.length > 0 ? b2c : list).slice(0, 6);
+  });
+
+  addSuggestedToCart(item: Item) {
+    const defaultSize = item.variants && item.variants.length > 0 ? item.variants[0].sizeCode : 'ALL';
+    const price = item.b2cPrice || item.b2bPrice || 0;
+    this.cartService.addToCart({
+      itemNumber: item.itemNumber,
+      itemName: item.name,
+      category: item.category,
+      companyCode: item.companyCode,
+      companyName: item.companyCode,
+      sizeCode: defaultSize,
+      channel: (item.salesChannel as 'B2B' | 'B2C' | 'Both') || 'Both',
+      unitPrice: price,
+      b2cPrice: item.b2cPrice,
+      b2bPrice: item.b2bPrice,
+      quantity: 1,
+      locationType: 'Store',
+      locationCode: 'DEFAULT',
+      locationName: 'Online Store'
+    });
+    this.toast.add({
+      severity: 'success',
+      summary: 'Added to Cart',
+      detail: `${item.name} added to your cart!`,
+      life: 3000
+    });
+    this.cartService.openDrawer();
+  }
+
+  // Embedded Notifications / Order Alerts helpers
+  dismissAlert(orderId: string, event?: Event) {
+    if (event) event.stopPropagation();
+    this.notifService.dismissNotification(orderId);
+  }
+
+  markAlertRead(orderId: string, event?: Event) {
+    if (event) event.stopPropagation();
+    this.notifService.markAsRead(orderId);
+  }
+
+  markAllAlertsRead() {
+    this.notifService.markAllAsRead();
   }
 }

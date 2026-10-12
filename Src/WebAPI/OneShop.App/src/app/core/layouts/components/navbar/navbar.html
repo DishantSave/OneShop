@@ -4,14 +4,163 @@
       <i class="pi pi-bars" [ngStyle]="{ fontSize: '1.25rem', color: 'var(--navbar-text)' }"></i>
     </button>
 
-    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '1rem' }">
+    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem' }">
       <a *ngFor="let item of tabItems" [routerLink]="item.route" routerLinkActive="active-tab"
          [routerLinkActiveOptions]="{ exact: true }"
-         [ngStyle]="{ textDecoration: 'none', fontWeight: '500', padding: '0.4rem 0.5rem', color: 'var(--navbar-text)' }">{{ item.label }}</a>
+         [ngStyle]="{ textDecoration: 'none', fontWeight: '500', padding: '0.4rem 0.5rem', color: 'var(--navbar-text)', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }">
+        {{ item.label }}
+        <span *ngIf="item.label.includes('Notif') && unreadNotifs() > 0"
+              [ngStyle]="{
+                background: '#ef4444', color: '#ffffff', borderRadius: '10px',
+                padding: '0.05rem 0.4rem', fontSize: '0.7rem', fontWeight: '800'
+              }">
+          {{ unreadNotifs() }}
+        </span>
+      </a>
     </div>
   </div>
 
-  <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '1rem', marginRight: 'clamp(80px, 12vw, 130px)' }">
+  <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginRight: 'clamp(80px, 12vw, 130px)' }">
+    <!-- Notification Bell Button & Dropdown -->
+    <div [ngStyle]="{ position: 'relative' }">
+      <!-- Backdrop for closing dropdown when clicking outside -->
+      <div *ngIf="notifDropdownOpen()" (click)="closeNotifDropdown()"
+           [ngStyle]="{ position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh', zIndex: '99', background: 'transparent' }">
+      </div>
+
+      <button (click)="toggleNotifDropdown()"
+              type="button"
+              title="Order Notifications & Alerts"
+              [ngStyle]="{
+                background: unreadNotifs() > 0 ? 'rgba(239, 68, 68, 0.08)' : 'rgba(5, 81, 126, 0.08)',
+                border: unreadNotifs() > 0 ? '1px solid rgba(239, 68, 68, 0.35)' : '1px solid rgba(5, 81, 126, 0.25)',
+                borderRadius: '20px', padding: '0.4rem 0.85rem', display: 'flex', alignItems: 'center',
+                gap: '0.45rem', cursor: 'pointer', color: 'var(--navbar-text)', fontSize: '0.85rem',
+                fontWeight: '700', transition: 'all 0.2s ease', position: 'relative', zIndex: '100'
+              }">
+        <i class="pi pi-bell" [ngStyle]="{ color: unreadNotifs() > 0 ? '#ef4444' : '#05517e', fontSize: '1rem' }"></i>
+        <span>Alerts</span>
+        <span *ngIf="unreadNotifs() > 0"
+              [ngStyle]="{
+                background: '#ef4444', color: '#ffffff', borderRadius: '10px',
+                padding: '0.1rem 0.45rem', fontSize: '0.72rem', fontWeight: '800'
+              }">
+          {{ unreadNotifs() }}
+        </span>
+      </button>
+
+      <!-- Dropdown Popup Window -->
+      <div *ngIf="notifDropdownOpen()"
+           [ngStyle]="{
+             position: 'absolute', top: 'calc(100% + 8px)', right: '0', width: '350px',
+             background: 'var(--card-bg, #ffffff)', border: '1px solid var(--border-color, #e2e8f0)',
+             borderRadius: '14px', boxShadow: '0 12px 30px rgba(0, 0, 0, 0.15)',
+             zIndex: '101', overflow: 'hidden', display: 'flex', flexDirection: 'column'
+           }">
+
+        <!-- Dropdown Header -->
+        <div [ngStyle]="{
+               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+               padding: '0.85rem 1rem', borderBottom: '1px solid var(--border-color, #e2e8f0)',
+               background: 'var(--navbar-bg)'
+             }">
+          <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
+            <span [ngStyle]="{ fontWeight: '800', fontSize: '0.9rem', color: 'var(--text-color)' }">
+              Order Notifications
+            </span>
+            <span *ngIf="unreadNotifs() > 0"
+                  [ngStyle]="{
+                    background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444',
+                    padding: '0.1rem 0.45rem', borderRadius: '10px', fontSize: '0.72rem', fontWeight: '800'
+                  }">
+              {{ unreadNotifs() }} New
+            </span>
+          </div>
+          <button *ngIf="unreadNotifs() > 0"
+                  (click)="markAllAsRead($event)"
+                  type="button"
+                  [ngStyle]="{
+                    background: 'transparent', border: 'none', color: '#05517e',
+                    fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', padding: '0.2rem'
+                  }">
+            Mark all read
+          </button>
+        </div>
+
+        <!-- Notification Items List -->
+        <div [ngStyle]="{ maxHeight: '340px', overflowY: 'auto' }">
+          <div *ngIf="recentNotifs().length === 0"
+               [ngStyle]="{ padding: '2rem 1rem', textAlign: 'center', color: 'var(--text-color)', opacity: '0.6', fontSize: '0.85rem' }">
+            <i class="pi pi-inbox" [ngStyle]="{ fontSize: '1.75rem', display: 'block', marginBottom: '0.5rem', opacity: '0.5' }"></i>
+            No order notifications yet
+          </div>
+
+          <div *ngFor="let n of recentNotifs()"
+               (click)="goToOrder(n, $event)"
+               [ngStyle]="{
+                 padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-color, #f1f5f9)',
+                 cursor: 'pointer', display: 'flex', gap: '0.75rem', alignItems: 'flex-start',
+                 background: !n.isRead ? 'rgba(5, 81, 126, 0.04)' : 'transparent',
+                 transition: 'background 0.15s ease'
+               }">
+            <!-- Indicator dot -->
+            <div [ngStyle]="{
+                   width: '8px', height: '8px', borderRadius: '50%', marginTop: '6px', flexShrink: '0',
+                   background: !n.isRead ? '#ef4444' : '#cbd5e1'
+                 }">
+            </div>
+
+            <!-- Content -->
+            <div [ngStyle]="{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', gap: '0.2rem', overflow: 'hidden' }">
+              <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }">
+                <span [ngStyle]="{ fontWeight: '800', fontSize: '0.85rem', color: '#05517e' }">
+                  Order #{{ n.orderId }}
+                </span>
+                <span [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.6' }">
+                  {{ n.timeAgo }}
+                </span>
+              </div>
+              <div [ngStyle]="{ fontSize: '0.8rem', color: 'var(--text-color)', fontWeight: !n.isRead ? '600' : '400', lineHeight: '1.3' }">
+                {{ n.customerName }} • {{ n.totalItems }} unit(s) • ${{ n.totalAmount | number:'1.2-2' }}
+              </div>
+              <div [ngStyle]="{ display: 'flex', gap: '0.35rem', marginTop: '0.15rem', alignItems: 'center' }">
+                <span [ngStyle]="{
+                        fontSize: '0.68rem', padding: '0.05rem 0.35rem', borderRadius: '4px',
+                        background: 'rgba(5, 81, 126, 0.1)', color: '#05517e', fontWeight: '700'
+                      }">
+                  {{ n.channel }}
+                </span>
+                <span [ngStyle]="{
+                        fontSize: '0.68rem', padding: '0.05rem 0.35rem', borderRadius: '4px',
+                        background: n.status === 'Shipped' || n.status === 'Delivered' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
+                        color: n.status === 'Shipped' || n.status === 'Delivered' ? '#10b981' : '#f59e0b',
+                        fontWeight: '700'
+                      }">
+                  {{ n.status }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dropdown Footer -->
+        <div [ngStyle]="{
+               padding: '0.75rem 1rem', borderTop: '1px solid var(--border-color, #e2e8f0)',
+               background: 'var(--navbar-bg)', display: 'flex', justifyContent: 'center'
+             }">
+          <button (click)="viewAllNotifications()"
+                  type="button"
+                  [ngStyle]="{
+                    width: '100%', background: '#05517e', color: '#ffffff',
+                    border: 'none', borderRadius: '8px', padding: '0.5rem', fontSize: '0.82rem',
+                    fontWeight: '700', cursor: 'pointer', textAlign: 'center', transition: 'background 0.2s ease'
+                  }">
+            View All Notifications Hub →
+          </button>
+        </div>
+      </div>
+    </div>
+
     <button (click)="openCart()"
             type="button"
             title="Shopping Cart & Segregated Checkout"

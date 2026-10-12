@@ -24,6 +24,7 @@ public static class QueryRegistrationExtension
         builder.AddTypeExtension<TaxQuery>();
         builder.AddTypeExtension<PromoCodeQuery>();
         builder.AddTypeExtension<UserAddressQuery>();
+        builder.AddTypeExtension<DeliveryPartnerQuery>();
 
         return builder;
     }

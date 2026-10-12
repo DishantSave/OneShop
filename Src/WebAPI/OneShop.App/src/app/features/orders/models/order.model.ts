@@ -11,6 +11,9 @@ export interface OrderItem {
   quantity: number;
   unitPrice: number;
   totalPrice?: number;
+  tax?: number;
+  shippingCost?: number;
+  discount?: number;
   dateAdded?: string;
 }
 
@@ -49,8 +52,10 @@ export interface Order {
   totalItems: number;
   subTotal: number;
   tax: number;
+  otherTax?: number;
   shippingCost: number;
   discount: number;
+  platformFee?: number;
   totalAmount: number;
   notes?: string;
   orderDate?: string;
@@ -98,6 +103,9 @@ export interface OrderItemInput {
   sku?: string;
   quantity: number;
   unitPrice: number;
+  tax?: number;
+  shippingCost?: number;
+  discount?: number;
 }
 
 export interface OrderInput {
@@ -114,8 +122,10 @@ export interface OrderInput {
   customerPhone?: string;
   shippingAddress?: string;
   tax?: number;
+  otherTax?: number;
   shippingCost?: number;
   discount?: number;
+  platformFee?: number;
   notes?: string;
   shipVia?: string;
   deliveryPartner?: string;
@@ -131,7 +141,7 @@ export interface BatchOrderInput {
 }
 
 export interface CartItem {
-  id: string; // unique cart key (e.g. itemNumber::sizeCode::companyCode)
+  id: string; // unique cart key (e.g. itemNumber::sizeCode::companyCode::locationCode)
   itemNumber: string;
   itemName: string;
   category?: string;
@@ -147,6 +157,10 @@ export interface CartItem {
   locationType: 'Store' | 'Warehouse';
   locationCode: string;
   locationName?: string;
+  // Item financial breakdown
+  taxAmount?: number;
+  shippingAmount?: number;
+  discountAmount?: number;
 }
 
 export interface SegregatedOrderGroup {
@@ -166,8 +180,51 @@ export interface SegregatedOrderGroup {
   pickupLocationCode?: string;
   pickupLocationName?: string;
   tax?: number;
+  otherTax?: number;
   shippingCost?: number;
   discount?: number;
+  platformFee?: number;
   promoCode?: string;
 }
 
+export interface DeliveryPartner {
+  sequence: number;
+  accountId: string;
+  companyCode: string;
+  partnerName: string;
+  channel: string;
+  itemCategory: string;
+  baseShippingRate: number;
+  perItemShippingRate: number;
+  freeShippingThreshold: number;
+  estimatedDays: number;
+  isDefault: boolean;
+  isActive: boolean;
+  dateCreated?: string;
+  dateModified?: string;
+  createdBy?: string;
+}
+
+export interface DeliveryPartnerInput {
+  sequence?: number;
+  companyCode: string;
+  partnerName: string;
+  channel?: string;
+  itemCategory?: string;
+  baseShippingRate?: number;
+  perItemShippingRate?: number;
+  freeShippingThreshold?: number;
+  estimatedDays?: number;
+  isDefault?: boolean;
+  isActive?: boolean;
+}
+
+export interface ShippingCalculationResult {
+  assignedPartnerName: string;
+  assignedPartner?: string;
+  totalShippingCost: number;
+  perItemShippingCost: number;
+  isFreeShipping: boolean;
+  freeShippingThreshold: number;
+  estimatedDays: number;
+}

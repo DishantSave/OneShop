@@ -111,6 +111,13 @@ export class DashboardHome implements OnInit {
     return result;
   });
 
+  // Active collection object if selected
+  activeCollection = computed(() => {
+    const code = this.selectedCatalogFilter();
+    if (code === 'ALL') return null;
+    return this.collections().find(c => c.code.toUpperCase() === code.toUpperCase()) || null;
+  });
+
   // KPI Stats
   totalCatalogsCount = computed(() => this.collections().length);
   totalItemsCount = computed(() => this.items().length);
@@ -124,7 +131,7 @@ export class DashboardHome implements OnInit {
       try {
         const u = JSON.parse(userStr);
         this.isCustomerUser.set(u.isCustomerAccount === true && !u.isSellerAccount);
-      } catch {}
+      } catch { }
     }
 
     this.collectionService.list().catch(console.error);
@@ -247,6 +254,68 @@ export class DashboardHome implements OnInit {
       detail: `${qty}x ${item.name} (${size}) added. Fulfill via ${dest.type}: ${dest.name}.`,
       life: 3000
     });
+  }
+
+  addCatalogToCart(col: Collection, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    if (!col || !col.items || col.items.length === 0) {
+      this.toast.add({
+        severity: 'warn',
+        summary: 'Empty Catalog',
+        detail: `Catalog "${col?.name || 'Selected'}" contains no items.`
+      });
+      return;
+    }
+
+    let addedCount = 0;
+    const allProducts = this.items();
+
+    for (const colItem of col.items) {
+      const match = allProducts.find(i => i.itemNumber.toUpperCase() === colItem.itemNumber.toUpperCase());
+      if (match) {
+        const size = this.getSelectedSize(match);
+        const dest = this.getSelectedDestination(match);
+        const price = this.getPrice(match);
+
+        this.cartService.addToCart({
+          itemNumber: match.itemNumber,
+          itemName: match.name,
+          category: match.category,
+          companyCode: match.companyCode,
+          companyName: this.companies().find(c => c.code.toUpperCase() === match.companyCode.toUpperCase())?.name || match.companyCode,
+          sizeCode: size,
+          channel: (match.salesChannel as 'B2B' | 'B2C' | 'Both') || 'Both',
+          unitPrice: price,
+          b2cPrice: match.b2cPrice,
+          b2bPrice: match.b2bPrice,
+          b2bMinQuantity: match.b2bMinQuantity,
+          quantity: 1,
+          locationType: dest.type,
+          locationCode: dest.code,
+          locationName: dest.name
+        });
+        addedCount++;
+      }
+    }
+
+    if (addedCount > 0) {
+      this.toast.add({
+        severity: 'success',
+        summary: 'Catalog Added to Cart',
+        detail: `Added ${addedCount} products from "${col.name}" to your Cart!`,
+        life: 4000
+      });
+      // Automatically open the cart drawer so customer sees their items
+      this.cartService.openDrawer();
+    } else {
+      this.toast.add({
+        severity: 'warn',
+        summary: 'Items Not Found',
+        detail: 'Catalog items could not be found in active inventory.'
+      });
+    }
   }
 
   goToOrders() {

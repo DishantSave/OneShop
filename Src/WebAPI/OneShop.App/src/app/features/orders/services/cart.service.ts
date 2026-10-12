@@ -168,7 +168,10 @@ export class CartService {
     promoCode?: string;
     discount?: number;
     tax?: number;
+    otherTax?: number;
     shippingCost?: number;
+    platformFee?: number;
+    paymentStatus?: string;
     shipVia?: string;
     deliveryPartner?: string;
     pickupLocationCode?: string;
@@ -180,8 +183,12 @@ export class CartService {
     return groups.map(g => {
       const isWarehouse = g.locationType === 'Warehouse';
       const grpDiscount = customerInfo?.discount ? Math.round((customerInfo.discount / count) * 100) / 100 : 0;
-      const grpShipping = customerInfo?.shippingCost ? Math.round((customerInfo.shippingCost / count) * 100) / 100 : 0;
+      const grpShipping = customerInfo?.shippingCost !== undefined ? Math.round((customerInfo.shippingCost / count) * 100) / 100 : 0;
       const grpTax = customerInfo?.tax ? Math.round((customerInfo.tax / count) * 100) / 100 : 0;
+      const grpOtherTax = customerInfo?.otherTax ? Math.round((customerInfo.otherTax / count) * 100) / 100 : 0;
+      const grpPlatformFee = customerInfo?.platformFee !== undefined ? Math.round((customerInfo.platformFee / count) * 100) / 100 : 0.50;
+
+      const groupItemCount = g.items.reduce((s, it) => s + it.quantity, 0) || 1;
 
       return {
         companyCode: g.companyCode,
@@ -190,7 +197,7 @@ export class CartService {
         locationType: g.locationType,
         locationCode: g.locationCode,
         status: 'Pending',
-        paymentStatus: 'Unpaid',
+        paymentStatus: customerInfo?.paymentStatus || 'Paid',
         customerName: customerInfo?.name,
         customerEmail: customerInfo?.email,
         customerPhone: customerInfo?.phone,
@@ -198,20 +205,31 @@ export class CartService {
         shippingState: customerInfo?.state,
         promoCode: customerInfo?.promoCode,
         tax: grpTax,
+        otherTax: grpOtherTax,
         shippingCost: grpShipping,
         discount: grpDiscount,
+        platformFee: grpPlatformFee,
         shipVia: isWarehouse ? (customerInfo?.shipVia || 'Road Freight') : undefined,
-        deliveryPartner: !isWarehouse ? (customerInfo?.deliveryPartner || 'Delhivery') : undefined,
+        deliveryPartner: customerInfo?.deliveryPartner || undefined,
         pickupLocationCode: !isWarehouse ? customerInfo?.pickupLocationCode : undefined,
         pickupLocationName: !isWarehouse ? customerInfo?.pickupLocationName : undefined,
         notes: customerInfo?.notes,
-        items: g.items.map(it => ({
-          itemNumber: it.itemNumber,
-          itemName: it.itemName,
-          sizeCode: it.sizeCode,
-          quantity: it.quantity,
-          unitPrice: it.unitPrice
-        }))
+        items: g.items.map(it => {
+          const itemTax = it.taxAmount ?? (Math.round((grpTax * (it.quantity / groupItemCount)) * 100) / 100);
+          const itemShipping = it.shippingAmount ?? (Math.round((grpShipping * (it.quantity / groupItemCount)) * 100) / 100);
+          const itemDiscount = it.discountAmount ?? (Math.round((grpDiscount * (it.quantity / groupItemCount)) * 100) / 100);
+
+          return {
+            itemNumber: it.itemNumber,
+            itemName: it.itemName,
+            sizeCode: it.sizeCode,
+            quantity: it.quantity,
+            unitPrice: it.unitPrice,
+            tax: itemTax,
+            shippingCost: itemShipping,
+            discount: itemDiscount
+          };
+        })
       };
     });
   }

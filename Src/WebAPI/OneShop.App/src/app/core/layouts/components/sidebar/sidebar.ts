@@ -12,7 +12,7 @@ import { ButtonModule } from 'primeng/button';
 })
 export class Sidebar {
   @Input() collapsed = false;
-  @Input() menuItems: { label: string; route: string; icon: string }[] = [];
+  @Input() menuItems: { label: string; route: string; icon: string; badge?: number }[] = [];
   @Input() userAvatar?: string;
   @Input() userName?: string;
   @Input() company?: string;

@@ -9,6 +9,9 @@ public class OrderItemInput
     public string? Sku { get; set; }
     public int Quantity { get; set; } = 1;
     public decimal UnitPrice { get; set; } = 0;
+    public decimal? Tax { get; set; } = 0;
+    public decimal? ShippingCost { get; set; } = 0;
+    public decimal? Discount { get; set; } = 0;
 }
 
 public class OrderInput
@@ -26,8 +29,10 @@ public class OrderInput
     public string? CustomerPhone { get; set; }
     public string? ShippingAddress { get; set; }
     public decimal? Tax { get; set; } = 0;
+    public decimal? OtherTax { get; set; } = 0;
     public decimal? ShippingCost { get; set; } = 0;
     public decimal? Discount { get; set; } = 0;
+    public decimal? PlatformFee { get; set; } = 0.50m;
     public string? Notes { get; set; }
     public string? ShipVia { get; set; }
     public string? DeliveryPartner { get; set; }

@@ -74,8 +74,13 @@ export const routes: Routes = [
         path: 'orders',
         component: OrderMaster,
         children: [
-          { path: '', component: OrderList }
+          { path: '', component: OrderList },
+          { path: 'success', loadComponent: () => import('./features/orders/order-success/order-success').then(m => m.OrderSuccess) }
         ]
+      },
+      {
+        path: 'notifications',
+        loadComponent: () => import('./features/notifications/notification-list/notification-list').then(m => m.NotificationList)
       },
       {
         path: 'settings',
@@ -144,6 +149,10 @@ export const routes: Routes = [
           {
             path: 'discounts',
             loadComponent: () => import('./features/discounts/promo-master/promo-master').then(m => m.PromoMaster)
+          },
+          {
+            path: 'delivery-partners',
+            loadComponent: () => import('./features/delivery-partner/delivery-partner-list/delivery-partner-list').then(m => m.DeliveryPartnerList)
           }
           // { path: 'customers', component: CustomerMaster }
           // ...customers, etc.

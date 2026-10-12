@@ -34,6 +34,7 @@
     "@primeuix/themes": "^3.0.0",
     "apollo-angular": "^14.1.0",
     "graphql": "^16.14.2",
+    "html2pdf.js": "^0.14.0",
     "primeflex": "^4.0.0",
     "primeicons": "^8.0.0",
     "primeng": "^20.4.0",

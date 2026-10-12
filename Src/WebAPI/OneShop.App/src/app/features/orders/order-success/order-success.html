@@ -1,0 +1,314 @@
+<div class="invoice-container"
+  [ngStyle]="{ padding: '2rem 1rem', maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }">
+
+  <!-- Top Action & Congratulations Bar (Hidden in Print) -->
+  <div class="no-print" [ngStyle]="{
+         background: isNewOrder() 
+           ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 81, 126, 0.08))' 
+           : 'linear-gradient(135deg, rgba(5, 81, 126, 0.08), rgba(5, 81, 126, 0.03))',
+         border: isNewOrder() 
+           ? '1px solid rgba(16, 185, 129, 0.3)' 
+           : '1px solid var(--border-color)', 
+         borderRadius: '16px', padding: '1.25rem 1.5rem',
+         display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem',
+         boxShadow: '0 4px 20px rgba(0,0,0,0.04)'
+       }">
+    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.85rem' }">
+      <span [ngStyle]="{
+              background: isNewOrder() 
+                ? 'linear-gradient(135deg, #10b981, #059669)' 
+                : 'linear-gradient(135deg, #05517e, #033654)', 
+              color: '#ffffff',
+              width: '46px', height: '46px', borderRadius: '50%',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem'
+            }">
+        <i [class]="isNewOrder() ? 'pi pi-check' : 'pi pi-file-pdf'"></i>
+      </span>
+      <div>
+        <h2
+          [ngStyle]="{ margin: '0', fontSize: '1.3rem', fontWeight: '800', color: isNewOrder() ? '#065f46' : 'var(--text-color)' }">
+          {{ isNewOrder() ? 'Order Placed Successfully!' : 'Official Tax Invoice' }}
+        </h2>
+        <span [ngStyle]="{ fontSize: '0.82rem', color: 'var(--text-color)', opacity: '0.8' }">
+          {{ isNewOrder()
+          ? 'Payment processed & OTP verified. Order dispatched for fulfillment.'
+          : 'Official commercial and tax billing record for your order.' }}
+        </span>
+      </div>
+    </div>
+
+    <div [ngStyle]="{ display: 'flex', gap: '0.65rem', alignItems: 'center', flexWrap: 'wrap' }">
+      <button (click)="downloadPdf()" [disabled]="isGeneratingPdf()" [ngStyle]="{
+                background: 'linear-gradient(135deg, #05517e, #033654)', color: '#ffffff', border: 'none',
+                padding: '0.65rem 1.25rem', borderRadius: '10px', fontSize: '0.88rem', fontWeight: '700',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem',
+                boxShadow: '0 4px 12px rgba(5, 81, 126, 0.3)', opacity: isGeneratingPdf() ? '0.7' : '1'
+              }">
+        <i *ngIf="isGeneratingPdf()" class="pi pi-spin pi-spinner"></i>
+        <i *ngIf="!isGeneratingPdf()" class="pi pi-download"></i>
+        <span>{{ isGeneratingPdf() ? 'Exporting PDF...' : 'Download Invoice (PDF)' }}</span>
+      </button>
+
+      <button (click)="printInvoice()" type="button" [ngStyle]="{
+                background: 'var(--card-bg, #ffffff)', border: '1px solid var(--border-color, #cbd5e1)',
+                color: 'var(--text-color)', padding: '0.65rem 1.15rem', borderRadius: '10px',
+                fontSize: '0.88rem', fontWeight: '600', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem'
+              }">
+        <i class="pi pi-print"></i>
+        <span>Print</span>
+      </button>
+
+      <a routerLink="/dashboard/orders" [ngStyle]="{
+           background: 'var(--card-bg, #ffffff)', border: '1px solid var(--border-color, #cbd5e1)',
+           color: 'var(--text-color)', padding: '0.65rem 1.15rem', borderRadius: '10px',
+           fontSize: '0.88rem', fontWeight: '600', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.4rem'
+         }">
+        <i class="pi pi-list"></i>
+        <span>Orders List</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" [ngStyle]="{ textAlign: 'center', padding: '3rem' }">
+    <i class="pi pi-spin pi-spinner" [ngStyle]="{ fontSize: '2rem', color: '#05517e' }"></i>
+    <div [ngStyle]="{ marginTop: '0.5rem', color: 'var(--text-color)' }">Loading invoice details...</div>
+  </div>
+
+  <!-- Official Printable Invoice Card -->
+  <div *ngIf="invoice() as inv" class="printable-invoice" [ngStyle]="{
+         background: '#ffffff', color: '#1e293b', border: '1px solid #e2e8f0',
+         borderRadius: '16px', padding: '2.5rem', boxShadow: '0 8px 30px rgba(0,0,0,0.06)',
+         display: 'flex', flexDirection: 'column', gap: '2rem', fontFamily: 'inherit'
+       }">
+
+    <!-- Invoice Header -->
+    <div
+      [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #05517e', paddingBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }">
+      <div>
+        <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.35rem' }">
+          <span [ngStyle]="{
+                  background: '#05517e', color: '#ffffff', width: '36px', height: '36px',
+                  borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '900'
+                }">
+            1S
+          </span>
+          <span [ngStyle]="{ fontSize: '1.5rem', fontWeight: '900', color: '#05517e', letterSpacing: '-0.5px' }">
+            OneShop
+          </span>
+        </div>
+        <div [ngStyle]="{ fontSize: '0.84rem', color: '#64748b', fontWeight: '500' }">
+          Enterprise Retail &amp; Wholesale Commerce
+        </div>
+      </div>
+
+      <div [ngStyle]="{ textAlign: 'right' }">
+        <h1
+          [ngStyle]="{ margin: '0', fontSize: '1.75rem', fontWeight: '900', color: '#0f172a', textTransform: 'uppercase', letterSpacing: '1px' }">
+          TAX INVOICE
+        </h1>
+        <div [ngStyle]="{ fontSize: '0.85rem', color: '#64748b', marginTop: '0.25rem' }">
+          Date: <strong>{{ inv.orderDate | date:'mediumDate' }}</strong>
+        </div>
+        <div [ngStyle]="{ display: 'flex', gap: '0.4rem', justifyContent: 'flex-end', marginTop: '0.4rem' }">
+          <span *ngFor="let oid of inv.orderIds"
+            [ngStyle]="{ background: '#f1f5f9', color: '#05517e', padding: '0.2rem 0.55rem', borderRadius: '4px', fontFamily: 'monospace', fontWeight: '800', fontSize: '0.82rem' }">
+            {{ oid }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Store (Seller) & Customer (Buyer) Details -->
+    <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }">
+      <!-- Seller / Store Details -->
+      <div [ngStyle]="{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem' }">
+        <div
+          [ngStyle]="{ fontSize: '0.74rem', fontWeight: '800', color: '#05517e', textTransform: 'uppercase', marginBottom: '0.5rem' }">
+          SOLD &amp; FULFILLED BY (STORE DETAIL)
+        </div>
+        <div [ngStyle]="{ fontSize: '1rem', fontWeight: '800', color: '#0f172a', marginBottom: '0.25rem' }">
+          {{ inv.storeName }}
+        </div>
+        <div [ngStyle]="{ fontSize: '0.82rem', color: '#475569', marginBottom: '0.2rem' }">
+          Store Code: <strong>{{ inv.storeCode }}</strong> &bull; Company: <strong>{{ inv.companyName }} ({{
+            inv.companyCode }})</strong>
+        </div>
+        <div [ngStyle]="{ fontSize: '0.82rem', color: '#475569' }">
+          Assigned Carrier: <strong>{{ inv.deliveryPartner || 'Automated Store Logistics' }}</strong>
+        </div>
+      </div>
+
+      <!-- Customer / Buyer Details -->
+      <div [ngStyle]="{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '1.25rem' }">
+        <div
+          [ngStyle]="{ fontSize: '0.74rem', fontWeight: '800', color: '#05517e', textTransform: 'uppercase', marginBottom: '0.5rem' }">
+          BILLED &amp; SHIPPED TO (CUSTOMER)
+        </div>
+        <div [ngStyle]="{ fontSize: '1rem', fontWeight: '800', color: '#0f172a', marginBottom: '0.25rem' }">
+          {{ inv.customerName }}
+        </div>
+        <div [ngStyle]="{ fontSize: '0.82rem', color: '#475569', marginBottom: '0.2rem' }">
+          {{ inv.shippingAddress }}
+        </div>
+        <div *ngIf="inv.shippingState" [ngStyle]="{ fontSize: '0.82rem', color: '#475569', marginBottom: '0.2rem' }">
+          State: <strong>{{ inv.shippingState }}</strong>
+        </div>
+        <div *ngIf="inv.customerEmail || inv.customerPhone" [ngStyle]="{ fontSize: '0.82rem', color: '#64748b' }">
+          {{ inv.customerEmail }} <span *ngIf="inv.customerEmail && inv.customerPhone">&bull;</span> {{
+          inv.customerPhone }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment Badge -->
+    <div [ngStyle]="{
+           background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)',
+           borderRadius: '8px', padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between',
+           alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem'
+         }">
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
+        <i class="pi pi-shield" [ngStyle]="{ color: '#10b981', fontSize: '1.1rem' }"></i>
+        <span [ngStyle]="{ fontSize: '0.84rem', fontWeight: '700', color: '#065f46' }">
+          Payment Status: <strong>PAID</strong> (Verified via Simulated Gateway OTP)
+        </span>
+      </div>
+      <span
+        [ngStyle]="{ fontSize: '0.78rem', background: '#10b981', color: '#ffffff', padding: '0.2rem 0.6rem', borderRadius: '4px', fontWeight: '800' }">
+        CONFIRMED
+      </span>
+    </div>
+
+    <!-- Items Table -->
+    <div [ngStyle]="{ overflowX: 'auto' }">
+      <table [ngStyle]="{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.84rem' }">
+        <thead>
+          <tr [ngStyle]="{ background: '#05517e', color: '#ffffff' }">
+            <th [ngStyle]="{ padding: '0.75rem 1rem', borderTopLeftRadius: '8px' }">#</th>
+            <th [ngStyle]="{ padding: '0.75rem 1rem' }">Item / SKU</th>
+            <th [ngStyle]="{ padding: '0.75rem 1rem' }">Store Info</th>
+            <th [ngStyle]="{ padding: '0.75rem 0.5rem', textAlign: 'center' }">Size</th>
+            <th [ngStyle]="{ padding: '0.75rem 0.5rem', textAlign: 'center' }">Qty</th>
+            <th [ngStyle]="{ padding: '0.75rem 0.75rem', textAlign: 'right' }">Unit Price</th>
+            <th [ngStyle]="{ padding: '0.75rem 0.75rem', textAlign: 'right' }">Tax</th>
+            <th [ngStyle]="{ padding: '0.75rem 0.75rem', textAlign: 'right' }">Shipping</th>
+            <th [ngStyle]="{ padding: '0.75rem 1rem', textAlign: 'right', borderTopRightRadius: '8px' }">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let it of inv.items; let i = index"
+            [ngStyle]="{ borderBottom: '1px solid #e2e8f0', background: i % 2 === 0 ? '#ffffff' : '#f8fafc' }">
+            <td [ngStyle]="{ padding: '0.75rem 1rem', color: '#64748b', fontWeight: '600' }">{{ i + 1 }}</td>
+            <td [ngStyle]="{ padding: '0.75rem 1rem' }">
+              <div [ngStyle]="{ fontWeight: '700', color: '#0f172a' }">{{ it.itemName }}</div>
+              <div [ngStyle]="{ fontSize: '0.74rem', color: '#64748b', fontFamily: 'monospace' }">{{ it.itemNumber }}
+              </div>
+            </td>
+            <td [ngStyle]="{ padding: '0.75rem 1rem' }">
+              <span
+                [ngStyle]="{ background: '#e0f2fe', color: '#0369a1', padding: '0.15rem 0.45rem', borderRadius: '4px', fontSize: '0.72rem', fontWeight: '700' }">
+                {{ it.storeName || it.companyCode }}
+              </span>
+            </td>
+            <td [ngStyle]="{ padding: '0.75rem 0.5rem', textAlign: 'center', fontWeight: '600' }">{{ it.sizeCode }}</td>
+            <td [ngStyle]="{ padding: '0.75rem 0.5rem', textAlign: 'center', fontWeight: '700' }">{{ it.quantity }}</td>
+            <td [ngStyle]="{ padding: '0.75rem 0.75rem', textAlign: 'right', color: '#475569' }">${{ it.unitPrice |
+              number:'1.2-2' }}</td>
+            <td [ngStyle]="{ padding: '0.75rem 0.75rem', textAlign: 'right', color: '#475569' }">${{ it.tax |
+              number:'1.2-2' }}</td>
+            <td [ngStyle]="{ padding: '0.75rem 0.75rem', textAlign: 'right', color: '#475569' }">${{ it.shippingCost |
+              number:'1.2-2' }}</td>
+            <td [ngStyle]="{ padding: '0.75rem 1rem', textAlign: 'right', fontWeight: '800', color: '#0f172a' }">${{
+              it.totalPrice | number:'1.2-2' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Financial Tally Breakdown -->
+    <div [ngStyle]="{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }">
+      <div [ngStyle]="{ width: '100%', maxWidth: '360px', display: 'flex', flexDirection: 'column', gap: '0.65rem' }">
+        <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem', color: '#475569' }">
+          <span>Item Price Subtotal:</span>
+          <span [ngStyle]="{ fontWeight: '700', color: '#0f172a' }">${{ inv.subTotal | number:'1.2-2' }}</span>
+        </div>
+
+        <div *ngIf="inv.discount > 0"
+          [ngStyle]="{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem', color: '#10b981' }">
+          <span>Promo Discounts:</span>
+          <span [ngStyle]="{ fontWeight: '700' }">-${{ inv.discount | number:'1.2-2' }}</span>
+        </div>
+
+        <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem', color: '#475569' }">
+          <span>State Tax (Item-Level Sum):</span>
+          <span [ngStyle]="{ fontWeight: '700', color: '#0f172a' }">+${{ inv.tax | number:'1.2-2' }}</span>
+        </div>
+
+        <div *ngIf="inv.otherTax > 0"
+          [ngStyle]="{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem', color: '#475569' }">
+          <span>Other Taxes:</span>
+          <span [ngStyle]="{ fontWeight: '700', color: '#0f172a' }">+${{ inv.otherTax | number:'1.2-2' }}</span>
+        </div>
+
+        <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem', color: '#475569' }">
+          <span>Shipping Charges:</span>
+          <span *ngIf="inv.isFreeShipping && inv.subTotal >= 500" [ngStyle]="{ fontWeight: '800', color: '#10b981' }">
+            $0.00 (Free Shipping)
+          </span>
+          <span *ngIf="!(inv.isFreeShipping && inv.subTotal >= 500)"
+            [ngStyle]="{ fontWeight: '700', color: '#0f172a' }">
+            +${{ inv.shippingCost | number:'1.2-2' }}
+          </span>
+        </div>
+
+        <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', fontSize: '0.88rem', color: '#475569' }">
+          <span>Platform Fee (Configured):</span>
+          <span [ngStyle]="{ fontWeight: '700', color: '#0f172a' }">+${{ inv.platformFee | number:'1.2-2' }}</span>
+        </div>
+
+        <div [ngStyle]="{
+               display: 'flex', justifyContent: 'space-between', fontSize: '1.2rem', fontWeight: '900',
+               color: '#05517e', borderTop: '2px solid #05517e', paddingTop: '0.75rem', marginTop: '0.25rem'
+             }">
+          <span>Grand Total Paid:</span>
+          <span>${{ inv.totalAmount | number:'1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Invoice Footer / Terms -->
+    <div
+      [ngStyle]="{ borderTop: '1px solid #e2e8f0', paddingTop: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', fontSize: '0.76rem', color: '#94a3b8' }">
+      <div>
+        This is an electronically generated invoice. No physical signature is required.
+      </div>
+      <div>
+        Thank you for choosing OneShop! For support, contact support@oneshop.com
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Print Styles -->
+<style>
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+
+    body {
+      background: #ffffff !important;
+      color: #000000 !important;
+    }
+
+    .printable-invoice {
+      box-shadow: none !important;
+      border: none !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      max-width: 100% !important;
+    }
+  }
+</style>

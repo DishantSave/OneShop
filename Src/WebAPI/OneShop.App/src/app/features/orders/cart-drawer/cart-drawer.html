@@ -1,7 +1,5 @@
 <!-- Backdrop Overlay -->
-<div *ngIf="isOpen()"
-     (click)="close()"
-     [ngStyle]="{
+<div *ngIf="isOpen()" (click)="close()" [ngStyle]="{
        position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh',
        background: 'rgba(0, 0, 0, 0.5)', backdropFilter: 'blur(3px)',
        zIndex: '1100', transition: 'all 0.3s ease'
@@ -44,19 +42,14 @@
     </div>
 
     <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
-      <button *ngIf="cartItems().length > 0"
-              (click)="clearAll()"
-              title="Empty Cart"
-              [ngStyle]="{
+      <button *ngIf="cartItems().length > 0" (click)="clearAll()" title="Empty Cart" [ngStyle]="{
                 background: 'transparent', border: 'none', color: '#ef4444',
                 fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer', padding: '0.35rem 0.5rem'
               }">
         Clear All
       </button>
 
-      <button (click)="close()"
-              title="Close Drawer"
-              [ngStyle]="{
+      <button (click)="close()" title="Close Drawer" [ngStyle]="{
                 background: 'transparent', border: 'none', color: 'var(--text-color)',
                 fontSize: '1.1rem', cursor: 'pointer', padding: '0.35rem', borderRadius: '6px'
               }">
@@ -65,12 +58,32 @@
     </div>
   </div>
 
+  <!-- Free Shipping Progress Tracker -->
+  <div *ngIf="cartItems().length > 0" [ngStyle]="{
+         padding: '0.75rem 1.25rem', background: isFreeShipping() ? 'rgba(16, 185, 129, 0.1)' : 'rgba(5, 81, 126, 0.06)',
+         borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+       }">
+    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.78rem' }">
+      <i [class]="isFreeShipping() ? 'pi pi-check-circle' : 'pi pi-truck'"
+        [ngStyle]="{ color: isFreeShipping() ? '#10b981' : '#05517e', fontSize: '0.95rem' }"></i>
+      <span *ngIf="isFreeShipping()" [ngStyle]="{ fontWeight: '700', color: '#059669' }">
+        Unlocked FREE Shipping (Order &gt;= $500)!
+      </span>
+      <span *ngIf="!isFreeShipping()" [ngStyle]="{ color: 'var(--text-color)' }">
+        Add <strong>${{ (500 - cartSubtotal()) | number:'1.2-2' }}</strong> more for <strong>FREE Shipping</strong>!
+      </span>
+    </div>
+    <span [ngStyle]="{ fontSize: '0.72rem', fontWeight: '800', color: isFreeShipping() ? '#10b981' : '#05517e' }">
+      {{ isFreeShipping() ? '$0.00' : 'Threshold: $500' }}
+    </span>
+  </div>
+
   <!-- Drawer Body -->
-  <div [ngStyle]="{ flex: '1 1 auto', overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }">
+  <div
+    [ngStyle]="{ flex: '1 1 auto', overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }">
 
     <!-- Empty State -->
-    <div *ngIf="cartItems().length === 0"
-         [ngStyle]="{
+    <div *ngIf="cartItems().length === 0" [ngStyle]="{
            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
            padding: '4rem 1.5rem', textAlign: 'center', color: 'var(--text-color)', opacity: '0.7', gap: '1rem'
          }">
@@ -83,14 +96,13 @@
       </span>
       <h4 [ngStyle]="{ margin: '0', fontSize: '1.1rem', fontWeight: '700' }">Your Cart is Empty</h4>
       <p [ngStyle]="{ margin: '0', fontSize: '0.85rem', maxWidth: '280px', lineHeight: '1.4' }">
-        Explore items from catalogs, select your sizes, and add them to cart to generate segregated fulfillment orders.
+        Explore items from catalogs, select your sizes, and add them to cart to order from verified store sellers.
       </p>
     </div>
 
-    <!-- Items List -->
+    <!-- Items List (Store Details Visible with Item Info) -->
     <div *ngIf="cartItems().length > 0" [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }">
-      <div *ngFor="let item of cartItems()"
-           [ngStyle]="{
+      <div *ngFor="let item of cartItems()" [ngStyle]="{
              background: 'var(--card-bg, #f8fafc)', border: '1px solid var(--border-color, #e2e8f0)',
              borderRadius: '12px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem'
            }">
@@ -98,12 +110,22 @@
         <!-- Item Header & Remove -->
         <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.75rem' }">
           <div [ngStyle]="{ flex: '1 1 auto' }">
-            <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.25rem' }">
+            <div
+              [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.25rem' }">
+              <!-- Company Detail Badge -->
               <span [ngStyle]="{
                       background: 'rgba(5, 81, 126, 0.1)', color: '#05517e',
                       padding: '0.15rem 0.45rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '700'
                     }">
-                {{ item.companyCode }}
+                {{ item.companyName || item.companyCode }}
+              </span>
+              <!-- Store Detail Badge -->
+              <span [ngStyle]="{
+                      background: 'rgba(16, 185, 129, 0.12)', color: '#065f46',
+                      padding: '0.15rem 0.45rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '700'
+                    }">
+                <i class="pi pi-shop" [ngStyle]="{ fontSize: '0.65rem' }"></i> Store: {{ item.locationName ||
+                item.locationCode }}
               </span>
               <span [ngStyle]="{
                       background: 'rgba(100, 116, 139, 0.12)', color: 'var(--text-color)',
@@ -112,157 +134,111 @@
                 Size: {{ item.sizeCode }}
               </span>
             </div>
+
+            <!-- Item Name & Number -->
             <div [ngStyle]="{ fontWeight: '700', fontSize: '0.92rem', color: 'var(--text-color)' }">
               {{ item.itemName }}
             </div>
             <div [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.6' }">
-              {{ item.itemNumber }}
+              SKU: {{ item.itemNumber }}
             </div>
           </div>
 
-          <button (click)="removeItem(item.id)"
-                  title="Remove item"
-                  [ngStyle]="{
+          <button (click)="removeItem(item.id)" title="Remove item" [ngStyle]="{
                     background: 'transparent', border: 'none', color: '#94a3b8',
-                    cursor: 'pointer', padding: '0.25rem', transition: 'color 0.15s ease'
+                    cursor: 'pointer', padding: '0.25rem'
                   }">
             <i class="pi pi-trash" [ngStyle]="{ fontSize: '0.95rem' }"></i>
           </button>
         </div>
 
-        <!-- Fulfillment Destination Selector -->
-        <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }">
-          <label [ngStyle]="{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.75' }">
-            Fulfill From (Store or Warehouse):
-          </label>
-          <select (change)="onDestinationChange(item, $event)"
-                  [ngStyle]="{
-                    width: '100%', padding: '0.4rem 0.6rem', borderRadius: '6px',
-                    border: '1px solid var(--border-color, #cbd5e1)', background: 'var(--input-bg, #ffffff)',
-                    color: 'var(--text-color)', fontSize: '0.8rem', fontWeight: '500'
-                  }">
-            <option *ngFor="let dest of getAvailableDestinations(item.companyCode)"
-                    [value]="dest.type + '::' + dest.code + '::' + dest.name"
-                    [selected]="item.locationType === dest.type && item.locationCode === dest.code">
-              [{{ dest.type }}] {{ dest.name }}
-            </option>
-          </select>
+        <!-- Store / Location Information Box -->
+        <div [ngStyle]="{
+               background: 'rgba(5, 81, 126, 0.04)', border: '1px dashed rgba(5, 81, 126, 0.2)',
+               borderRadius: '6px', padding: '0.4rem 0.65rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.74rem'
+             }">
+          <span [ngStyle]="{ color: 'var(--text-color)', opacity: '0.8' }">
+            Fulfilling Store: <strong>{{ item.locationCode }}</strong>
+          </span>
+          <span [ngStyle]="{ color: '#05517e', fontWeight: '700' }">
+            {{ item.locationType }}
+          </span>
         </div>
 
-        <!-- Price & Quantity Adjuster -->
-        <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.4rem', borderTop: '1px dashed var(--border-color, #e2e8f0)' }">
-          <div>
-            <span [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.6' }">
-              ${{ item.unitPrice | number:'1.2-2' }} each
-            </span>
-            <div [ngStyle]="{ fontSize: '0.95rem', fontWeight: '800', color: 'var(--text-color)' }">
-              ${{ (item.unitPrice * item.quantity) | number:'1.2-2' }}
-            </div>
-          </div>
-
-          <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.35rem', background: 'var(--input-bg, #ffffff)', border: '1px solid var(--border-color, #cbd5e1)', borderRadius: '6px', padding: '0.15rem' }">
+        <!-- Price & Quantity Controls -->
+        <div
+          [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.25rem' }">
+          <div
+            [ngStyle]="{ display: 'flex', alignItems: 'center', border: '1px solid var(--border-color, #cbd5e1)', borderRadius: '6px', overflow: 'hidden' }">
             <button (click)="updateQty(item.id, -1)"
-                    [ngStyle]="{ width: '26px', height: '26px', border: 'none', background: 'transparent', cursor: 'pointer', fontWeight: '700', color: 'var(--text-color)' }">
+              [ngStyle]="{ background: 'transparent', border: 'none', padding: '0.25rem 0.6rem', cursor: 'pointer', color: 'var(--text-color)', fontWeight: '700' }">
               -
             </button>
-            <span [ngStyle]="{ minWidth: '24px', textAlign: 'center', fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-color)' }">
+            <span
+              [ngStyle]="{ padding: '0.25rem 0.65rem', fontSize: '0.82rem', fontWeight: '700', minWidth: '24px', textAlign: 'center' }">
               {{ item.quantity }}
             </span>
             <button (click)="updateQty(item.id, 1)"
-                    [ngStyle]="{ width: '26px', height: '26px', border: 'none', background: 'transparent', cursor: 'pointer', fontWeight: '700', color: 'var(--text-color)' }">
+              [ngStyle]="{ background: 'transparent', border: 'none', padding: '0.25rem 0.6rem', cursor: 'pointer', color: 'var(--text-color)', fontWeight: '700' }">
               +
             </button>
           </div>
-        </div>
 
-      </div>
-    </div>
-
-    <!-- Live Segregation Visualizer Preview -->
-    <div *ngIf="segregatedGroups().length > 0"
-         [ngStyle]="{
-           background: 'linear-gradient(145deg, rgba(5, 81, 126, 0.05), rgba(35, 162, 197, 0.08))',
-           border: '1px solid rgba(5, 81, 126, 0.25)', borderRadius: '12px', padding: '1rem',
-           display: 'flex', flexDirection: 'column', gap: '0.75rem'
-         }">
-      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
-        <i class="pi pi-bolt" [ngStyle]="{ color: '#05517e', fontSize: '1.1rem' }"></i>
-        <div>
-          <span [ngStyle]="{ fontSize: '0.85rem', fontWeight: '800', color: '#05517e' }">
-            Automated Multi-Tenant Segregation
-          </span>
-          <p [ngStyle]="{ margin: '0.15rem 0 0', fontSize: '0.73rem', color: 'var(--text-color)', opacity: '0.7' }">
-            Cart automatically splits into <strong>{{ segregatedGroups().length }} distinct orders</strong>:
-          </p>
-        </div>
-      </div>
-
-      <!-- Segregation Groups Mini Breakdown -->
-      <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }">
-        <div *ngFor="let g of segregatedGroups(); let i = index"
-             [ngStyle]="{
-               background: 'var(--card-bg, #ffffff)', border: '1px solid var(--border-color, #e2e8f0)',
-               borderRadius: '8px', padding: '0.65rem 0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-             }">
-          <div>
-            <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.15rem' }">
-              <span [ngStyle]="{
-                      background: '#05517e', color: '#ffffff',
-                      padding: '0.15rem 0.4rem', borderRadius: '4px', fontSize: '0.68rem', fontWeight: '800', fontFamily: 'monospace'
-                    }">
-                {{ g.assignedOrderId }}
-              </span>
-              <span [ngStyle]="{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-color)' }">
-                {{ g.companyCode }} &bull; {{ g.locationType }}: {{ g.locationCode }}
-              </span>
+          <div [ngStyle]="{ textAlign: 'right' }">
+            <div [ngStyle]="{ fontSize: '0.95rem', fontWeight: '800', color: 'var(--text-color)' }">
+              ${{ (item.quantity * item.unitPrice) | number:'1.2-2' }}
             </div>
-            <span [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.65' }">
-              {{ g.totalItems }} item{{ g.totalItems === 1 ? '' : 's' }}
-            </span>
+            <div [ngStyle]="{ fontSize: '0.7rem', color: 'var(--text-color)', opacity: '0.6' }">
+              ${{ item.unitPrice | number:'1.2-2' }} each
+            </div>
           </div>
-
-          <span [ngStyle]="{ fontSize: '0.88rem', fontWeight: '800', color: '#05517e' }">
-            ${{ g.subTotal | number:'1.2-2' }}
-          </span>
         </div>
+
       </div>
     </div>
 
   </div>
 
-  <!-- Drawer Footer / Checkout CTA -->
-  <div *ngIf="cartItems().length > 0"
-       [ngStyle]="{
-         padding: '1.25rem 1.5rem', borderTop: '1px solid var(--border-color, #e2e8f0)',
+  <!-- Drawer Footer Summary -->
+  <div *ngIf="cartItems().length > 0" [ngStyle]="{
+         padding: '1.25rem', borderTop: '1px solid var(--border-color, #e2e8f0)',
          background: 'var(--card-header-bg, #f8fafc)', display: 'flex', flexDirection: 'column', gap: '0.85rem'
        }">
-    <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }">
-      <span [ngStyle]="{ fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.75' }">
-        Estimated Subtotal
-      </span>
-      <span [ngStyle]="{ fontSize: '1.35rem', fontWeight: '900', color: 'var(--text-color)' }">
-        ${{ cartSubtotal() | number:'1.2-2' }}
-      </span>
+    <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.82rem' }">
+      <div
+        [ngStyle]="{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-color)', opacity: '0.75' }">
+        <span>Item Subtotal:</span>
+        <span [ngStyle]="{ fontWeight: '700' }">${{ cartSubtotal() | number:'1.2-2' }}</span>
+      </div>
+      <div
+        [ngStyle]="{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-color)', opacity: '0.75' }">
+        <span>Shipping (Automated Store Carrier):</span>
+        <span [ngStyle]="{ fontWeight: '700', color: isFreeShipping() ? '#10b981' : 'inherit' }">
+          {{ isFreeShipping() ? 'FREE ($0.00)' : ('+$' + (shippingCost() | number:'1.2-2')) }}
+        </span>
+      </div>
+      <div
+        [ngStyle]="{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-color)', opacity: '0.75' }">
+        <span>Platform Fee (Configured):</span>
+        <span [ngStyle]="{ fontWeight: '700' }">${{ platformFee() | number:'1.2-2' }}</span>
+      </div>
     </div>
 
-    <button (click)="openCheckout()"
-            type="button"
-            [ngStyle]="{
+    <button (click)="openCheckout()" [ngStyle]="{
               background: 'linear-gradient(135deg, #05517e, #033654)', color: '#ffffff', border: 'none',
               padding: '0.85rem 1.25rem', borderRadius: '10px', fontSize: '0.95rem', fontWeight: '800',
               cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem',
-              boxShadow: '0 4px 14px rgba(5, 81, 126, 0.35)', transition: 'all 0.2s ease'
+              boxShadow: '0 4px 14px rgba(5, 81, 126, 0.35)'
             }">
       <i class="pi pi-check-circle" [ngStyle]="{ fontSize: '1rem' }"></i>
-      Proceed to Checkout ({{ segregatedGroups().length }} Order{{ segregatedGroups().length === 1 ? '' : 's' }})
+      Review Order &amp; Checkout
     </button>
   </div>
 
 </div>
 
-<!-- Full Checkout Confirmation Modal -->
-<div *ngIf="showCheckoutModal()"
-     [ngStyle]="{
+<!-- Full Checkout Review Modal -->
+<div *ngIf="showCheckoutModal()" [ngStyle]="{
        position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh',
        background: 'rgba(0, 0, 0, 0.65)', backdropFilter: 'blur(4px)',
        zIndex: '1200', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem',
@@ -271,7 +247,7 @@
 
   <div [ngStyle]="{
          background: 'var(--bg-color, #ffffff)', border: '1px solid var(--border-color, #e2e8f0)',
-         borderRadius: '16px', maxWidth: '640px', width: '100%', maxHeight: '90vh',
+         borderRadius: '16px', maxWidth: '680px', width: '100%', maxHeight: '92vh',
          display: 'flex', flexDirection: 'column', boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
          overflow: 'hidden'
        }">
@@ -291,106 +267,54 @@
           <i class="pi pi-shopping-bag"></i>
         </span>
         <h3 [ngStyle]="{ margin: '0', fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-color)' }">
-          Review &amp; Place Segregated Orders
+          Review &amp; Place Order
         </h3>
       </div>
 
       <button (click)="closeCheckout()"
-              [disabled]="isSubmitting()"
-              [ngStyle]="{ background: 'transparent', border: 'none', color: 'var(--text-color)', fontSize: '1.2rem', cursor: 'pointer' }">
+        [ngStyle]="{ background: 'transparent', border: 'none', color: 'var(--text-color)', fontSize: '1.2rem', cursor: 'pointer' }">
         <i class="pi pi-times"></i>
       </button>
     </div>
 
-    <!-- Modal Content: Success State -->
-    <div *ngIf="submissionSuccess()"
-         [ngStyle]="{ padding: '2.5rem 1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '1.25rem' }">
-      <span [ngStyle]="{
-              background: 'rgba(16, 185, 129, 0.12)', color: '#10b981',
-              width: '68px', height: '68px', borderRadius: '50%',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem'
-            }">
-        <i class="pi pi-check"></i>
-      </span>
-
-      <div>
-        <h3 [ngStyle]="{ margin: '0 0 0.5rem', fontSize: '1.35rem', fontWeight: '800', color: 'var(--text-color)' }">
-          Orders Created Successfully!
-        </h3>
-        <p [ngStyle]="{ margin: '0', fontSize: '0.88rem', color: 'var(--text-color)', opacity: '0.75' }">
-          Your cart items have been automatically segregated and placed into the following orders:
-        </p>
-      </div>
-
-      <!-- Generated Order IDs List -->
-      <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.5rem', width: '100%', maxWidth: '380px' }">
-        <div *ngFor="let id of generatedOrderIds()"
-             [ngStyle]="{
-               background: 'rgba(5, 81, 126, 0.08)', border: '1px solid rgba(5, 81, 126, 0.25)',
-               borderRadius: '8px', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between'
-             }">
-          <span [ngStyle]="{ fontFamily: 'monospace', fontWeight: '800', fontSize: '0.95rem', color: '#05517e' }">
-            {{ id }}
-          </span>
-          <span [ngStyle]="{ fontSize: '0.72rem', background: '#10b981', color: '#ffffff', padding: '0.15rem 0.5rem', borderRadius: '4px', fontWeight: '700' }">
-            Placed
-          </span>
-        </div>
-      </div>
-
-      <div [ngStyle]="{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }">
-        <button (click)="goToOrders()"
-                [ngStyle]="{
-                  background: 'linear-gradient(135deg, #05517e, #033654)', color: '#ffffff', border: 'none',
-                  padding: '0.75rem 1.35rem', borderRadius: '8px', fontWeight: '700', fontSize: '0.9rem', cursor: 'pointer'
-                }">
-          View in Orders Screen
-        </button>
-        <button (click)="closeCheckout(); close()"
-                [ngStyle]="{
-                  background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-color)',
-                  padding: '0.75rem 1.35rem', borderRadius: '8px', fontWeight: '600', fontSize: '0.9rem', cursor: 'pointer'
-                }">
-          Continue Shopping
-        </button>
-      </div>
-    </div>
-
-    <!-- Modal Content: Checkout Form & Breakdown -->
-    <div *ngIf="!submissionSuccess()"
-         [ngStyle]="{ flex: '1 1 auto', overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }">
+    <!-- Modal Body: Breakdown & Delivery Info -->
+    <div
+      [ngStyle]="{ flex: '1 1 auto', overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }">
 
       <!-- Error Alert -->
-      <div *ngIf="errorMessage()"
-           [ngStyle]="{
+      <div *ngIf="errorMessage()" [ngStyle]="{
              background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)',
              color: '#ef4444', borderRadius: '8px', padding: '0.75rem 1rem', fontSize: '0.85rem', fontWeight: '600'
            }">
         {{ errorMessage() }}
       </div>
 
-      <!-- Segregation Summary Card -->
+      <!-- Store & Company Fulfillment Details (Prominently Visible) -->
       <div [ngStyle]="{
              background: 'rgba(5, 81, 126, 0.05)', border: '1px solid rgba(5, 81, 126, 0.2)',
              borderRadius: '10px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.65rem'
            }">
         <span [ngStyle]="{ fontSize: '0.78rem', fontWeight: '800', color: '#05517e', textTransform: 'uppercase' }">
-          Segregated Orders Breakdown
+          Store &amp; Seller Fulfillment Details
         </span>
 
         <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }">
-          <div *ngFor="let g of segregatedGroups(); let i = index"
-               [ngStyle]="{
+          <div *ngFor="let g of segregatedGroups()" [ngStyle]="{
                  background: 'var(--bg-color)', border: '1px solid var(--border-color)',
-                 borderRadius: '8px', padding: '0.65rem 0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                 borderRadius: '8px', padding: '0.75rem 0.85rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                }">
             <div>
-              <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.2rem' }">
-                <span [ngStyle]="{ background: '#05517e', color: '#fff', padding: '0.15rem 0.45rem', borderRadius: '4px', fontSize: '0.72rem', fontWeight: '800', fontFamily: 'monospace' }">
+              <div
+                [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.2rem', flexWrap: 'wrap' }">
+                <span
+                  [ngStyle]="{ background: '#05517e', color: '#fff', padding: '0.15rem 0.45rem', borderRadius: '4px', fontSize: '0.72rem', fontWeight: '800', fontFamily: 'monospace' }">
                   {{ g.assignedOrderId }}
                 </span>
                 <span [ngStyle]="{ fontSize: '0.82rem', fontWeight: '700', color: 'var(--text-color)' }">
-                  Company: {{ g.companyCode }} &bull; {{ g.locationType }}: {{ g.locationCode }}
+                  Company: <strong>{{ g.companyName }} ({{ g.companyCode }})</strong>
+                </span>
+                <span [ngStyle]="{ fontSize: '0.82rem', color: '#059669', fontWeight: '700' }">
+                  &bull; Store: <strong>{{ g.locationName }} ({{ g.locationCode }})</strong>
                 </span>
               </div>
               <span [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.7' }">
@@ -407,9 +331,11 @@
 
       <!-- Customer Details Form -->
       <form [formGroup]="checkoutForm" [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1rem' }">
-        <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }">
-          <span [ngStyle]="{ fontSize: '0.82rem', fontWeight: '800', color: 'var(--text-color)', textTransform: 'uppercase' }">
-            1. Delivery &amp; Customer Information
+        <div
+          [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }">
+          <span
+            [ngStyle]="{ fontSize: '0.82rem', fontWeight: '800', color: 'var(--text-color)', textTransform: 'uppercase' }">
+            1. Customer Delivery Address
           </span>
 
           <!-- Quick Address Book Select -->
@@ -429,13 +355,14 @@
           </div>
         </div>
 
-        <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }">
+        <div
+          [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }">
           <div>
-            <label [ngStyle]="{ display: 'block', fontSize: '0.76rem', fontWeight: '700', color: 'var(--text-color)', marginBottom: '0.25rem' }">
+            <label
+              [ngStyle]="{ display: 'block', fontSize: '0.76rem', fontWeight: '700', color: 'var(--text-color)', marginBottom: '0.25rem' }">
               Customer Name *
             </label>
-            <input type="text" formControlName="customerName" placeholder="e.g. John Doe"
-                   [ngStyle]="{
+            <input type="text" formControlName="customerName" placeholder="e.g. John Doe" [ngStyle]="{
                      width: '100%', padding: '0.55rem 0.75rem', borderRadius: '6px',
                      border: '1px solid var(--border-color)', background: 'var(--input-bg)',
                      color: 'var(--text-color)', fontSize: '0.85rem'
@@ -443,11 +370,11 @@
           </div>
 
           <div>
-            <label [ngStyle]="{ display: 'block', fontSize: '0.76rem', fontWeight: '700', color: 'var(--text-color)', marginBottom: '0.25rem' }">
+            <label
+              [ngStyle]="{ display: 'block', fontSize: '0.76rem', fontWeight: '700', color: 'var(--text-color)', marginBottom: '0.25rem' }">
               Customer Email
             </label>
-            <input type="email" formControlName="customerEmail" placeholder="e.g. john@example.com"
-                   [ngStyle]="{
+            <input type="email" formControlName="customerEmail" placeholder="e.g. john@example.com" [ngStyle]="{
                      width: '100%', padding: '0.55rem 0.75rem', borderRadius: '6px',
                      border: '1px solid var(--border-color)', background: 'var(--input-bg)',
                      color: 'var(--text-color)', fontSize: '0.85rem'
@@ -455,11 +382,11 @@
           </div>
 
           <div>
-            <label [ngStyle]="{ display: 'block', fontSize: '0.76rem', fontWeight: '700', color: 'var(--text-color)', marginBottom: '0.25rem' }">
+            <label
+              [ngStyle]="{ display: 'block', fontSize: '0.76rem', fontWeight: '700', color: 'var(--text-color)', marginBottom: '0.25rem' }">
               Phone Number
             </label>
-            <input type="text" formControlName="customerPhone" placeholder="e.g. +1 555-0199"
-                   [ngStyle]="{
+            <input type="text" formControlName="customerPhone" placeholder="e.g. +1 555-0199" [ngStyle]="{
                      width: '100%', padding: '0.55rem 0.75rem', borderRadius: '6px',
                      border: '1px solid var(--border-color)', background: 'var(--input-bg)',
                      color: 'var(--text-color)', fontSize: '0.85rem'
@@ -467,13 +394,15 @@
           </div>
         </div>
 
-        <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }">
+        <div
+          [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }">
           <div [ngStyle]="{ gridColumn: 'span 2' }">
-            <label [ngStyle]="{ display: 'block', fontSize: '0.76rem', fontWeight: '700', color: 'var(--text-color)', marginBottom: '0.25rem' }">
+            <label
+              [ngStyle]="{ display: 'block', fontSize: '0.76rem', fontWeight: '700', color: 'var(--text-color)', marginBottom: '0.25rem' }">
               Shipping Address *
             </label>
             <input type="text" formControlName="shippingAddress" placeholder="Full delivery street address..."
-                   [ngStyle]="{
+              [ngStyle]="{
                      width: '100%', padding: '0.55rem 0.75rem', borderRadius: '6px',
                      border: '1px solid var(--border-color)', background: 'var(--input-bg)',
                      color: 'var(--text-color)', fontSize: '0.85rem'
@@ -481,170 +410,192 @@
           </div>
 
           <div>
-            <label [ngStyle]="{ display: 'block', fontSize: '0.76rem', fontWeight: '700', color: 'var(--text-color)', marginBottom: '0.25rem' }">
-              Destination State (For Tax)
+            <label
+              [ngStyle]="{ display: 'block', fontSize: '0.76rem', fontWeight: '700', color: 'var(--text-color)', marginBottom: '0.25rem' }">
+              Destination State (For State Tax)
             </label>
             <div [ngStyle]="{ display: 'flex', gap: '0.35rem' }">
-              <input type="text" formControlName="shippingState" (blur)="onStateInputBlur()" placeholder="e.g. Maharashtra"
-                     [ngStyle]="{
+              <input type="text" formControlName="shippingState" (blur)="onStateInputBlur()"
+                placeholder="e.g. Maharashtra, California" [ngStyle]="{
                        width: '100%', padding: '0.55rem 0.75rem', borderRadius: '6px',
                        border: '1px solid var(--border-color)', background: 'var(--input-bg)',
                        color: 'var(--text-color)', fontSize: '0.85rem'
                      }" />
-              <button type="button" (click)="onStateInputBlur()" title="Calculate Tax" [ngStyle]="{
+              <button type="button" (click)="onStateInputBlur()" title="Recalculate Tax & Shipping" [ngStyle]="{
                   background: 'var(--sidebar-link-active-bg, #05517e)', color: '#fff', border: 'none',
                   padding: '0.5rem 0.7rem', borderRadius: '6px', fontSize: '0.75rem', cursor: 'pointer'
                 }">
-                Tax
+                Calc
               </button>
             </div>
           </div>
         </div>
 
-        <!-- 2. Logistics & Shipping Options (Warehouse B2B vs Store B2C) -->
+        <!-- 2. Automated Delivery Assignment Info (Store Responsibility) -->
         <div [ngStyle]="{
-            background: 'var(--card-bg, #f8fafc)', border: '1px solid var(--border-color)', borderRadius: '10px',
-            padding: '0.85rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem'
-          }">
-          <span [ngStyle]="{ fontSize: '0.78rem', fontWeight: '800', color: '#05517e', textTransform: 'uppercase' }">
-            2. Shipping &amp; Logistics Configuration
-          </span>
+               background: 'var(--card-bg, #f8fafc)', border: '1px solid var(--border-color)', borderRadius: '10px',
+               padding: '0.85rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem'
+             }">
+          <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }">
+            <span [ngStyle]="{ fontSize: '0.78rem', fontWeight: '800', color: '#05517e', textTransform: 'uppercase' }">
+              2. Automated Logistics &amp; Delivery Partner
+            </span>
+            <span
+              [ngStyle]="{ fontSize: '0.72rem', background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', padding: '0.15rem 0.45rem', borderRadius: '4px', fontWeight: '700' }">
+              Store Managed
+            </span>
+          </div>
 
-          <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }">
-            <!-- Warehouse B2B ShipVia -->
-            <div *ngIf="hasWarehouseGroup()">
-              <label [ngStyle]="{ display: 'block', fontSize: '0.76rem', fontWeight: '700', color: '#3b82f6', marginBottom: '0.25rem' }">
-                <i class="pi pi-truck"></i> Warehouse Orders (B2B ShipVia)
-              </label>
-              <select formControlName="shipVia" [ngStyle]="{
-                  width: '100%', padding: '0.5rem 0.7rem', borderRadius: '6px',
-                  border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-color)', fontSize: '0.82rem'
-                }">
-                <option value="Road Freight">Road Freight (Truckload)</option>
-                <option value="BlueDart B2B Cargo">BlueDart B2B Cargo</option>
-                <option value="VRL Logistics">VRL Logistics Express</option>
-                <option value="GATI-KWE Commercial">GATI-KWE Commercial</option>
-                <option value="Rail Freight">Rail Freight</option>
-                <option value="Air Cargo Express">Air Cargo Express</option>
-              </select>
+          <!-- Customer View: Explanatory Card -->
+          <div
+            [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.65rem', fontSize: '0.82rem', color: 'var(--text-color)' }">
+            <i class="pi pi-truck" [ngStyle]="{ color: '#05517e', fontSize: '1.1rem' }"></i>
+            <div>
+              Assigned Courier: <strong>{{ assignedCarrierName() }}</strong>
+              <span *ngIf="isFreeShipping()" [ngStyle]="{ color: '#10b981', fontWeight: '700', marginLeft: '0.35rem' }">
+                (Free Shipping Rule Applied &gt;= $500)
+              </span>
+              <span *ngIf="!isFreeShipping()"
+                [ngStyle]="{ color: '#05517e', fontWeight: '700', marginLeft: '0.35rem' }">
+                (Store Shipping Rate: +${{ shippingCost() | number:'1.2-2' }})
+              </span>
+              <div [ngStyle]="{ fontSize: '0.74rem', opacity: '0.7', marginTop: '0.15rem' }">
+                Delivery partners are automatically assigned by store rules based on items in cart. The store can modify
+                this later.
+              </div>
             </div>
+          </div>
 
-            <!-- Store B2C Delivery Partner -->
-            <div *ngIf="hasStoreGroup()">
-              <label [ngStyle]="{ display: 'block', fontSize: '0.76rem', fontWeight: '700', color: '#10b981', marginBottom: '0.25rem' }">
-                <i class="pi pi-send"></i> Store Orders (B2C Delivery Partner)
-              </label>
-              <select formControlName="deliveryPartner" [ngStyle]="{
-                  width: '100%', padding: '0.5rem 0.7rem', borderRadius: '6px',
-                  border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-color)', fontSize: '0.82rem'
-                }">
-                <option value="Delhivery">Delhivery</option>
-                <option value="Dunzo">Dunzo</option>
-                <option value="Porter">Porter</option>
-                <option value="Shadowfax">Shadowfax</option>
-                <option value="BlueDart B2C">BlueDart B2C</option>
-              </select>
-            </div>
-
-            <!-- Store B2C Pickup Warehouse -->
-            <div *ngIf="hasStoreGroup()">
-              <label [ngStyle]="{ display: 'block', fontSize: '0.76rem', fontWeight: '700', color: '#8b5cf6', marginBottom: '0.25rem' }">
-                <i class="pi pi-building"></i> Stock Pickup Warehouse
-              </label>
-              <select (change)="onPickupWarehouseChange($event)" [value]="checkoutForm.get('pickupLocationCode')?.value" [ngStyle]="{
-                  width: '100%', padding: '0.5rem 0.7rem', borderRadius: '6px',
-                  border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-color)', fontSize: '0.82rem'
-                }">
-                <option value="" disabled>-- Select Pickup Warehouse --</option>
-                <option *ngFor="let wh of warehouses()" [value]="wh.code">
-                  {{ wh.code }} — {{ wh.name }}
-                </option>
-              </select>
-            </div>
+          <!-- Vendor Only View: Editable Delivery Partner -->
+          <div *ngIf="isVendor()"
+            [ngStyle]="{ marginTop: '0.5rem', borderTop: '1px dashed var(--border-color)', paddingTop: '0.5rem' }">
+            <label
+              [ngStyle]="{ display: 'block', fontSize: '0.74rem', fontWeight: '700', color: '#8b5cf6', marginBottom: '0.25rem' }">
+              [Vendor Login] Modify Assigned Delivery Partner:
+            </label>
+            <input type="text" formControlName="deliveryPartner" [placeholder]="assignedCarrierName()" [ngStyle]="{
+                     width: '100%', padding: '0.45rem 0.65rem', borderRadius: '6px',
+                     border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-color)', fontSize: '0.8rem'
+                   }" />
           </div>
         </div>
 
-        <!-- 3. Discounts, Promo Voucher & Tax -->
+        <!-- 3. Discounts Voucher & Financials -->
         <div [ngStyle]="{
-            background: 'var(--card-bg, #f8fafc)', border: '1px solid var(--border-color)', borderRadius: '10px',
-            padding: '0.85rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem'
-          }">
+               background: 'var(--card-bg, #f8fafc)', border: '1px solid var(--border-color)', borderRadius: '10px',
+               padding: '0.85rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem'
+             }">
           <span [ngStyle]="{ fontSize: '0.78rem', fontWeight: '800', color: '#05517e', textTransform: 'uppercase' }">
-            3. Discounts &amp; Financials
+            3. Order Financial Tally &amp; Discounts
           </span>
 
-          <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '0.75rem' }">
-            <!-- Promo Code Input -->
-            <div [ngStyle]="{ gridColumn: 'span 2' }">
-              <label [ngStyle]="{ display: 'block', fontSize: '0.74rem', fontWeight: '700', color: 'var(--text-color)', marginBottom: '0.25rem' }">
-                Promo Code Voucher
-              </label>
-              <div [ngStyle]="{ display: 'flex', gap: '0.35rem', alignItems: 'center' }">
-                <input type="text" formControlName="promoCode" placeholder="e.g. WELCOME10, FESTIVE500"
-                       [disabled]="!!appliedPromo()"
-                       [ngStyle]="{
-                         width: '100%', padding: '0.5rem 0.7rem', borderRadius: '6px', textTransform: 'uppercase',
-                         border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-color)', fontSize: '0.82rem'
-                       }" />
-                <button *ngIf="!appliedPromo()" (click)="applyPromoCode()" type="button" [disabled]="validatingPromo()" [ngStyle]="{
-                    background: '#10b981', color: '#fff', border: 'none',
-                    padding: '0.5rem 0.85rem', borderRadius: '6px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap'
-                  }">
-                  {{ validatingPromo() ? 'Checking...' : 'Apply' }}
-                </button>
-                <button *ngIf="appliedPromo()" (click)="removePromoCode()" type="button" [ngStyle]="{
-                    background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)',
-                    padding: '0.5rem 0.75rem', borderRadius: '6px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap'
-                  }">
-                  Remove
-                </button>
-              </div>
-              <div *ngIf="appliedPromo()" [ngStyle]="{ marginTop: '0.25rem', fontSize: '0.72rem', color: '#10b981', fontWeight: '700' }">
-                <i class="pi pi-check-circle"></i> {{ appliedPromo()?.message }}
-              </div>
+          <!-- Promo Voucher (For both Customer & Vendor) -->
+          <div>
+            <label
+              [ngStyle]="{ display: 'block', fontSize: '0.74rem', fontWeight: '700', color: 'var(--text-color)', marginBottom: '0.25rem' }">
+              Promo Code Voucher
+            </label>
+            <div [ngStyle]="{ display: 'flex', gap: '0.35rem', alignItems: 'center' }">
+              <input type="text" formControlName="promoCode" placeholder="e.g. WELCOME10, FESTIVE500"
+                [disabled]="!!appliedPromo()" [ngStyle]="{
+                       width: '100%', padding: '0.5rem 0.7rem', borderRadius: '6px', textTransform: 'uppercase',
+                       border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-color)', fontSize: '0.82rem'
+                     }" />
+              <button *ngIf="!appliedPromo()" (click)="applyPromoCode()" type="button" [disabled]="validatingPromo()"
+                [ngStyle]="{
+                  background: '#10b981', color: '#fff', border: 'none',
+                  padding: '0.5rem 0.85rem', borderRadius: '6px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap'
+                }">
+                {{ validatingPromo() ? 'Checking...' : 'Apply' }}
+              </button>
+              <button *ngIf="appliedPromo()" (click)="removePromoCode()" type="button" [ngStyle]="{
+                  background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)',
+                  padding: '0.5rem 0.75rem', borderRadius: '6px', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap'
+                }">
+                Remove
+              </button>
+            </div>
+            <div *ngIf="appliedPromo()"
+              [ngStyle]="{ marginTop: '0.25rem', fontSize: '0.72rem', color: '#10b981', fontWeight: '700' }">
+              <i class="pi pi-check-circle"></i> {{ appliedPromo()?.message }}
+            </div>
+          </div>
+
+          <!-- Vendor Manual Discount (Hidden for Customer) -->
+          <div *ngIf="isVendor()" [ngStyle]="{ borderTop: '1px dashed var(--border-color)', paddingTop: '0.5rem' }">
+            <label
+              [ngStyle]="{ display: 'block', fontSize: '0.74rem', fontWeight: '700', color: '#8b5cf6', marginBottom: '0.25rem' }">
+              [Vendor Login] Manual Order Discount ($):
+            </label>
+            <input type="number" step="0.5" formControlName="discount" [ngStyle]="{
+                width: '100%', padding: '0.5rem 0.7rem', borderRadius: '6px',
+                border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-color)', fontSize: '0.82rem'
+              }" />
+          </div>
+
+          <!-- Financial Tally List -->
+          <div
+            [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.4rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.65rem', fontSize: '0.82rem' }">
+            <div
+              [ngStyle]="{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-color)', opacity: '0.8' }">
+              <span>1. Item Price Subtotal:</span>
+              <span [ngStyle]="{ fontWeight: '700' }">${{ cartSubtotal() | number:'1.2-2' }}</span>
             </div>
 
-            <!-- State Tax Amount -->
-            <div>
-              <label [ngStyle]="{ display: 'block', fontSize: '0.74rem', fontWeight: '700', color: 'var(--text-color)', marginBottom: '0.25rem' }">
-                State Tax ($)
-              </label>
-              <input type="number" step="0.01" formControlName="tax" [ngStyle]="{
-                  width: '100%', padding: '0.5rem 0.7rem', borderRadius: '6px',
-                  border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-color)', fontSize: '0.82rem'
-                }" />
+            <div *ngIf="checkoutForm.get('discount')?.value"
+              [ngStyle]="{ display: 'flex', justifyContent: 'space-between', color: '#10b981' }">
+              <span>2. Discounts:</span>
+              <span [ngStyle]="{ fontWeight: '700' }">-${{ (checkoutForm.get('discount')?.value || 0) | number:'1.2-2'
+                }}</span>
             </div>
 
-            <!-- Shipping Charges -->
-            <div>
-              <label [ngStyle]="{ display: 'block', fontSize: '0.74rem', fontWeight: '700', color: 'var(--text-color)', marginBottom: '0.25rem' }">
-                Shipping Charges ($)
-              </label>
-              <input type="number" step="0.01" formControlName="shippingCost" [ngStyle]="{
-                  width: '100%', padding: '0.5rem 0.7rem', borderRadius: '6px',
-                  border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-color)', fontSize: '0.82rem'
-                }" />
+            <div
+              [ngStyle]="{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-color)', opacity: '0.8' }">
+              <span>3. State Tax (Item-Level Sum):</span>
+              <span [ngStyle]="{ fontWeight: '700' }">+${{ (checkoutForm.get('tax')?.value || 0) | number:'1.2-2'
+                }}</span>
             </div>
 
-            <!-- Discount Amount -->
-            <div>
-              <label [ngStyle]="{ display: 'block', fontSize: '0.74rem', fontWeight: '700', color: 'var(--text-color)', marginBottom: '0.25rem' }">
-                Discount ($)
-              </label>
-              <input type="number" step="0.01" formControlName="discount" [ngStyle]="{
-                  width: '100%', padding: '0.5rem 0.7rem', borderRadius: '6px',
-                  border: '1px solid var(--border-color)', background: 'var(--input-bg)', color: 'var(--text-color)', fontSize: '0.82rem'
-                }" />
+            <div *ngIf="otherTax() > 0"
+              [ngStyle]="{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-color)', opacity: '0.8' }">
+              <span>&nbsp;&nbsp;&nbsp;&bull; Other Taxes:</span>
+              <span [ngStyle]="{ fontWeight: '700' }">+${{ otherTax() | number:'1.2-2' }}</span>
+            </div>
+
+            <div
+              [ngStyle]="{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-color)', opacity: '0.8' }">
+              <span>4. Shipping Charges:</span>
+              <span *ngIf="isFreeShipping()" [ngStyle]="{ fontWeight: '800', color: '#10b981' }">
+                $0.00 (Free Shipping)
+              </span>
+              <span *ngIf="!isFreeShipping()" [ngStyle]="{ fontWeight: '700' }">
+                +${{ shippingCost() | number:'1.2-2' }}
+              </span>
+            </div>
+
+            <div
+              [ngStyle]="{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-color)', opacity: '0.8' }">
+              <span>5. Platform Fee (Static Config):</span>
+              <span [ngStyle]="{ fontWeight: '700' }">+${{ platformFee() | number:'1.2-2' }}</span>
+            </div>
+
+            <div [ngStyle]="{
+                   display: 'flex', justifyContent: 'space-between', fontSize: '1.15rem', fontWeight: '900',
+                   color: '#05517e', borderTop: '2px solid #05517e', paddingTop: '0.5rem', marginTop: '0.2rem'
+                 }">
+              <span>Total Payable:</span>
+              <span>${{ totalPayable() | number:'1.2-2' }}</span>
             </div>
           </div>
         </div>
 
         <div>
-          <label [ngStyle]="{ display: 'block', fontSize: '0.76rem', fontWeight: '700', color: 'var(--text-color)', marginBottom: '0.25rem' }">
-            Order Notes / Special Delivery Instructions
+          <label
+            [ngStyle]="{ display: 'block', fontSize: '0.76rem', fontWeight: '700', color: 'var(--text-color)', marginBottom: '0.25rem' }">
+            Order Notes / Delivery Instructions
           </label>
           <input type="text" formControlName="notes" placeholder="Optional notes for fulfillment dock or courier"
-                 [ngStyle]="{
+            [ngStyle]="{
                    width: '100%', padding: '0.55rem 0.75rem', borderRadius: '6px',
                    border: '1px solid var(--border-color)', background: 'var(--input-bg)',
                    color: 'var(--text-color)', fontSize: '0.85rem'
@@ -654,51 +605,238 @@
 
     </div>
 
-    <!-- Modal Footer -->
-    <div *ngIf="!submissionSuccess()"
-         [ngStyle]="{
+    <!-- Modal Footer: Proceed to Payment Button -->
+    <div [ngStyle]="{
            padding: '1.1rem 1.5rem', borderTop: '1px solid var(--border-color, #e2e8f0)',
            background: 'var(--card-header-bg, #f8fafc)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem'
          }">
       <div>
-        <div [ngStyle]="{ display: 'flex', gap: '0.75rem', fontSize: '0.76rem', color: 'var(--text-color)', opacity: '0.75' }">
-          <span>Sub: <strong>${{ cartSubtotal() | number:'1.2-2' }}</strong></span>
-          <span>Tax: <strong>+${{ (checkoutForm.get('tax')?.value || 0) | number:'1.2-2' }}</strong></span>
-          <span>Ship: <strong>+${{ (checkoutForm.get('shippingCost')?.value || 0) | number:'1.2-2' }}</strong></span>
-          <span *ngIf="checkoutForm.get('discount')?.value" [ngStyle]="{ color: '#10b981' }">
-            Disc: <strong>-${{ (checkoutForm.get('discount')?.value || 0) | number:'1.2-2' }}</strong>
-          </span>
-        </div>
-        <div [ngStyle]="{ fontSize: '1.25rem', fontWeight: '900', color: 'var(--sidebar-link-active-bg, #05517e)', marginTop: '0.2rem' }">
+        <div [ngStyle]="{ fontSize: '1.25rem', fontWeight: '900', color: '#05517e' }">
           Total: ${{ totalPayable() | number:'1.2-2' }}
+        </div>
+        <div [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.65' }">
+          Includes item price, taxes, platform fee &amp; shipping
         </div>
       </div>
 
       <div [ngStyle]="{ display: 'flex', gap: '0.75rem' }">
-        <button (click)="closeCheckout()"
-                [disabled]="isSubmitting()"
-                type="button"
-                [ngStyle]="{
+        <button (click)="closeCheckout()" type="button" [ngStyle]="{
                   background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-color)',
                   padding: '0.65rem 1.15rem', borderRadius: '8px', fontWeight: '600', fontSize: '0.85rem', cursor: 'pointer'
                 }">
           Cancel
         </button>
 
-        <button (click)="submitCheckout()"
-                [disabled]="isSubmitting() || checkoutForm.invalid"
-                type="button"
-                [ngStyle]="{
-                  background: isSubmitting() ? '#94a3b8' : 'linear-gradient(135deg, #05517e, #033654)',
-                  color: '#ffffff', border: 'none', padding: '0.65rem 1.35rem', borderRadius: '8px',
-                  fontWeight: '800', fontSize: '0.88rem', cursor: isSubmitting() ? 'not-allowed' : 'pointer',
+        <!-- Proceed to Payment Action Button -->
+        <button (click)="proceedToPayment()" [disabled]="checkoutForm.invalid" type="button" [ngStyle]="{
+                  background: 'linear-gradient(135deg, #05517e, #033654)',
+                  color: '#ffffff', border: 'none', padding: '0.7rem 1.4rem', borderRadius: '10px',
+                  fontWeight: '800', fontSize: '0.9rem', cursor: 'pointer',
                   display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 12px rgba(5, 81, 126, 0.3)'
                 }">
-          <i *ngIf="isSubmitting()" class="pi pi-spin pi-spinner"></i>
-          <i *ngIf="!isSubmitting()" class="pi pi-check-circle"></i>
-          <span>{{ isSubmitting() ? 'Placing Orders...' : 'Place ' + segregatedGroups().length + ' Orders' }}</span>
+          <i class="pi pi-credit-card"></i>
+          <span>Proceed to Payment</span>
         </button>
       </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Payment Gateway Simulation Modal (OTP Based) -->
+<div *ngIf="showPaymentGatewayModal()" [ngStyle]="{
+       position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh',
+       background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(5px)',
+       zIndex: '1300', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem',
+       boxSizing: 'border-box'
+     }">
+
+  <div [ngStyle]="{
+         background: 'var(--bg-color, #ffffff)', border: '1px solid var(--border-color, #e2e8f0)',
+         borderRadius: '20px', maxWidth: '520px', width: '100%',
+         display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px rgba(0, 0, 0, 0.35)',
+         overflow: 'hidden'
+       }">
+
+    <!-- Gateway Header -->
+    <div [ngStyle]="{
+           padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border-color)',
+           background: 'linear-gradient(135deg, #0f172a, #1e293b)', color: '#ffffff',
+           display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+         }">
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem' }">
+        <span [ngStyle]="{
+                background: 'linear-gradient(135deg, #38bdf8, #0284c7)', color: '#fff',
+                width: '36px', height: '36px', borderRadius: '8px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.1rem'
+              }">
+          <i class="pi pi-shield"></i>
+        </span>
+        <div>
+          <h3 [ngStyle]="{ margin: '0', fontSize: '1.15rem', fontWeight: '800' }">
+            OneShop Secure Gateway
+          </h3>
+          <span [ngStyle]="{ fontSize: '0.75rem', opacity: '0.75' }">
+            256-Bit Encrypted Payment Simulation
+          </span>
+        </div>
+      </div>
+
+      <button (click)="closePaymentGateway()" [disabled]="isProcessingPayment()"
+        [ngStyle]="{ background: 'transparent', border: 'none', color: '#94a3b8', fontSize: '1.2rem', cursor: 'pointer' }">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <!-- Gateway Content -->
+    <div [ngStyle]="{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }">
+
+      <!-- Amount Header Banner -->
+      <div [ngStyle]="{
+             background: 'rgba(5, 81, 126, 0.06)', border: '1px solid rgba(5, 81, 126, 0.2)',
+             borderRadius: '12px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+           }">
+        <div>
+          <div
+            [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.75', textTransform: 'uppercase', fontWeight: '700' }">
+            Amount To Authorize
+          </div>
+          <div [ngStyle]="{ fontSize: '1.6rem', fontWeight: '900', color: '#05517e' }">
+            ${{ totalPayable() | number:'1.2-2' }}
+          </div>
+        </div>
+
+        <span [ngStyle]="{
+                background: '#10b981', color: '#fff', padding: '0.25rem 0.65rem',
+                borderRadius: '6px', fontSize: '0.72rem', fontWeight: '800'
+              }">
+          TEST MODE
+        </span>
+      </div>
+
+      <!-- Payment Mode Selector -->
+      <div [ngStyle]="{ display: 'flex', gap: '0.5rem' }">
+        <button type="button" (click)="paymentMode.set('CARD')" [ngStyle]="{
+                  flex: '1', padding: '0.6rem', borderRadius: '8px', border: '1px solid',
+                  borderColor: paymentMode() === 'CARD' ? '#05517e' : 'var(--border-color)',
+                  background: paymentMode() === 'CARD' ? 'rgba(5, 81, 126, 0.1)' : 'transparent',
+                  color: paymentMode() === 'CARD' ? '#05517e' : 'var(--text-color)',
+                  fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer'
+                }">
+          <i class="pi pi-credit-card"></i> Card
+        </button>
+
+        <button type="button" (click)="paymentMode.set('UPI')" [ngStyle]="{
+                  flex: '1', padding: '0.6rem', borderRadius: '8px', border: '1px solid',
+                  borderColor: paymentMode() === 'UPI' ? '#05517e' : 'var(--border-color)',
+                  background: paymentMode() === 'UPI' ? 'rgba(5, 81, 126, 0.1)' : 'transparent',
+                  color: paymentMode() === 'UPI' ? '#05517e' : 'var(--text-color)',
+                  fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer'
+                }">
+          <i class="pi pi-mobile"></i> UPI / QR
+        </button>
+
+        <button type="button" (click)="paymentMode.set('NETBANKING')" [ngStyle]="{
+                  flex: '1', padding: '0.6rem', borderRadius: '8px', border: '1px solid',
+                  borderColor: paymentMode() === 'NETBANKING' ? '#05517e' : 'var(--border-color)',
+                  background: paymentMode() === 'NETBANKING' ? 'rgba(5, 81, 126, 0.1)' : 'transparent',
+                  color: paymentMode() === 'NETBANKING' ? '#05517e' : 'var(--text-color)',
+                  fontWeight: '700', fontSize: '0.8rem', cursor: 'pointer'
+                }">
+          <i class="pi pi-building"></i> Net Banking
+        </button>
+      </div>
+
+      <!-- Simulated Card Details -->
+      <div *ngIf="paymentMode() === 'CARD'" [ngStyle]="{
+             background: 'var(--card-header-bg, #f8fafc)', border: '1px solid var(--border-color)',
+             borderRadius: '10px', padding: '0.85rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.6rem'
+           }">
+        <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }">
+          <span [ngStyle]="{ color: 'var(--text-color)', opacity: '0.7' }">Simulated Card:</span>
+          <span [ngStyle]="{ fontWeight: '700', fontFamily: 'monospace' }">{{ cardNumber() }}</span>
+        </div>
+        <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }">
+          <span [ngStyle]="{ color: 'var(--text-color)', opacity: '0.7' }">Expiry / CVV:</span>
+          <span [ngStyle]="{ fontWeight: '700', fontFamily: 'monospace' }">{{ cardExpiry() }} &bull; {{ cardCvv()
+            }}</span>
+        </div>
+      </div>
+
+      <!-- OTP Verification Card (Mandatory to process payment & reach vendor) -->
+      <div [ngStyle]="{
+             background: 'linear-gradient(135deg, rgba(5, 81, 126, 0.05), rgba(16, 185, 129, 0.05))',
+             border: '1px solid rgba(5, 81, 126, 0.25)', borderRadius: '14px', padding: '1.25rem',
+             display: 'flex', flexDirection: 'column', gap: '0.85rem'
+           }">
+
+        <div>
+          <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }">
+            <span [ngStyle]="{ fontSize: '0.84rem', fontWeight: '800', color: '#05517e' }">
+              One-Time Password (OTP) Verification
+            </span>
+            <span
+              [ngStyle]="{ fontSize: '0.72rem', background: '#3b82f6', color: '#fff', padding: '0.15rem 0.5rem', borderRadius: '4px', fontWeight: '700' }">
+              OTP SENT
+            </span>
+          </div>
+          <p [ngStyle]="{ margin: '0.25rem 0 0', fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.75' }">
+            Enter the 6-digit OTP to authenticate payment. Order will reach vendor only after OTP verification.
+          </p>
+        </div>
+
+        <!-- Generated OTP Demo Callout -->
+        <div [ngStyle]="{
+               background: '#ffffff', border: '1px dashed #05517e', borderRadius: '8px',
+               padding: '0.65rem 0.85rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between'
+             }">
+          <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
+            <span [ngStyle]="{ fontSize: '0.76rem', color: '#64748b' }">Demo Generated OTP:</span>
+            <strong [ngStyle]="{ fontFamily: 'monospace', fontSize: '1.1rem', letterSpacing: '2px', color: '#05517e' }">
+              {{ generatedOtp() }}
+            </strong>
+          </div>
+
+          <button type="button" (click)="fillDemoOtp()" [ngStyle]="{
+                    background: '#05517e', color: '#fff', border: 'none', padding: '0.35rem 0.65rem',
+                    borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer'
+                  }">
+            Auto Fill OTP
+          </button>
+        </div>
+
+        <!-- OTP Input Field -->
+        <div>
+          <input type="text" [(ngModel)]="enteredOtp" maxlength="6" placeholder="Enter 6-digit OTP" [ngStyle]="{
+                   width: '100%', padding: '0.75rem', borderRadius: '8px', border: '2px solid',
+                   borderColor: otpError() ? '#ef4444' : '#05517e', background: 'var(--input-bg, #ffffff)',
+                   color: 'var(--text-color)', fontSize: '1.25rem', fontWeight: '800',
+                   textAlign: 'center', letterSpacing: '4px', boxSizing: 'border-box'
+                 }" />
+
+          <div *ngIf="otpError()"
+            [ngStyle]="{ marginTop: '0.4rem', fontSize: '0.78rem', color: '#ef4444', fontWeight: '700' }">
+            <i class="pi pi-exclamation-triangle"></i> {{ otpError() }}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Action Button -->
+      <button (click)="verifyOtpAndCompletePayment()" [disabled]="isProcessingPayment() || !enteredOtp()" [ngStyle]="{
+                background: isProcessingPayment() ? '#94a3b8' : 'linear-gradient(135deg, #10b981, #059669)',
+                color: '#ffffff', border: 'none', padding: '0.85rem 1.5rem', borderRadius: '12px',
+                fontSize: '0.95rem', fontWeight: '800', cursor: isProcessingPayment() ? 'not-allowed' : 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem',
+                boxShadow: '0 4px 16px rgba(16, 185, 129, 0.35)'
+              }">
+        <i *ngIf="isProcessingPayment()" class="pi pi-spin pi-spinner"></i>
+        <i *ngIf="!isProcessingPayment()" class="pi pi-lock"></i>
+        <span>{{ isProcessingPayment() ? 'Authorizing &amp; Placing Order...' : 'Verify OTP &amp; Pay $' +
+          (totalPayable() | number:'1.2-2') }}</span>
+      </button>
+
     </div>
 
   </div>

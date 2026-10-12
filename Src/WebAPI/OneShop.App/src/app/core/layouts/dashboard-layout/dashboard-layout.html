@@ -1,11 +1,11 @@
 <div [ngStyle]="{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: 'var(--bg-color)' }">
-  <app-navbar [tabItems]="tabItems"
+  <app-navbar [tabItems]="tabItems()"
               [logoUrl]="userDetails?.productLogo"
               (toggleSidebar)="toggleSidebar()"></app-navbar>
 
   <div [ngStyle]="{ display: 'flex', flex: '1 1 auto', overflow: 'hidden' }">
     <app-sidebar [collapsed]="!sidebarOpen"
-                 [menuItems]="sidebarItems"
+                 [menuItems]="sidebarItems()"
                  [userAvatar]="userDetails?.profilePicture"
                  [userName]="userDetails?.userName"
                  [company]="userDetails?.company"

@@ -38,6 +38,7 @@ public static class MutationRegistrationExtension
 
         //Taxes, Promos & User Addresses
         builder.AddTypeExtension<TaxMutation>();
+        builder.AddTypeExtension<DeliveryPartnerMutation>();
         builder.AddTypeExtension<PromoCodeMutation>();
         builder.AddTypeExtension<UserAddressMutation>();
 

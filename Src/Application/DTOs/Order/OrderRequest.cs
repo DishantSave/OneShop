@@ -7,7 +7,10 @@ public record OrderItemRequest(
     string SizeCode,
     string? Sku,
     int Quantity,
-    decimal UnitPrice
+    decimal UnitPrice,
+    decimal Tax = 0,
+    decimal ShippingCost = 0,
+    decimal Discount = 0
 );
 
 public record OrderRequest(
@@ -35,6 +38,8 @@ public record OrderRequest(
     string? PickupLocationCode = null,
     string? PickupLocationName = null,
     string? ShippingState = null,
-    string? PromoCode = null
+    string? PromoCode = null,
+    decimal PlatformFee = 0.50m,
+    decimal OtherTax = 0
 );
 

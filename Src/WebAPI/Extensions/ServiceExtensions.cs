@@ -52,6 +52,7 @@ public static class ServiceExtensions
         services.AddScoped<IStateTaxService, Application.Services.Tax.StateTaxService>();
         services.AddScoped<IPromoCodeService, Application.Services.Discounts.PromoCodeService>();
         services.AddScoped<IUserAddressService, Application.Services.Address.UserAddressService>();
+        services.AddScoped<Application.Interfaces.GraphQLService.IDeliveryPartnerService, Application.Services.DeliveryPartner.DeliveryPartnerService>();
         
         // GraphQL Service Dependencies ends...
 
@@ -74,6 +75,7 @@ public static class ServiceExtensions
         services.AddScoped<IStateTaxRepository, Infrastructure.Repositories.Masters.StateTaxRepository>();
         services.AddScoped<IPromoCodeRepository, Infrastructure.Repositories.Discounts.PromoCodeRepository>();
         services.AddScoped<IUserAddressRepository, Infrastructure.Repositories.Address.UserAddressRepository>();
+        services.AddScoped<Application.Interfaces.DataService.IDeliveryPartnerRepository, Infrastructure.Repositories.DeliveryPartner.DeliveryPartnerRepository>();
         services.AddScoped<IUserRoleResolver, Infrastructure.Services.UserRoleResolver>();
         // Data Layer Dependencies ends...
 

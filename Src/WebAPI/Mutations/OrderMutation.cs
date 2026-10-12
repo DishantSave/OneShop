@@ -34,7 +34,10 @@ public class OrderMutation
                 string.IsNullOrWhiteSpace(x.SizeCode) ? "ALL" : x.SizeCode.Trim().ToUpper(),
                 x.Sku?.Trim(),
                 x.Quantity > 0 ? x.Quantity : 1,
-                x.UnitPrice
+                x.UnitPrice,
+                x.Tax ?? 0,
+                x.ShippingCost ?? 0,
+                x.Discount ?? 0
             )).ToList() ?? [];
 
             var request = new OrderRequest(
@@ -62,7 +65,9 @@ public class OrderMutation
                 input.PickupLocationCode?.Trim()?.ToUpper(),
                 input.PickupLocationName?.Trim(),
                 input.ShippingState?.Trim(),
-                input.PromoCode?.Trim()?.ToUpper()
+                input.PromoCode?.Trim()?.ToUpper(),
+                input.PlatformFee ?? 0.50m,
+                input.OtherTax ?? 0
             );
 
             return await orderService.CreateOrderAsync(request, cancellationToken);
@@ -104,7 +109,10 @@ public class OrderMutation
                     string.IsNullOrWhiteSpace(x.SizeCode) ? "ALL" : x.SizeCode.Trim().ToUpper(),
                     x.Sku?.Trim(),
                     x.Quantity > 0 ? x.Quantity : 1,
-                    x.UnitPrice
+                    x.UnitPrice,
+                    x.Tax ?? 0,
+                    x.ShippingCost ?? 0,
+                    x.Discount ?? 0
                 )).ToList() ?? [];
 
                 requests.Add(new OrderRequest(
@@ -132,7 +140,9 @@ public class OrderMutation
                     o.PickupLocationCode?.Trim()?.ToUpper(),
                     o.PickupLocationName?.Trim(),
                     o.ShippingState?.Trim(),
-                    o.PromoCode?.Trim()?.ToUpper()
+                    o.PromoCode?.Trim()?.ToUpper(),
+                    o.PlatformFee ?? 0.50m,
+                    o.OtherTax ?? 0
                 ));
             }
 

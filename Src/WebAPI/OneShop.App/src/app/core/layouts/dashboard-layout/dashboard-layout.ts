@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { Navbar } from '../components/navbar/navbar';
@@ -7,6 +7,7 @@ import { Footer } from '../components/footer/footer';
 import { Theme, ThemeType } from '../../services/theme';
 import { Access } from '../../services/access';
 import { CartDrawer } from '../../../features/orders/cart-drawer/cart-drawer';
+import { NotificationService } from '../../../features/notifications/services/notification.service';
 
 @Component({
   selector: 'app-dashboard-layout',
@@ -18,13 +19,11 @@ export class DashboardLayout implements OnInit {
   private router = inject(Router);
   private themeService = inject(Theme);
   private access = inject(Access);
+  public notifService = inject(NotificationService);
 
   userDetails: any = null;
   sidebarOpen = true;
   selectedTheme: ThemeType = 'light-theme';
-
-  sidebarItems: { label: string; route: string; icon: string }[] = [];
-  tabItems: { label: string; route: string }[] = [];
 
   // screenKeys: multiple keys means "show if user has access to ANY of these"
   private allNavItems = [
@@ -33,6 +32,7 @@ export class DashboardLayout implements OnInit {
     { label: 'Items', screenKeys: ['Items'], icon: 'pi pi-box', route: '/dashboard/items' },
     { label: 'Inventory', screenKeys: ['Inventory'], icon: 'pi pi-database', route: '/dashboard/inventory' },
     { label: 'Orders', screenKeys: ['Orders'], icon: 'pi pi-shopping-cart', route: '/dashboard/orders' },
+    { label: 'Notifications', screenKeys: ['Notifications', 'Orders'], icon: 'pi pi-bell', route: '/dashboard/notifications' },
     { label: 'Invoicing', screenKeys: ['Invoicing'], icon: 'pi pi-file', route: '/dashboard/invoicing' },
     { label: 'Reports', screenKeys: ['Reports'], icon: 'pi pi-chart-bar', route: '/dashboard/reports' },
     { label: 'Analytics', screenKeys: ['Analytics'], icon: 'pi pi-chart-line', route: '/dashboard/analytics' },
@@ -43,23 +43,33 @@ export class DashboardLayout implements OnInit {
 
   private allTabItems = [
     { label: 'Dashboard', screenKey: 'Dashboard', route: '/dashboard' },
+    { label: 'Orders', screenKey: 'Orders', route: '/dashboard/orders' },
+    { label: 'Notifications', screenKey: 'Notifications', route: '/dashboard/notifications' },
     { label: 'Analytics', screenKey: 'Analytics', route: '/dashboard/analytics' },
     { label: 'Reports', screenKey: 'Reports', route: '/dashboard/reports' }
   ];
 
-  ngOnInit() {
-    const userStr = localStorage.getItem('userDetails');
-    if (userStr) this.userDetails = JSON.parse(userStr);
-
-    this.access.reload();
-
+  sidebarItems = computed(() => {
     const isCustomer = this.userDetails?.isCustomerAccount && !this.userDetails?.isSellerAccount;
+    const unread = this.notifService.unreadCount();
 
-    this.sidebarItems = this.allNavItems
-      .filter(i => this.access.hasAnyAccess(i.screenKeys))
+    return this.allNavItems
+      .filter(i => {
+        // For customers, notifications are embedded directly within Orders screen
+        if (isCustomer && i.route === '/dashboard/notifications') {
+          return false;
+        }
+        return this.access.hasAnyAccess(i.screenKeys);
+      })
       .map(({ label, route, icon }) => {
         let displayLabel = label;
         let displayIcon = icon;
+        let badge: number | undefined;
+
+        if (route === '/dashboard/notifications' && unread > 0) {
+          badge = unread;
+        }
+
         if (isCustomer) {
           if (route === '/dashboard') {
             displayLabel = 'Catalog & Shop';
@@ -72,18 +82,37 @@ export class DashboardLayout implements OnInit {
           if (route === '/dashboard/orders') {
             displayLabel = 'My Orders';
             displayIcon = 'pi pi-shopping-bag';
+            if (unread > 0) {
+              badge = unread;
+            }
           }
           if (route === '/dashboard/settings') {
             displayLabel = 'Addresses & Profile';
             displayIcon = 'pi pi-map-marker';
           }
         }
-        return { label: displayLabel, route, icon: displayIcon };
+        return { label: displayLabel, route, icon: displayIcon, badge };
       });
+  });
 
-    this.tabItems = isCustomer ? [] : this.allTabItems
+  tabItems = computed(() => {
+    const isCustomer = this.userDetails?.isCustomerAccount && !this.userDetails?.isSellerAccount;
+    if (isCustomer) {
+      return [
+        { label: 'Catalog', route: '/dashboard' },
+        { label: 'My Orders', route: '/dashboard/orders' }
+      ];
+    }
+    return this.allTabItems
       .filter(i => this.access.hasAccess(i.screenKey))
       .map(({ label, route }) => ({ label, route }));
+  });
+
+  ngOnInit() {
+    const userStr = localStorage.getItem('userDetails');
+    if (userStr) this.userDetails = JSON.parse(userStr);
+
+    this.access.reload();
 
     this.themeService.theme$.subscribe(theme => {
       this.selectedTheme = theme;

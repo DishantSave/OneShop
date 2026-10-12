@@ -1,0 +1,417 @@
+<p-toast position="top-right"></p-toast>
+
+<div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', boxSizing: 'border-box' }">
+
+  <!-- Top Page Header -->
+  <div [ngStyle]="{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem',
+      background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px', padding: '1.5rem 1.75rem',
+      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
+    }">
+    <div>
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.65rem' }">
+        <span [ngStyle]="{
+            background: 'linear-gradient(135deg, #05517e, #033654)', color: '#fff',
+            width: '36px', height: '36px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            position: 'relative'
+          }">
+          <i class="pi pi-bell" [ngStyle]="{ fontSize: '1.15rem' }"></i>
+          <span *ngIf="unreadCount() > 0"
+                [ngStyle]="{
+                  position: 'absolute', top: '-4px', right: '-4px', width: '12px', height: '12px',
+                  borderRadius: '50%', background: '#ef4444', border: '2px solid #ffffff'
+                }">
+          </span>
+        </span>
+        <h2 [ngStyle]="{ margin: '0', fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-color)' }">
+          Order Notifications &amp; Alerts
+        </h2>
+        <span *ngIf="unreadCount() > 0"
+              [ngStyle]="{
+                background: 'rgba(239, 68, 68, 0.12)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)',
+                padding: '0.2rem 0.65rem', borderRadius: '12px', fontSize: '0.78rem', fontWeight: '800'
+              }">
+          {{ unreadCount() }} New
+        </span>
+      </div>
+      <p [ngStyle]="{ margin: '0.35rem 0 0', fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.7' }">
+        Real-time order alerts, customer fulfillment requests, and status transition logs
+      </p>
+    </div>
+
+    <!-- Quick Action Controls -->
+    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }">
+      <button (click)="refresh()"
+              type="button"
+              title="Refresh notifications"
+              [disabled]="loading()"
+              [ngStyle]="{
+                background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--text-color)',
+                padding: '0.6rem 1.1rem', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '700',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.45rem', transition: 'all 0.2s ease'
+              }">
+        <i class="pi pi-refresh" [ngClass]="{ 'pi-spin': loading() }" [ngStyle]="{ color: '#05517e' }"></i>
+        <span>Refresh</span>
+      </button>
+
+      <button *ngIf="unreadCount() > 0"
+              (click)="markAllAsRead()"
+              type="button"
+              [ngStyle]="{
+                background: 'rgba(5, 81, 126, 0.1)', border: '1px solid rgba(5, 81, 126, 0.3)', color: '#05517e',
+                padding: '0.6rem 1.15rem', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '700',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.45rem', transition: 'all 0.2s ease'
+              }">
+        <i class="pi pi-check-circle"></i>
+        <span>Mark All as Read</span>
+      </button>
+
+      <button *ngIf="allNotifications().length > 0"
+              (click)="clearAll()"
+              type="button"
+              [ngStyle]="{
+                background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-color)',
+                opacity: '0.75', padding: '0.6rem 1rem', borderRadius: '10px', fontSize: '0.85rem', fontWeight: '600',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.45rem'
+              }">
+        <i class="pi pi-trash" [ngStyle]="{ fontSize: '0.82rem' }"></i>
+        <span>Clear All</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Overview Cards -->
+  <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }">
+    <!-- Total Alerts Card -->
+    <div [ngStyle]="{
+           background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+           borderRadius: '14px', padding: '1.15rem 1.35rem', display: 'flex', flexDirection: 'column', gap: '0.35rem',
+           boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
+         }">
+      <span [ngStyle]="{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.6' }">
+        TOTAL ORDER ALERTS
+      </span>
+      <div [ngStyle]="{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }">
+        <span [ngStyle]="{ fontSize: '1.65rem', fontWeight: '900', color: 'var(--text-color)' }">
+          {{ allNotifications().length }}
+        </span>
+        <span [ngStyle]="{ fontSize: '0.75rem', color: '#05517e', fontWeight: '700' }">orders logged</span>
+      </div>
+    </div>
+
+    <!-- Unread Alerts Card -->
+    <div [ngStyle]="{
+           background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+           borderRadius: '14px', padding: '1.15rem 1.35rem', display: 'flex', flexDirection: 'column', gap: '0.35rem',
+           boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
+         }">
+      <span [ngStyle]="{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.6' }">
+        UNREAD NOTIFICATIONS
+      </span>
+      <div [ngStyle]="{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }">
+        <span [ngStyle]="{ fontSize: '1.65rem', fontWeight: '900', color: unreadCount() > 0 ? '#ef4444' : 'var(--text-color)' }">
+          {{ unreadCount() }}
+        </span>
+        <span [ngStyle]="{ fontSize: '0.75rem', color: unreadCount() > 0 ? '#ef4444' : '#10b981', fontWeight: '700' }">
+          {{ unreadCount() > 0 ? 'requires attention' : 'all caught up' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Pending Fulfillment Card -->
+    <div [ngStyle]="{
+           background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+           borderRadius: '14px', padding: '1.15rem 1.35rem', display: 'flex', flexDirection: 'column', gap: '0.35rem',
+           boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
+         }">
+      <span [ngStyle]="{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.6' }">
+        AWAITING FULFILLMENT
+      </span>
+      <div [ngStyle]="{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }">
+        <span [ngStyle]="{ fontSize: '1.65rem', fontWeight: '900', color: '#f59e0b' }">
+          {{ pendingFulfillmentCount() }}
+        </span>
+        <span [ngStyle]="{ fontSize: '0.75rem', color: '#f59e0b', fontWeight: '700' }">pending orders</span>
+      </div>
+    </div>
+
+    <!-- Tracked Volume Card -->
+    <div [ngStyle]="{
+           background: 'var(--card-bg)', border: '1px solid var(--border-color)',
+           borderRadius: '14px', padding: '1.15rem 1.35rem', display: 'flex', flexDirection: 'column', gap: '0.35rem',
+           boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
+         }">
+      <span [ngStyle]="{ fontSize: '0.72rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.6' }">
+        ORDER REVENUE TRACKED
+      </span>
+      <div [ngStyle]="{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }">
+        <span [ngStyle]="{ fontSize: '1.65rem', fontWeight: '900', color: '#10b981' }">
+          ${{ totalVolume().toFixed(2) }}
+        </span>
+        <span [ngStyle]="{ fontSize: '0.75rem', color: '#10b981', fontWeight: '700' }">total value</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Bar & Search -->
+  <div [ngStyle]="{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem',
+      background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '0.85rem 1.25rem'
+    }">
+    <!-- Filter Pills -->
+    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }">
+      <button (click)="setFilter('ALL')"
+              type="button"
+              [ngStyle]="{
+                padding: '0.45rem 1rem', borderRadius: '20px', fontSize: '0.82rem', fontWeight: '700', cursor: 'pointer', border: '1px solid',
+                borderColor: activeFilter() === 'ALL' ? '#05517e' : 'var(--border-color)',
+                background: activeFilter() === 'ALL' ? 'linear-gradient(135deg, #05517e, #033654)' : 'transparent',
+                color: activeFilter() === 'ALL' ? '#ffffff' : 'var(--text-color)', transition: 'all 0.15s ease'
+              }">
+        All ({{ allNotifications().length }})
+      </button>
+
+      <button (click)="setFilter('UNREAD')"
+              type="button"
+              [ngStyle]="{
+                padding: '0.45rem 1rem', borderRadius: '20px', fontSize: '0.82rem', fontWeight: '700', cursor: 'pointer', border: '1px solid',
+                borderColor: activeFilter() === 'UNREAD' ? '#ef4444' : 'var(--border-color)',
+                background: activeFilter() === 'UNREAD' ? 'linear-gradient(135deg, #ef4444, #dc2626)' : 'transparent',
+                color: activeFilter() === 'UNREAD' ? '#ffffff' : (unreadCount() > 0 ? '#ef4444' : 'var(--text-color)'), transition: 'all 0.15s ease'
+              }">
+        Unread ({{ unreadCount() }})
+      </button>
+
+      <button (click)="setFilter('PENDING')"
+              type="button"
+              [ngStyle]="{
+                padding: '0.45rem 1rem', borderRadius: '20px', fontSize: '0.82rem', fontWeight: '700', cursor: 'pointer', border: '1px solid',
+                borderColor: activeFilter() === 'PENDING' ? '#f59e0b' : 'var(--border-color)',
+                background: activeFilter() === 'PENDING' ? 'linear-gradient(135deg, #f59e0b, #d97706)' : 'transparent',
+                color: activeFilter() === 'PENDING' ? '#ffffff' : 'var(--text-color)', transition: 'all 0.15s ease'
+              }">
+        Pending Fulfillment ({{ pendingFulfillmentCount() }})
+      </button>
+
+      <button (click)="setFilter('B2C')"
+              type="button"
+              [ngStyle]="{
+                padding: '0.45rem 1rem', borderRadius: '20px', fontSize: '0.82rem', fontWeight: '700', cursor: 'pointer', border: '1px solid',
+                borderColor: activeFilter() === 'B2C' ? '#05517e' : 'var(--border-color)',
+                background: activeFilter() === 'B2C' ? 'linear-gradient(135deg, #05517e, #033654)' : 'transparent',
+                color: activeFilter() === 'B2C' ? '#ffffff' : 'var(--text-color)', transition: 'all 0.15s ease'
+              }">
+        B2C Retail
+      </button>
+
+      <button (click)="setFilter('B2B')"
+              type="button"
+              [ngStyle]="{
+                padding: '0.45rem 1rem', borderRadius: '20px', fontSize: '0.82rem', fontWeight: '700', cursor: 'pointer', border: '1px solid',
+                borderColor: activeFilter() === 'B2B' ? '#6366f1' : 'var(--border-color)',
+                background: activeFilter() === 'B2B' ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : 'transparent',
+                color: activeFilter() === 'B2B' ? '#ffffff' : 'var(--text-color)', transition: 'all 0.15s ease'
+              }">
+        B2B Wholesale
+      </button>
+    </div>
+
+    <!-- Search Input -->
+    <div [ngStyle]="{
+        display: 'flex', alignItems: 'center', gap: '0.5rem',
+        background: 'var(--input-bg)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.45rem 0.85rem', width: '260px'
+      }">
+      <i class="pi pi-search" [ngStyle]="{ color: 'var(--text-color)', opacity: '0.5', fontSize: '0.85rem' }"></i>
+      <input type="text" placeholder="Search orders, customers, style..." [value]="searchQuery()"
+             (input)="searchQuery.set($any($event.target).value)"
+             [ngStyle]="{ border: 'none', outline: 'none', background: 'transparent', color: 'var(--input-text)', fontSize: '0.85rem', width: '100%' }" />
+      <button *ngIf="searchQuery()" (click)="searchQuery.set('')" type="button"
+              [ngStyle]="{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-color)', opacity: '0.5', padding: '0' }">
+        <i class="pi pi-times" [ngStyle]="{ fontSize: '0.75rem' }"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Notifications List -->
+  <div *ngIf="filteredNotifications().length > 0"
+       [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }">
+    <div *ngFor="let notif of filteredNotifications()"
+         (click)="goToOrder(notif)"
+         [ngStyle]="{
+           background: notif.isRead ? 'var(--card-bg)' : 'rgba(5, 81, 126, 0.04)',
+           border: '1px solid',
+           borderColor: notif.isRead ? 'var(--border-color)' : 'rgba(5, 81, 126, 0.35)',
+           borderLeft: notif.isRead ? '4px solid var(--border-color)' : '4px solid #05517e',
+           borderRadius: '14px', padding: '1.15rem 1.35rem', cursor: 'pointer',
+           display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.25rem',
+           transition: 'all 0.2s ease', boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+         }">
+
+      <!-- Left Side: Icon & Order Summary -->
+      <div [ngStyle]="{ display: 'flex', alignItems: 'flex-start', gap: '1rem', flex: '1 1 450px' }">
+        <!-- Icon Avatar -->
+        <div [ngStyle]="{
+            width: '42px', height: '42px', borderRadius: '12px', flexShrink: '0',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: notif.channel === 'B2B' ? 'rgba(99, 102, 241, 0.12)' : 'rgba(5, 81, 126, 0.12)',
+            color: notif.channel === 'B2B' ? '#6366f1' : '#05517e'
+          }">
+          <i class="pi" [ngClass]="notif.channel === 'B2B' ? 'pi-building' : 'pi-shopping-bag'" [ngStyle]="{ fontSize: '1.25rem' }"></i>
+        </div>
+
+        <!-- Order Text & Details -->
+        <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }">
+          <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }">
+            <!-- Unread Pulse Dot -->
+            <span *ngIf="!notif.isRead"
+                  title="Unread notification"
+                  [ngStyle]="{
+                    width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444', display: 'inline-block'
+                  }">
+            </span>
+
+            <span [ngStyle]="{ fontWeight: '800', fontSize: '0.98rem', color: 'var(--text-color)' }">
+              {{ notif.title }}
+            </span>
+
+            <!-- Channel Badge -->
+            <span [ngStyle]="{
+                background: notif.channel === 'B2B' ? 'rgba(99, 102, 241, 0.12)' : 'rgba(5, 81, 126, 0.1)',
+                color: notif.channel === 'B2B' ? '#6366f1' : '#05517e',
+                border: '1px solid ' + (notif.channel === 'B2B' ? 'rgba(99, 102, 241, 0.3)' : 'rgba(5, 81, 126, 0.25)'),
+                padding: '0.15rem 0.55rem', borderRadius: '6px', fontSize: '0.72rem', fontWeight: '800'
+              }">
+              {{ notif.channel === 'B2B' ? 'B2B Wholesale' : 'B2C Retail' }}
+            </span>
+
+            <!-- Company Tag -->
+            <span [ngStyle]="{
+                background: 'rgba(100, 116, 139, 0.1)', color: 'var(--text-color)', opacity: '0.8',
+                border: '1px solid var(--border-color)', padding: '0.15rem 0.5rem', borderRadius: '6px', fontSize: '0.72rem', fontWeight: '700'
+              }">
+              {{ notif.companyName ? notif.companyName + ' (' + notif.companyCode + ')' : notif.companyCode }}
+            </span>
+
+            <!-- Status Badge -->
+            <span [ngStyle]="{
+                background: notif.status === 'Pending' ? 'rgba(245, 158, 11, 0.15)' :
+                            (notif.status === 'Confirmed' ? 'rgba(16, 185, 129, 0.15)' :
+                            (notif.status === 'Shipped' ? 'rgba(5, 81, 126, 0.15)' : 'rgba(100, 116, 139, 0.15)')),
+                color: notif.status === 'Pending' ? '#d97706' :
+                       (notif.status === 'Confirmed' ? '#059669' :
+                       (notif.status === 'Shipped' ? '#05517e' : 'var(--text-color)')),
+                border: '1px solid ' + (notif.status === 'Pending' ? 'rgba(245, 158, 11, 0.3)' :
+                                       (notif.status === 'Confirmed' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(5, 81, 126, 0.3)')),
+                padding: '0.15rem 0.6rem', borderRadius: '8px', fontSize: '0.72rem', fontWeight: '800'
+              }">
+              {{ notif.status }}
+            </span>
+          </div>
+
+          <p [ngStyle]="{ margin: '0', fontSize: '0.88rem', color: 'var(--text-color)', opacity: '0.85' }">
+            {{ notif.message }}
+          </p>
+
+          <!-- Order Metadata Row -->
+          <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '1.25rem', flexWrap: 'wrap', fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.65', marginTop: '0.2rem' }">
+            <span [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.35rem' }">
+              <i class="pi pi-user" [ngStyle]="{ fontSize: '0.75rem' }"></i>
+              Customer: <strong>{{ notif.customerName }}</strong>
+            </span>
+            <span *ngIf="notif.customerEmail" [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.35rem' }">
+              <i class="pi pi-envelope" [ngStyle]="{ fontSize: '0.75rem' }"></i>
+              {{ notif.customerEmail }}
+            </span>
+            <span [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.35rem' }">
+              <i class="pi pi-map-marker" [ngStyle]="{ fontSize: '0.75rem' }"></i>
+              {{ notif.locationName }}
+            </span>
+            <span [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.35rem' }">
+              <i class="pi pi-clock" [ngStyle]="{ fontSize: '0.75rem' }"></i>
+              {{ notif.timeAgo }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Side: Total Amount & Action Buttons -->
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }">
+        <div [ngStyle]="{ textAlign: 'right', marginRight: '0.5rem' }">
+          <div [ngStyle]="{ fontSize: '1.25rem', fontWeight: '900', color: '#05517e' }">
+            ${{ notif.totalAmount.toFixed(2) }}
+          </div>
+          <div [ngStyle]="{ fontSize: '0.74rem', color: 'var(--text-color)', opacity: '0.6', fontWeight: '600' }">
+            {{ notif.totalItems }} unit(s)
+          </div>
+        </div>
+
+        <!-- Fulfill Order CTA -->
+        <button (click)="goToFulfill(notif, $event)"
+                type="button"
+                [ngStyle]="{
+                  background: 'linear-gradient(135deg, #05517e, #033654)', color: '#ffffff', border: 'none',
+                  padding: '0.55rem 1.15rem', borderRadius: '8px', fontSize: '0.82rem', fontWeight: '800',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.45rem',
+                  boxShadow: '0 3px 10px rgba(5, 81, 126, 0.25)', transition: 'all 0.15s ease'
+                }">
+          <i class="pi pi-external-link" [ngStyle]="{ fontSize: '0.78rem' }"></i>
+          <span>Fulfill Order</span>
+        </button>
+
+        <!-- Toggle Read Button -->
+        <button (click)="toggleRead(notif, $event)"
+                type="button"
+                [title]="notif.isRead ? 'Mark as unread' : 'Mark as read'"
+                [ngStyle]="{
+                  background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--text-color)',
+                  padding: '0.55rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }">
+          <i class="pi" [ngClass]="notif.isRead ? 'pi-eye-slash' : 'pi-check'" [ngStyle]="{ fontSize: '0.85rem' }"></i>
+        </button>
+
+        <!-- Dismiss Button -->
+        <button (click)="dismiss(notif, $event)"
+                type="button"
+                title="Dismiss notification"
+                [ngStyle]="{
+                  background: 'transparent', border: 'none', color: 'var(--text-color)', opacity: '0.45',
+                  padding: '0.55rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                }">
+          <i class="pi pi-times" [ngStyle]="{ fontSize: '0.85rem' }"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="filteredNotifications().length === 0"
+       [ngStyle]="{
+         background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px',
+         padding: '4rem 2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center',
+         justifyContent: 'center', gap: '1rem'
+       }">
+    <div [ngStyle]="{
+        width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(5, 81, 126, 0.08)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#05517e'
+      }">
+      <i class="pi pi-bell-slash" [ngStyle]="{ fontSize: '2rem' }"></i>
+    </div>
+    <h3 [ngStyle]="{ margin: '0', fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-color)' }">
+      No notifications to show
+    </h3>
+    <p [ngStyle]="{ margin: '0', fontSize: '0.88rem', color: 'var(--text-color)', opacity: '0.65', maxWidth: '420px' }">
+      {{ searchQuery() ? 'No orders match your search criteria. Try a different query or clear the filter.' : 'All caught up! New orders placed by customers will automatically appear here for quick fulfillment.' }}
+    </p>
+    <button *ngIf="searchQuery() || activeFilter() !== 'ALL'"
+            (click)="searchQuery.set(''); activeFilter.set('ALL')"
+            type="button"
+            [ngStyle]="{
+              background: '#05517e', color: '#ffffff', border: 'none', padding: '0.55rem 1.25rem',
+              borderRadius: '8px', fontSize: '0.85rem', fontWeight: '700', cursor: 'pointer', marginTop: '0.5rem'
+            }">
+      Reset Filters
+    </button>
+  </div>
+
+</div>

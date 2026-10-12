@@ -14,6 +14,9 @@ public record OrderItemDto
     public int Quantity { get; init; }
     public decimal UnitPrice { get; init; }
     public decimal TotalPrice { get; init; }
+    public decimal Tax { get; init; } = 0;
+    public decimal ShippingCost { get; init; } = 0;
+    public decimal Discount { get; init; } = 0;
     public DateTime DateAdded { get; init; }
 }
 
@@ -38,8 +41,10 @@ public record OrderDto
     public int TotalItems { get; init; }
     public decimal SubTotal { get; init; }
     public decimal Tax { get; init; }
+    public decimal OtherTax { get; init; } = 0;
     public decimal ShippingCost { get; init; }
     public decimal Discount { get; init; }
+    public decimal PlatformFee { get; init; } = 0.50m;
     public decimal TotalAmount { get; init; }
     public string? Notes { get; init; }
     public DateTime OrderDate { get; init; }
