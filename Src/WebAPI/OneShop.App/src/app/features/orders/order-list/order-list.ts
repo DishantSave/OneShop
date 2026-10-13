@@ -112,6 +112,21 @@ export class OrderList implements OnInit {
   newTimelineComment = signal<string>('');
   submittingComment = signal<boolean>(false);
 
+  // Shipping Label & Vendor Dispatch Processing State
+  showShippingLabelModal = signal<boolean>(false);
+  selectedOrderForLabel = signal<Order | null>(null);
+  labelFacilityType = signal<'Warehouse' | 'Store'>('Warehouse');
+  labelFacilityCode = signal<string>('');
+  labelFacilityName = signal<string>('');
+  labelDeliveryPartner = signal<string>('Delhivery');
+  labelShipVia = signal<string>('Road Freight');
+  labelTrackingNumber = signal<string>('');
+  labelTrackingUrl = signal<string>('');
+  labelPackageWeight = signal<string>('2.5 kg');
+  labelPackageDimensions = signal<string>('30 x 20 x 15 cm');
+  labelDispatchNotes = signal<string>('');
+  savingShippingLabel = signal<boolean>(false);
+
   // Edit Order Form (Limited, relevant fields)
   editOrderForm = this.fb.group({
     customerName: [''],
@@ -522,6 +537,21 @@ export class OrderList implements OnInit {
     this.itemQuantityForDraft.set(minQty);
   }
 
+  onDraftQuantityChanged(newQty: number) {
+    const qty = Math.max(1, Number(newQty) || 1);
+    this.itemQuantityForDraft.set(qty);
+    const itm = this.selectedItemForDraft();
+    if (itm) {
+      const minQty = (itm.b2bMinQuantity && itm.b2bMinQuantity > 0) ? itm.b2bMinQuantity : 10;
+      if (itm.b2bPrice && itm.b2bPrice > 0 && qty >= minQty) {
+        this.itemUnitPriceForDraft.set(itm.b2bPrice);
+        this.createOrderForm.patchValue({ channel: 'B2B', locationType: 'Warehouse', shipVia: 'Road Freight' });
+      } else {
+        this.itemUnitPriceForDraft.set(itm.b2cPrice || itm.b2bPrice || 0);
+      }
+    }
+  }
+
   getItemSizes(itm: Item): string[] {
     if (!itm.variants || itm.variants.length === 0) return ['ALL'];
     const s = Array.from(new Set(itm.variants.map(v => v.sizeCode.toUpperCase()))).filter(Boolean);
@@ -541,8 +571,14 @@ export class OrderList implements OnInit {
       return;
     }
 
-    const price = this.itemUnitPriceForDraft();
+    const minQty = (itm.b2bMinQuantity && itm.b2bMinQuantity > 0) ? itm.b2bMinQuantity : 10;
+    const isWholesale = itm.b2bPrice && itm.b2bPrice > 0 && qty >= minQty;
+    const price = isWholesale ? itm.b2bPrice : (this.itemUnitPriceForDraft() || itm.b2cPrice || 0);
     const size = this.selectedSizeForDraft() || 'ALL';
+
+    if (isWholesale) {
+      this.createOrderForm.patchValue({ channel: 'B2B', locationType: 'Warehouse', shipVia: 'Road Freight' });
+    }
 
     const current = this.orderDraftItems();
     const existingIndex = current.findIndex(x => x.itemNumber.toUpperCase() === itm.itemNumber.toUpperCase() && x.sizeCode.toUpperCase() === size.toUpperCase());
@@ -994,6 +1030,146 @@ export class OrderList implements OnInit {
     }
   }
 
+  // --- Vendor Shipping Label & Logistics Processing Methods ---
+
+  openShippingLabelModal(order: Order) {
+    this.selectedOrderForLabel.set(order);
+    const isWholesale = order.channel === 'B2B' || order.locationType === 'Warehouse';
+    this.labelFacilityType.set(isWholesale ? 'Warehouse' : (order.locationType as 'Store' | 'Warehouse' || 'Store'));
+
+    const compWhs = this.warehouses().filter(w => w.companyCode.toUpperCase() === order.companyCode.toUpperCase());
+    const compStores = this.stores().filter(s => s.companyCode.toUpperCase() === order.companyCode.toUpperCase());
+
+    if (isWholesale || this.labelFacilityType() === 'Warehouse') {
+      const wh = compWhs.find(w => w.code.toUpperCase() === (order.locationCode || '').toUpperCase()) || compWhs[0];
+      this.labelFacilityCode.set(wh ? wh.code : order.locationCode);
+      this.labelFacilityName.set(wh ? `${wh.name} (${wh.code})` : order.locationName || order.locationCode);
+      this.labelShipVia.set('Road Freight');
+      this.labelDeliveryPartner.set('Road Freight Logistics');
+    } else {
+      const st = compStores.find(s => s.code.toUpperCase() === (order.locationCode || '').toUpperCase()) || compStores[0];
+      this.labelFacilityCode.set(st ? st.code : order.locationCode);
+      this.labelFacilityName.set(st ? `${st.name} (${st.code})` : order.locationName || order.locationCode);
+      this.labelShipVia.set('Surface Express');
+      this.labelDeliveryPartner.set(order.deliveryPartner || 'Delhivery');
+    }
+
+    // Parse existing tracking info or generate new tracking number
+    const tracking = this.parseTrackingFromOrder(order);
+    const randomSuffix = Math.floor(100000000 + Math.random() * 900000000);
+    const awb = tracking.awb || `AWB-IND-${randomSuffix}`;
+    const url = tracking.url || `https://track.delhivery.com/tracking?awb=${awb}`;
+
+    this.labelTrackingNumber.set(awb);
+    this.labelTrackingUrl.set(url);
+    this.labelDispatchNotes.set('');
+    this.showShippingLabelModal.set(true);
+  }
+
+  generateNewAwb() {
+    const randomSuffix = Math.floor(100000000 + Math.random() * 900000000);
+    const partner = this.labelDeliveryPartner().toLowerCase();
+    const prefix = partner.includes('freight') ? 'FRT' : (partner.includes('blue') ? 'BLU' : 'AWB');
+    const awb = `${prefix}-IND-${randomSuffix}`;
+    this.labelTrackingNumber.set(awb);
+    this.labelTrackingUrl.set(`https://track.delhivery.com/tracking?awb=${awb}`);
+  }
+
+  closeShippingLabelModal() {
+    this.showShippingLabelModal.set(false);
+    this.selectedOrderForLabel.set(null);
+  }
+
+  onLabelFacilityChanged(event: Event) {
+    const val = (event.target as HTMLSelectElement).value; // "Type::Code::Name"
+    if (!val) return;
+    const [type, code, name] = val.split('::');
+    this.labelFacilityType.set(type as 'Store' | 'Warehouse');
+    this.labelFacilityCode.set(code);
+    this.labelFacilityName.set(name);
+  }
+
+  async saveTrackingAndDispatch() {
+    const order = this.selectedOrderForLabel();
+    if (!order) return;
+
+    const carrier = this.labelDeliveryPartner().trim();
+    const shipVia = this.labelShipVia().trim();
+    const awb = this.labelTrackingNumber().trim();
+    const url = this.labelTrackingUrl().trim();
+    const notes = this.labelDispatchNotes().trim();
+    const facilityCode = this.labelFacilityCode().trim();
+    const facilityName = this.labelFacilityName().trim();
+
+    if (!awb) {
+      this.toast.add({ severity: 'warn', summary: 'Missing Tracking #', detail: 'Please provide or generate a tracking number.' });
+      return;
+    }
+
+    this.savingShippingLabel.set(true);
+    try {
+      const formattedNotes = `AWB: ${awb} | URL: ${url} | Fulfilled: ${facilityName} (${this.labelFacilityType()}) | Carrier: ${carrier}${notes ? ' | ' + notes : ''}`;
+
+      const res = await this.orderService.updateDetails({
+        companyCode: order.companyCode,
+        orderId: order.orderId,
+        shipVia: shipVia,
+        deliveryPartner: carrier,
+        pickupLocationCode: facilityCode,
+        pickupLocationName: facilityName,
+        notes: formattedNotes,
+        userRole: this.userRoleLabel()
+      });
+
+      if (res.success) {
+        // Move order to Shipped status
+        await this.orderService.updateStatus(order.companyCode, order.orderId, 'Shipped', this.userRoleLabel());
+
+        // Notify customer via NotificationService
+        this.notifService.addNotification({
+          id: `TRACK-${order.orderId}`,
+          orderId: order.orderId,
+          title: `Order #${order.orderId} Shipped & Tracking Updated!`,
+          message: `Package has been dispatched via ${carrier}. Tracking #: ${awb}. Fulfilled from ${facilityName}.`,
+          timestamp: new Date().toISOString(),
+          type: 'info',
+          read: false
+        });
+
+        this.toast.add({
+          severity: 'success',
+          summary: 'Order Dispatched & Tracking Updated',
+          detail: `Order #${order.orderId} is now Shipped. Customer notified with Tracking #${awb}.`
+        });
+
+        this.closeShippingLabelModal();
+        await this.refreshData();
+      } else {
+        this.toast.add({ severity: 'error', summary: 'Update Failed', detail: res.message });
+      }
+    } catch (err: any) {
+      this.toast.add({ severity: 'error', summary: 'Error', detail: err.message || 'Failed to dispatch order.' });
+    } finally {
+      this.savingShippingLabel.set(false);
+    }
+  }
+
+  printShippingLabel() {
+    window.print();
+  }
+
+  parseTrackingFromOrder(order: Order | null): { awb?: string; url?: string; carrier?: string } {
+    if (!order) return { carrier: 'Express Courier' };
+    const notes = order.notes || '';
+    const trackingMatch = notes.match(/AWB:\s*([^\s|]+)/i);
+    const urlMatch = notes.match(/URL:\s*([^\s|]+)/i);
+    return {
+      awb: trackingMatch ? trackingMatch[1] : undefined,
+      url: urlMatch ? urlMatch[1] : undefined,
+      carrier: order.deliveryPartner || order.shipVia || 'Express Courier'
+    };
+  }
+
   getStatusBadgeColor(status: string): { bg: string; color: string; border: string } {
     switch ((status || '').toLowerCase()) {
       case 'confirmed':
@@ -1056,10 +1232,12 @@ export class OrderList implements OnInit {
       const estDate = new Date(baseDate);
       estDate.setDate(estDate.getDate() + 4);
       const estStr = estDate.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
-      const partner = order.deliveryPartner || order.shipVia || 'Express Courier';
+      const tracking = this.parseTrackingFromOrder(order);
+      const partner = tracking.carrier || order.deliveryPartner || order.shipVia || 'Express Courier';
+      const awbText = tracking.awb ? ` | AWB: ${tracking.awb}` : '';
       return {
         label: 'Shipped',
-        dateText: `Estimated Delivery: ${estStr} (Dispatched via ${partner})`,
+        dateText: `Estimated Delivery: ${estStr} (Dispatched via ${partner}${awbText})`,
         isProcessing: false,
         icon: 'pi pi-truck',
         color: '#05517e'

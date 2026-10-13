@@ -1,22 +1,56 @@
-<div [ngStyle]="{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: 'var(--bg-color)' }">
-  <app-navbar [tabItems]="tabItems()"
-              [logoUrl]="userDetails?.productLogo"
-              (toggleSidebar)="toggleSidebar()"></app-navbar>
+<div
+  [ngStyle]="{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: 'var(--bg-color)' }">
+  <app-navbar [tabItems]="tabItems()" [logoUrl]="userDetails?.productLogo"
+    (toggleSidebar)="toggleSidebar()"></app-navbar>
 
   <div [ngStyle]="{ display: 'flex', flex: '1 1 auto', overflow: 'hidden' }">
-    <app-sidebar [collapsed]="!sidebarOpen"
-                 [menuItems]="sidebarItems()"
-                 [userAvatar]="userDetails?.profilePicture"
-                 [userName]="userDetails?.userName"
-                 [company]="userDetails?.company"
-                 [tier]="userDetails?.subscriptionType || 'Basic'"
-                 (logout)="logout()"></app-sidebar>
+    <app-sidebar [collapsed]="!sidebarOpen" [menuItems]="sidebarItems()" [userAvatar]="userDetails?.profilePicture"
+      [userName]="userDetails?.userName" [company]="userDetails?.company"
+      [tier]="userDetails?.subscriptionType || 'Basic'" (logout)="logout()"></app-sidebar>
 
-    <div [ngStyle]="{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', overflowY: 'auto', padding: '1.5rem', background: 'var(--bg-color)', color: 'var(--text-color)' }">
+    <div
+      [ngStyle]="{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', overflowY: 'auto', padding: '1.5rem', background: 'var(--bg-color)', color: 'var(--text-color)' }">
       <router-outlet></router-outlet>
     </div>
   </div>
 
   <app-footer></app-footer>
   <app-cart-drawer></app-cart-drawer>
+
+  <!-- Floating Round Cart Button on Bottom Right Corner -->
+  <button (click)="openCart()" type="button" title="Open Shopping Cart" [ngStyle]="{
+            position: 'fixed',
+            bottom: '2rem',
+            right: '2rem',
+            width: '60px',
+            height: '60px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, #05517e, #033654)',
+            color: '#ffffff',
+            border: 'none',
+            boxShadow: '0 8px 24px rgba(5, 81, 126, 0.45)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: '999',
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+          }">
+    <i class="pi pi-shopping-bag" [ngStyle]="{ fontSize: '1.4rem' }"></i>
+    <span *ngIf="cartCount() > 0" [ngStyle]="{
+            position: 'absolute',
+            top: '-2px',
+            right: '-2px',
+            background: '#ef4444',
+            color: '#ffffff',
+            borderRadius: '12px',
+            padding: '0.15rem 0.45rem',
+            fontSize: '0.74rem',
+            fontWeight: '900',
+            border: '2px solid #ffffff',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
+          }">
+      {{ cartCount() }}
+    </span>
+  </button>
 </div>

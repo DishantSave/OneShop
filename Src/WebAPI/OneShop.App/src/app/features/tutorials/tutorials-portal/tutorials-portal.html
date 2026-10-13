@@ -1,0 +1,318 @@
+<div
+  [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', boxSizing: 'border-box', padding: '0.25rem' }">
+
+  <!-- Header Banner -->
+  <div [ngStyle]="{
+         background: 'var(--card-bg, #ffffff)', border: '1px solid var(--border-color, #e2e8f0)',
+         borderRadius: '16px', padding: '1.5rem 1.75rem', display: 'flex', alignItems: 'center',
+         justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.25rem',
+         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
+       }">
+    <div>
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.65rem' }">
+        <span [ngStyle]="{
+                background: 'linear-gradient(135deg, #05517e, #033654)', color: '#ffffff',
+                width: '36px', height: '36px', borderRadius: '10px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }">
+          <i class="pi pi-video" [ngStyle]="{ fontSize: '1.2rem' }"></i>
+        </span>
+        <h2 [ngStyle]="{ margin: '0', fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-color)' }">
+          Vendor Knowledge Base &amp; Video Tutorials
+        </h2>
+      </div>
+      <p [ngStyle]="{ margin: '0.35rem 0 0', fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.7' }">
+        High-definition simulated screencasts with synchronized AI Voiceover narration, interactive closed captions, and
+        step walkthroughs
+      </p>
+    </div>
+
+    <!-- Category Filter Pills -->
+    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }">
+      <button *ngFor="let cat of ['ALL', 'ITEMS', 'ORDERS', 'INVENTORY', 'DISCOUNTS']"
+        (click)="selectedCategory.set(cat)" type="button" [ngStyle]="{
+          background: selectedCategory() === cat ? '#05517e' : 'var(--input-bg, #f1f5f9)',
+          color: selectedCategory() === cat ? '#ffffff' : 'var(--text-color)',
+          border: '1px solid ' + (selectedCategory() === cat ? '#05517e' : 'var(--border-color)'),
+          padding: '0.45rem 0.85rem', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '700',
+          cursor: 'pointer', transition: 'all 0.2s ease'
+        }">
+        {{ cat === 'ALL' ? 'All Guides' : cat }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Featured Video Player & Interactive Simulation Studio -->
+  <div [ngStyle]="{
+         display: 'grid', gridTemplateColumns: 'minmax(0, 1.4fr) minmax(320px, 0.8fr)',
+         gap: '1.5rem', background: 'var(--card-bg, #ffffff)', border: '1px solid var(--border-color, #e2e8f0)',
+         borderRadius: '16px', padding: '1.5rem', boxShadow: '0 4px 20px rgba(0,0,0,0.04)'
+       }">
+
+    <!-- High-Fidelity Video Player Stage -->
+    <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.75rem', minWidth: '0' }">
+
+      <!-- Video Screen Frame -->
+      <div #playerContainer [ngStyle]="{
+             background: '#091124', borderRadius: '14px', position: 'relative', overflow: 'hidden',
+             boxShadow: '0 12px 32px rgba(0,0,0,0.35)', border: '1px solid #1e293b',
+             display: 'flex', flexDirection: 'column', aspectRatio: '16/9', maxHeight: '460px'
+           }">
+
+        <!-- Real Canvas Video Rendering Viewport -->
+        <canvas #videoCanvas (click)="togglePlay()" [ngStyle]="{
+                  width: '100%', height: '100%', objectFit: 'contain',
+                  cursor: 'pointer', display: 'block', background: '#0b1329'
+                }"></canvas>
+
+        <!-- Hidden Audio Element for Pre-recorded AI Voiceover -->
+        <audio #audioPlayer [src]="selectedTutorial().audioUrl" preload="auto"></audio>
+
+        <!-- Central Play Overlay Button (Visible when paused) -->
+        <div *ngIf="!isPlaying()" (click)="togglePlay()" [ngStyle]="{
+               position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+               width: '72px', height: '72px', borderRadius: '50%',
+               background: 'rgba(5, 81, 126, 0.85)', backdropFilter: 'blur(8px)',
+               border: '2px solid rgba(255, 255, 255, 0.6)', color: '#ffffff',
+               display: 'flex', alignItems: 'center', justifyContent: 'center',
+               cursor: 'pointer', boxShadow: '0 8px 30px rgba(0,0,0,0.5)', zIndex: '5',
+               transition: 'transform 0.2s ease'
+             }">
+          <i class="pi pi-play" [ngStyle]="{ fontSize: '1.8rem', marginLeft: '5px' }"></i>
+        </div>
+
+        <!-- Video Player Control Bar -->
+        <div [ngStyle]="{
+               position: 'absolute', bottom: '0', left: '0', right: '0',
+               background: 'linear-gradient(to top, rgba(9, 17, 36, 0.95), rgba(9, 17, 36, 0.4), transparent)',
+               padding: '0.75rem 1rem 0.5rem', display: 'flex', flexDirection: 'column', gap: '0.45rem',
+               zIndex: '4'
+             }">
+
+          <!-- Timeline Scrubber Bar -->
+          <div (click)="onTimelineScrub($event)" [ngStyle]="{
+                 width: '100%', height: '6px', borderRadius: '999px',
+                 background: 'rgba(255, 255, 255, 0.25)', cursor: 'pointer', position: 'relative'
+               }">
+            <div [ngStyle]="{
+                   width: ((currentTime() / selectedTutorial().totalSeconds) * 100) + '%',
+                   height: '100%', background: 'linear-gradient(90deg, #38bdf8, #0ea5e9)',
+                   borderRadius: '999px', transition: 'width 0.1s linear'
+                 }"></div>
+          </div>
+
+          <!-- Bottom Buttons & Status -->
+          <div
+            [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#cbd5e1', fontSize: '0.78rem' }">
+            <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem' }">
+              <button (click)="togglePlay()" type="button" [ngStyle]="{
+                        background: 'transparent', border: 'none', color: '#ffffff', cursor: 'pointer',
+                        padding: '0', fontSize: '1rem'
+                      }">
+                <i [class]="isPlaying() ? 'pi pi-pause' : 'pi pi-play'"></i>
+              </button>
+
+              <span [ngStyle]="{ fontFamily: 'monospace', fontSize: '0.82rem', color: '#ffffff' }">
+                {{ currentTime() | number:'1.0-0' }}s / {{ selectedTutorial().duration }}
+              </span>
+
+              <!-- Live Voiceover Indicator -->
+              <span [ngStyle]="{
+                      display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                      background: isPlaying() && !isMuted() ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255,255,255,0.08)',
+                      color: isPlaying() && !isMuted() ? '#10b981' : '#94a3b8',
+                      border: '1px solid ' + (isPlaying() && !isMuted() ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255,255,255,0.15)'),
+                      padding: '0.15rem 0.5rem', borderRadius: '6px', fontSize: '0.7rem', fontWeight: '700'
+                    }">
+                <i class="pi pi-volume-up"></i>
+                <span>{{ isPlaying() && !isMuted() ? 'AI Voice Active' : 'Voiceover Muted' }}</span>
+              </span>
+            </div>
+
+            <!-- Right Controls: Speed, Mute, Captions, Export, Fullscreen -->
+            <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.65rem' }">
+              <button (click)="toggleSpeed()" type="button" title="Playback Speed" [ngStyle]="{
+                        background: 'rgba(255,255,255,0.15)', border: 'none', color: '#ffffff',
+                        padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.72rem', fontWeight: '700', cursor: 'pointer'
+                      }">
+                {{ playbackSpeed() }}x Speed
+              </button>
+
+              <button (click)="toggleMute()" type="button" title="Toggle Voiceover Mute" [ngStyle]="{
+                        background: 'transparent', border: 'none', color: isMuted() ? '#ef4444' : '#ffffff', cursor: 'pointer',
+                        padding: '0.2rem', fontSize: '0.9rem'
+                      }">
+                <i [class]="isMuted() ? 'pi pi-volume-off' : 'pi pi-volume-up'"></i>
+              </button>
+
+              <button (click)="toggleCaptions()" type="button" title="Toggle Closed Captions (CC)" [ngStyle]="{
+                        background: captionsEnabled() ? 'rgba(56, 189, 248, 0.3)' : 'transparent',
+                        border: '1px solid ' + (captionsEnabled() ? '#38bdf8' : 'rgba(255,255,255,0.3)'),
+                        color: captionsEnabled() ? '#38bdf8' : '#ffffff',
+                        padding: '0.15rem 0.4rem', borderRadius: '4px', fontSize: '0.68rem', fontWeight: '800', cursor: 'pointer'
+                      }">
+                CC
+              </button>
+
+              <button (click)="downloadRecordedVideo()" type="button" title="Download Video File (.webm)" [ngStyle]="{
+                        background: 'rgba(255,255,255,0.15)', border: 'none', color: '#ffffff',
+                        padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.72rem', fontWeight: '700', cursor: 'pointer',
+                        display: 'flex', alignItems: 'center', gap: '0.25rem'
+                      }">
+                <i class="pi pi-download"></i>
+                <span *ngIf="!isRecording()">Export .webm</span>
+                <span *ngIf="isRecording()" [ngStyle]="{ color: '#ef4444' }">Recording...</span>
+              </button>
+
+              <button (click)="toggleFullscreen()" type="button" title="Fullscreen" [ngStyle]="{
+                        background: 'transparent', border: 'none', color: '#ffffff', cursor: 'pointer',
+                        padding: '0.2rem', fontSize: '0.9rem'
+                      }">
+                <i class="pi pi-window-maximize"></i>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Chapter Navigation Quick Jump Buttons -->
+      <div [ngStyle]="{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginTop: '0.25rem' }">
+        <button *ngFor="let ch of selectedTutorial().chapters" (click)="jumpToChapter(ch)" type="button" [ngStyle]="{
+            background: (currentTime() >= ch.second && currentTime() < (ch.second + 8)) ? 'rgba(5, 81, 126, 0.12)' : 'var(--input-bg, #f8fafc)',
+            border: '1px solid ' + ((currentTime() >= ch.second && currentTime() < (ch.second + 8)) ? '#05517e' : 'var(--border-color, #e2e8f0)'),
+            color: (currentTime() >= ch.second && currentTime() < (ch.second + 8)) ? '#05517e' : 'var(--text-color)',
+            padding: '0.35rem 0.65rem', borderRadius: '6px', fontSize: '0.75rem', fontWeight: '700',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem'
+          }">
+          <span [ngStyle]="{ fontFamily: 'monospace', opacity: '0.75' }">{{ ch.time }}</span>
+          <span>{{ ch.title }}</span>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Step-by-Step Implementation Guide & Direct Shortcut CTA -->
+    <div [ngStyle]="{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '1rem' }">
+      <div>
+        <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }">
+          <i class="pi pi-list-check" [ngStyle]="{ color: '#05517e', fontSize: '1.2rem' }"></i>
+          <h4 [ngStyle]="{ margin: '0', fontSize: '1.15rem', fontWeight: '800', color: 'var(--text-color)' }">
+            Actionable Implementation Guide
+          </h4>
+        </div>
+        <p [ngStyle]="{ margin: '0 0 1rem', fontSize: '0.82rem', color: 'var(--text-color)', opacity: '0.75' }">
+          {{ selectedTutorial().description }}
+        </p>
+
+        <!-- Steps list -->
+        <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }">
+          <div *ngFor="let step of selectedTutorial().steps; let idx = index" [ngStyle]="{
+                 display: 'flex', alignItems: 'flex-start', gap: '0.65rem',
+                 background: 'var(--input-bg, #f8fafc)', padding: '0.65rem 0.85rem',
+                 borderRadius: '8px', border: '1px solid var(--border-color, #e2e8f0)'
+               }">
+            <span [ngStyle]="{
+                    width: '22px', height: '22px', borderRadius: '50%', background: '#05517e',
+                    color: '#ffffff', fontSize: '0.75rem', fontWeight: '800',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: '0'
+                  }">
+              {{ idx + 1 }}
+            </span>
+            <span [ngStyle]="{ fontSize: '0.82rem', color: 'var(--text-color)', lineHeight: '1.4' }">
+              {{ step }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Action CTA -->
+      <div [ngStyle]="{
+             background: 'rgba(5, 81, 126, 0.06)', border: '1px solid rgba(5, 81, 126, 0.2)',
+             borderRadius: '12px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem'
+           }">
+        <div>
+          <span [ngStyle]="{ fontSize: '0.74rem', fontWeight: '800', color: '#05517e' }">PRACTICE LIVE IN SYSTEM</span>
+          <div [ngStyle]="{ fontSize: '0.86rem', fontWeight: '700', color: 'var(--text-color)' }">
+            Ready to apply what you learned?
+          </div>
+        </div>
+
+        <a [routerLink]="selectedTutorial().actionLink" [ngStyle]="{
+             background: 'linear-gradient(135deg, #05517e, #033654)', color: '#ffffff', textDecoration: 'none',
+             padding: '0.65rem 1.25rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: '800',
+             display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 12px rgba(5, 81, 126, 0.3)'
+           }">
+          <span>{{ selectedTutorial().actionLabel }}</span>
+          <i class="pi pi-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Library Grid: All Curated Video Guides -->
+  <div>
+    <h3 [ngStyle]="{ margin: '0 0 1rem', fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-color)' }">
+      Full Video Curriculum
+    </h3>
+
+    <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.25rem' }">
+      <div *ngFor="let tut of filteredTutorials()" (click)="selectTutorial(tut)" [ngStyle]="{
+             background: 'var(--card-bg, #ffffff)',
+             border: '2px solid ' + (selectedTutorial().id === tut.id ? '#05517e' : 'var(--border-color, #e2e8f0)'),
+             borderRadius: '14px', padding: '1.25rem', display: 'flex', flexDirection: 'column',
+             justifyContent: 'space-between', gap: '1rem', cursor: 'pointer', transition: 'all 0.2s ease',
+             boxShadow: selectedTutorial().id === tut.id ? '0 6px 20px rgba(5, 81, 126, 0.15)' : '0 2px 8px rgba(0,0,0,0.03)'
+           }">
+        <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }">
+          <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }">
+            <span [ngStyle]="{
+                    width: '38px', height: '38px', borderRadius: '10px',
+                    background: tut.thumbnailColor, color: '#ffffff',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  }">
+              <i [class]="tut.thumbnailIcon" [ngStyle]="{ fontSize: '1.1rem' }"></i>
+            </span>
+
+            <span [ngStyle]="{
+                    background: 'var(--input-bg, #f1f5f9)', color: 'var(--text-color)',
+                    padding: '0.2rem 0.55rem', borderRadius: '6px', fontSize: '0.72rem', fontWeight: '700'
+                  }">
+              <i class="pi pi-clock"></i> {{ tut.duration }}
+            </span>
+          </div>
+
+          <div>
+            <h4
+              [ngStyle]="{ margin: '0 0 0.35rem', fontSize: '0.96rem', fontWeight: '800', color: 'var(--text-color)' }">
+              {{ tut.title }}
+            </h4>
+            <p
+              [ngStyle]="{ margin: '0', fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.7', lineHeight: '1.4' }">
+              {{ tut.description }}
+            </p>
+          </div>
+        </div>
+
+        <div [ngStyle]="{
+               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+               paddingTop: '0.75rem', borderTop: '1px solid var(--border-color, #f1f5f9)'
+             }">
+          <span [ngStyle]="{ fontSize: '0.74rem', fontWeight: '700', color: tut.thumbnailColor }">
+            {{ tut.difficulty }} Level
+          </span>
+
+          <span [ngStyle]="{
+                  fontSize: '0.78rem', fontWeight: '800', color: '#05517e',
+                  display: 'flex', alignItems: 'center', gap: '0.35rem'
+                }">
+            <i class="pi pi-play-circle"></i> Play Video &amp; Voiceover
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

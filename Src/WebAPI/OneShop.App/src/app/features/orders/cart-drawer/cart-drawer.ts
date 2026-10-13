@@ -11,7 +11,9 @@ import { PromoService } from '../../discounts/services/promo.service';
 import { AddressService } from '../../settings/services/address.service';
 import { DeliveryPartnerService } from '../../delivery-partner/services/delivery-partner.service';
 import { Access } from '../../../core/services/access';
-import { PromoValidationResult } from '../../discounts/models/promo.model';
+import { ItemService } from '../../item/services/item.service';
+import { Item } from '../../item/models/item.model';
+import { PromoCode, PromoValidationResult } from '../../discounts/models/promo.model';
 import { CartItem, SegregatedOrderGroup, ShippingCalculationResult } from '../models/order.model';
 import { InvoiceData } from '../order-success/order-success';
 
@@ -26,6 +28,7 @@ export class CartDrawer implements OnInit {
   private orderService = inject(OrderService);
   private storeService = inject(StoreService);
   private warehouseService = inject(WarehouseService);
+  private itemService = inject(ItemService);
   private taxService = inject(TaxService);
   private promoService = inject(PromoService);
   private addressService = inject(AddressService);
@@ -41,6 +44,17 @@ export class CartDrawer implements OnInit {
   cartSubtotal = this.cartService.cartSubtotal;
   segregatedGroups = this.cartService.segregatedGroups;
 
+  // Inventory items for suggestions
+  items = this.itemService.items;
+
+  // Curated product suggestions for empty cart
+  suggestedProducts = computed(() => {
+    const all = this.items();
+    if (!all || all.length === 0) return [];
+    const cartSkus = new Set(this.cartItems().map(ci => ci.itemNumber.toUpperCase()));
+    return all.filter(i => !cartSkus.has(i.itemNumber.toUpperCase())).slice(0, 4);
+  });
+
   // Stores & Warehouses
   stores = this.storeService.stores;
   warehouses = this.warehouseService.warehouses;
@@ -51,6 +65,8 @@ export class CartDrawer implements OnInit {
   userAddresses = this.addressService.addresses;
   appliedPromo = signal<PromoValidationResult | null>(null);
   validatingPromo = signal<boolean>(false);
+  stateTax = signal<number>(0);
+  discountAmount = signal<number>(0);
 
   // Persona
   isCustomer = computed(() => this.access.isCustomer());
@@ -117,16 +133,30 @@ export class CartDrawer implements OnInit {
 
   totalPayable = computed(() => {
     const sub = this.cartSubtotal();
-    const tax = Number(this.checkoutForm.get('tax')?.value || 0);
-    const othTax = Number(this.otherTax() || 0);
+    const tax = this.stateTax();
+    const othTax = this.otherTax();
     const ship = this.isFreeShipping() ? 0 : this.shippingCost();
-    const plat = Number(this.platformFee() || 0.50);
-    const disc = Number(this.checkoutForm.get('discount')?.value || 0);
+    const plat = this.platformFee();
+    const disc = this.discountAmount();
     const tot = sub + tax + othTax + ship + plat - disc;
     return tot > 0 ? Math.round(tot * 100) / 100 : 0;
   });
 
   constructor() {
+    this.checkoutForm.get('tax')?.valueChanges.subscribe(val => {
+      const num = Number(val || 0);
+      if (this.stateTax() !== num) {
+        this.stateTax.set(num);
+      }
+    });
+
+    this.checkoutForm.get('discount')?.valueChanges.subscribe(val => {
+      const num = Number(val || 0);
+      if (this.discountAmount() !== num) {
+        this.discountAmount.set(num);
+      }
+    });
+
     // Automatically keep shipping rate in sync whenever cart items / subtotal change
     effect(() => {
       const sub = this.cartSubtotal();
@@ -190,6 +220,51 @@ export class CartDrawer implements OnInit {
     if (!item) return;
     const newQty = item.quantity + delta;
     this.cartService.updateQuantity(itemId, newQty);
+    this.recalculateAllFinancials();
+  }
+
+  onQtyInputChange(itemId: string, event: Event) {
+    const input = event.target as HTMLInputElement;
+    const val = parseInt(input.value, 10);
+    const newQty = isNaN(val) || val < 1 ? 1 : val;
+    input.value = newQty.toString();
+    this.cartService.updateQuantity(itemId, newQty);
+    this.recalculateAllFinancials();
+  }
+
+  getItemImage(item: Item): string | null {
+    if (!item.images) return null;
+    const parts = item.images.split(',');
+    return parts[0]?.trim() || null;
+  }
+
+  addSuggestedProduct(item: Item) {
+    const defaultSize = item.variants && item.variants.length > 0 ? item.variants[0].sizeCode : 'ALL';
+    const compStores = this.stores().filter(s => s.companyCode.toUpperCase() === item.companyCode.toUpperCase());
+    const dest = compStores.length > 0
+      ? { type: 'Store' as const, code: compStores[0].code, name: compStores[0].name }
+      : { type: 'Store' as const, code: 'DEFAULT', name: 'Default Store' };
+
+    const price = item.b2cPrice || item.b2bPrice || 0;
+
+    this.cartService.addToCart({
+      itemNumber: item.itemNumber,
+      itemName: item.name,
+      category: item.category,
+      companyCode: item.companyCode,
+      companyName: item.companyCode,
+      sizeCode: defaultSize,
+      channel: (item.salesChannel as 'B2B' | 'B2C' | 'Both') || 'Both',
+      unitPrice: price,
+      b2cPrice: item.b2cPrice,
+      b2bPrice: item.b2bPrice,
+      b2bMinQuantity: item.b2bMinQuantity,
+      quantity: 1,
+      locationType: dest.type,
+      locationCode: dest.code,
+      locationName: dest.name
+    });
+
     this.recalculateAllFinancials();
   }
 
@@ -261,7 +336,11 @@ export class CartDrawer implements OnInit {
 
   calculateStateTax(stateNameOrCode?: string) {
     const state = (stateNameOrCode || this.checkoutForm.get('shippingState')?.value || '').trim().toLowerCase();
-    if (!state) return;
+    if (!state) {
+      this.stateTax.set(0);
+      this.checkoutForm.patchValue({ tax: 0 });
+      return;
+    }
 
     const match = this.taxes().find(t =>
       t.isActive && (
@@ -271,14 +350,15 @@ export class CartDrawer implements OnInit {
       )
     );
 
+    const sub = this.cartSubtotal();
     if (match) {
-      const sub = this.cartSubtotal();
       const calculatedTax = Math.round((sub * match.taxRate / 100) * 100) / 100;
+      this.stateTax.set(calculatedTax);
       this.checkoutForm.patchValue({ tax: calculatedTax });
     } else {
       // Default standard state tax (e.g. 5%)
-      const sub = this.cartSubtotal();
       const calculatedTax = Math.round((sub * 0.05) * 100) / 100;
+      this.stateTax.set(calculatedTax);
       this.checkoutForm.patchValue({ tax: calculatedTax });
     }
   }
@@ -359,9 +439,11 @@ export class CartDrawer implements OnInit {
 
     if (res.isValid) {
       this.appliedPromo.set(res);
+      this.discountAmount.set(res.calculatedDiscount);
       this.checkoutForm.patchValue({ discount: res.calculatedDiscount });
     } else {
       this.appliedPromo.set(null);
+      this.discountAmount.set(0);
       this.checkoutForm.patchValue({ discount: 0 });
       this.errorMessage.set(res.message);
     }
@@ -369,6 +451,7 @@ export class CartDrawer implements OnInit {
 
   removePromoCode() {
     this.appliedPromo.set(null);
+    this.discountAmount.set(0);
     this.checkoutForm.patchValue({ promoCode: '', discount: 0 });
   }
 
@@ -388,6 +471,7 @@ export class CartDrawer implements OnInit {
         const res = await this.promoService.validatePromo(promo.code, sub);
         if (res.isValid) {
           this.appliedPromo.set(res);
+          this.discountAmount.set(res.calculatedDiscount);
           this.checkoutForm.patchValue({ discount: res.calculatedDiscount });
         } else {
           this.removePromoCode();
@@ -488,8 +572,8 @@ export class CartDrawer implements OnInit {
       state: raw.shippingState?.trim(),
       notes: raw.notes?.trim(),
       promoCode: raw.promoCode?.trim() || undefined,
-      discount: Number(raw.discount || 0),
-      tax: Number(raw.tax || 0),
+      discount: this.discountAmount(),
+      tax: this.stateTax(),
       otherTax: othTax,
       shippingCost: finalShipCost,
       platformFee: platFee,
@@ -536,15 +620,15 @@ export class CartDrawer implements OnInit {
               storeName: it.locationName || it.locationCode,
               quantity: it.quantity,
               unitPrice: it.unitPrice,
-              tax: Math.round(Number(raw.tax || 0) * ratio * 100) / 100,
+              tax: Math.round(this.stateTax() * ratio * 100) / 100,
               shippingCost: Math.round(finalShipCost * ratio * 100) / 100,
-              discount: Math.round(Number(raw.discount || 0) * ratio * 100) / 100,
+              discount: Math.round(this.discountAmount() * ratio * 100) / 100,
               totalPrice: it.quantity * it.unitPrice
             };
           }),
           subTotal: this.cartSubtotal(),
-          discount: Number(raw.discount || 0),
-          tax: Number(raw.tax || 0),
+          discount: this.discountAmount(),
+          tax: this.stateTax(),
           otherTax: othTax,
           shippingCost: finalShipCost,
           platformFee: platFee,

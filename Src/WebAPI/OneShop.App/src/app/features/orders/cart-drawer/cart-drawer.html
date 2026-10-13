@@ -82,10 +82,10 @@
   <div
     [ngStyle]="{ flex: '1 1 auto', overflowY: 'auto', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }">
 
-    <!-- Empty State -->
+    <!-- Empty State with Curated Product Suggestions -->
     <div *ngIf="cartItems().length === 0" [ngStyle]="{
            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-           padding: '4rem 1.5rem', textAlign: 'center', color: 'var(--text-color)', opacity: '0.7', gap: '1rem'
+           padding: '2rem 1rem', textAlign: 'center', color: 'var(--text-color)', gap: '1.25rem'
          }">
       <span [ngStyle]="{
               background: 'rgba(5, 81, 126, 0.08)', color: '#05517e',
@@ -94,10 +94,74 @@
             }">
         <i class="pi pi-shopping-bag"></i>
       </span>
-      <h4 [ngStyle]="{ margin: '0', fontSize: '1.1rem', fontWeight: '700' }">Your Cart is Empty</h4>
-      <p [ngStyle]="{ margin: '0', fontSize: '0.85rem', maxWidth: '280px', lineHeight: '1.4' }">
-        Explore items from catalogs, select your sizes, and add them to cart to order from verified store sellers.
-      </p>
+      <div>
+        <h4 [ngStyle]="{ margin: '0 0 0.35rem', fontSize: '1.15rem', fontWeight: '800' }">Your Cart is Empty</h4>
+        <p
+          [ngStyle]="{ margin: '0', fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.7', maxWidth: '300px', lineHeight: '1.4' }">
+          Looking for inspiration? Check out these trending products available right now:
+        </p>
+      </div>
+
+      <!-- Suggested Products in Empty Cart -->
+      <div *ngIf="suggestedProducts().length > 0" [ngStyle]="{
+             width: '100%', display: 'flex', flexDirection: 'column', gap: '0.75rem',
+             marginTop: '0.5rem', textAlign: 'left'
+           }">
+        <div [ngStyle]="{
+               fontSize: '0.82rem', fontWeight: '800', color: '#05517e',
+               display: 'flex', alignItems: 'center', gap: '0.4rem', textTransform: 'uppercase', letterSpacing: '0.04em'
+             }">
+          <i class="pi pi-bolt" [ngStyle]="{ color: '#f59e0b' }"></i>
+          Recommended For You
+        </div>
+
+        <div *ngFor="let sItem of suggestedProducts()" [ngStyle]="{
+               background: 'var(--card-bg, #ffffff)', border: '1px solid var(--border-color, #e2e8f0)',
+               borderRadius: '12px', padding: '0.75rem', display: 'flex', alignItems: 'center',
+               justifyContent: 'space-between', gap: '0.75rem', boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+             }">
+          <div
+            [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: '1 1 auto', overflow: 'hidden' }">
+            <div [ngStyle]="{
+                   width: '44px', height: '44px', borderRadius: '8px',
+                   background: 'rgba(5, 81, 126, 0.08)', display: 'flex',
+                   alignItems: 'center', justifyContent: 'center', overflow: 'hidden', flexShrink: '0'
+                 }">
+              <img *ngIf="getItemImage(sItem)" [src]="getItemImage(sItem)" [alt]="sItem.name"
+                [ngStyle]="{ width: '100%', height: '100%', objectFit: 'cover' }" />
+              <i *ngIf="!getItemImage(sItem)" class="pi pi-box"
+                [ngStyle]="{ color: '#05517e', fontSize: '1.1rem' }"></i>
+            </div>
+            <div [ngStyle]="{ overflow: 'hidden' }">
+              <div
+                [ngStyle]="{ fontWeight: '700', fontSize: '0.85rem', color: 'var(--text-color)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }">
+                {{ sItem.name }}
+              </div>
+              <div
+                [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.75rem', marginTop: '0.15rem' }">
+                <span [ngStyle]="{ fontWeight: '800', color: '#05517e' }">
+                  ${{ (sItem.b2cPrice || sItem.b2bPrice || 0) | number:'1.2-2' }}
+                </span>
+                <span *ngIf="sItem.b2bPrice && sItem.b2bPrice < (sItem.b2cPrice || 0)"
+                  [ngStyle]="{ background: 'rgba(99, 102, 241, 0.12)', color: '#4f46e5', padding: '0.05rem 0.35rem', borderRadius: '4px', fontSize: '0.65rem', fontWeight: '700' }">
+                  Wholesale: ${{ sItem.b2bPrice | number:'1.2-2' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <button (click)="addSuggestedProduct(sItem)" type="button" title="Add to Cart" [ngStyle]="{
+                    background: 'linear-gradient(135deg, #05517e, #033654)', color: '#ffffff',
+                    border: 'none', borderRadius: '8px', padding: '0.4rem 0.75rem',
+                    fontSize: '0.75rem', fontWeight: '800', cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: '0',
+                    boxShadow: '0 2px 6px rgba(5,81,126,0.25)'
+                  }">
+            <i class="pi pi-plus" [ngStyle]="{ fontSize: '0.7rem' }"></i>
+            Add
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Items List (Store Details Visible with Item Info) -->
@@ -133,6 +197,13 @@
                     }">
                 Size: {{ item.sizeCode }}
               </span>
+              <!-- Wholesale Badge if qualified -->
+              <span *ngIf="item.b2bPrice && item.quantity >= (item.b2bMinQuantity || 10)" [ngStyle]="{
+                      background: 'rgba(99, 102, 241, 0.15)', color: '#4f46e5',
+                      padding: '0.15rem 0.45rem', borderRadius: '4px', fontSize: '0.68rem', fontWeight: '800'
+                    }">
+                <i class="pi pi-tag" [ngStyle]="{ fontSize: '0.65rem' }"></i> Wholesale Rate Applied!
+              </span>
             </div>
 
             <!-- Item Name & Number -->
@@ -165,21 +236,23 @@
           </span>
         </div>
 
-        <!-- Price & Quantity Controls -->
+        <!-- Price & Quantity Controls with Manual Typing -->
         <div
           [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '0.25rem' }">
           <div
-            [ngStyle]="{ display: 'flex', alignItems: 'center', border: '1px solid var(--border-color, #cbd5e1)', borderRadius: '6px', overflow: 'hidden' }">
-            <button (click)="updateQty(item.id, -1)"
-              [ngStyle]="{ background: 'transparent', border: 'none', padding: '0.25rem 0.6rem', cursor: 'pointer', color: 'var(--text-color)', fontWeight: '700' }">
+            [ngStyle]="{ display: 'flex', alignItems: 'center', border: '1px solid var(--border-color, #cbd5e1)', borderRadius: '6px', overflow: 'hidden', background: 'var(--input-bg)' }">
+            <button (click)="updateQty(item.id, -1)" type="button"
+              [ngStyle]="{ background: 'transparent', border: 'none', padding: '0.25rem 0.55rem', cursor: 'pointer', color: 'var(--text-color)', fontWeight: '700' }">
               -
             </button>
-            <span
-              [ngStyle]="{ padding: '0.25rem 0.65rem', fontSize: '0.82rem', fontWeight: '700', minWidth: '24px', textAlign: 'center' }">
-              {{ item.quantity }}
-            </span>
-            <button (click)="updateQty(item.id, 1)"
-              [ngStyle]="{ background: 'transparent', border: 'none', padding: '0.25rem 0.6rem', cursor: 'pointer', color: 'var(--text-color)', fontWeight: '700' }">
+            <input type="number" min="1" [value]="item.quantity" (change)="onQtyInputChange(item.id, $event)"
+              (keyup.enter)="onQtyInputChange(item.id, $event)" title="Type quantity manually" [ngStyle]="{
+                     width: '46px', padding: '0.2rem 0.1rem', border: 'none', textAlign: 'center',
+                     fontSize: '0.82rem', fontWeight: '700', background: 'transparent',
+                     color: 'var(--text-color)', outline: 'none'
+                   }" />
+            <button (click)="updateQty(item.id, 1)" type="button"
+              [ngStyle]="{ background: 'transparent', border: 'none', padding: '0.25rem 0.55rem', cursor: 'pointer', color: 'var(--text-color)', fontWeight: '700' }">
               +
             </button>
           </div>
@@ -542,18 +615,16 @@
               <span [ngStyle]="{ fontWeight: '700' }">${{ cartSubtotal() | number:'1.2-2' }}</span>
             </div>
 
-            <div *ngIf="checkoutForm.get('discount')?.value"
+            <div *ngIf="discountAmount() > 0"
               [ngStyle]="{ display: 'flex', justifyContent: 'space-between', color: '#10b981' }">
               <span>2. Discounts:</span>
-              <span [ngStyle]="{ fontWeight: '700' }">-${{ (checkoutForm.get('discount')?.value || 0) | number:'1.2-2'
-                }}</span>
+              <span [ngStyle]="{ fontWeight: '700' }">-${{ discountAmount() | number:'1.2-2' }}</span>
             </div>
 
             <div
               [ngStyle]="{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-color)', opacity: '0.8' }">
               <span>3. State Tax (Item-Level Sum):</span>
-              <span [ngStyle]="{ fontWeight: '700' }">+${{ (checkoutForm.get('tax')?.value || 0) | number:'1.2-2'
-                }}</span>
+              <span [ngStyle]="{ fontWeight: '700' }">+${{ stateTax() | number:'1.2-2' }}</span>
             </div>
 
             <div *ngIf="otherTax() > 0"

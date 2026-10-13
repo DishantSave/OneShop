@@ -105,6 +105,14 @@ export class CartService {
     this.isDrawerOpen.update(v => !v);
   }
 
+  resolveUnitPrice(item: { b2cPrice?: number; b2bPrice?: number; b2bMinQuantity?: number; unitPrice: number }, quantity: number): number {
+    const minQty = (item.b2bMinQuantity && item.b2bMinQuantity > 0) ? item.b2bMinQuantity : 10;
+    if (item.b2bPrice && item.b2bPrice > 0 && quantity >= minQty) {
+      return item.b2bPrice;
+    }
+    return item.b2cPrice || item.unitPrice || 0;
+  }
+
   addToCart(newItem: Omit<CartItem, 'id'>) {
     const key = `${newItem.itemNumber.toUpperCase()}::${newItem.sizeCode.toUpperCase()}::${newItem.companyCode.toUpperCase()}::${newItem.locationCode.toUpperCase()}`;
     const current = this.cartItems();
@@ -112,13 +120,25 @@ export class CartService {
 
     if (existingIndex > -1) {
       const updated = [...current];
+      const newQty = updated[existingIndex].quantity + newItem.quantity;
+      const effectivePrice = this.resolveUnitPrice(updated[existingIndex], newQty);
+      const isWholesale = updated[existingIndex].b2bPrice && updated[existingIndex].b2bPrice! > 0 && newQty >= (updated[existingIndex].b2bMinQuantity || 10);
       updated[existingIndex] = {
         ...updated[existingIndex],
-        quantity: updated[existingIndex].quantity + newItem.quantity
+        quantity: newQty,
+        unitPrice: effectivePrice,
+        channel: isWholesale ? 'B2B' : updated[existingIndex].channel
       };
       this.cartItems.set(updated);
     } else {
-      this.cartItems.set([...current, { ...newItem, id: key }]);
+      const effectivePrice = this.resolveUnitPrice(newItem, newItem.quantity);
+      const isWholesale = newItem.b2bPrice && newItem.b2bPrice > 0 && newItem.quantity >= (newItem.b2bMinQuantity || 10);
+      this.cartItems.set([...current, {
+        ...newItem,
+        id: key,
+        unitPrice: effectivePrice,
+        channel: isWholesale ? 'B2B' : newItem.channel
+      }]);
     }
   }
 
@@ -128,7 +148,19 @@ export class CartService {
       return;
     }
     this.cartItems.update(items =>
-      items.map(item => item.id === id ? { ...item, quantity: newQty } : item)
+      items.map(item => {
+        if (item.id === id) {
+          const effectivePrice = this.resolveUnitPrice(item, newQty);
+          const isWholesale = item.b2bPrice && item.b2bPrice > 0 && newQty >= (item.b2bMinQuantity || 10);
+          return {
+            ...item,
+            quantity: newQty,
+            unitPrice: effectivePrice,
+            channel: isWholesale ? 'B2B' : (item.b2cPrice ? 'B2C' : 'Both')
+          };
+        }
+        return item;
+      })
     );
   }
 
@@ -181,7 +213,13 @@ export class CartService {
     const count = groups.length || 1;
 
     return groups.map(g => {
-      const isWarehouse = g.locationType === 'Warehouse';
+      // Check if this group contains wholesale quantities
+      const hasWholesaleItems = g.items.some(it => {
+        const minQty = (it.b2bMinQuantity && it.b2bMinQuantity > 0) ? it.b2bMinQuantity : 10;
+        return (it.b2bPrice && it.b2bPrice > 0 && it.quantity >= minQty) || it.channel === 'B2B';
+      });
+
+      const isWarehouse = g.locationType === 'Warehouse' || hasWholesaleItems;
       const grpDiscount = customerInfo?.discount ? Math.round((customerInfo.discount / count) * 100) / 100 : 0;
       const grpShipping = customerInfo?.shippingCost !== undefined ? Math.round((customerInfo.shippingCost / count) * 100) / 100 : 0;
       const grpTax = customerInfo?.tax ? Math.round((customerInfo.tax / count) * 100) / 100 : 0;
@@ -190,12 +228,17 @@ export class CartService {
 
       const groupItemCount = g.items.reduce((s, it) => s + it.quantity, 0) || 1;
 
+      // When wholesale items are present, small-scale couriers cannot carry this bulk load.
+      // Automatically allot 'Road Freight' and ensure Warehouse fulfillment!
+      const effectiveShipVia = isWarehouse ? (customerInfo?.shipVia || 'Road Freight') : undefined;
+      const effectiveDeliveryPartner = isWarehouse ? 'Road Freight Logistics' : (customerInfo?.deliveryPartner || undefined);
+
       return {
         companyCode: g.companyCode,
         orderId: g.assignedOrderId,
         channel: isWarehouse ? 'B2B' : 'B2C',
-        locationType: g.locationType,
-        locationCode: g.locationCode,
+        locationType: isWarehouse ? 'Warehouse' : g.locationType,
+        locationCode: (isWarehouse && g.locationType === 'Store') ? 'WH-MAIN' : g.locationCode,
         status: 'Pending',
         paymentStatus: customerInfo?.paymentStatus || 'Paid',
         customerName: customerInfo?.name,
@@ -209,12 +252,17 @@ export class CartService {
         shippingCost: grpShipping,
         discount: grpDiscount,
         platformFee: grpPlatformFee,
-        shipVia: isWarehouse ? (customerInfo?.shipVia || 'Road Freight') : undefined,
-        deliveryPartner: customerInfo?.deliveryPartner || undefined,
+        shipVia: effectiveShipVia,
+        deliveryPartner: effectiveDeliveryPartner,
         pickupLocationCode: !isWarehouse ? customerInfo?.pickupLocationCode : undefined,
         pickupLocationName: !isWarehouse ? customerInfo?.pickupLocationName : undefined,
         notes: customerInfo?.notes,
         items: g.items.map(it => {
+          const minQty = (it.b2bMinQuantity && it.b2bMinQuantity > 0) ? it.b2bMinQuantity : 10;
+          const effectivePrice = (it.b2bPrice && it.b2bPrice > 0 && it.quantity >= minQty)
+            ? it.b2bPrice
+            : (it.unitPrice || it.b2cPrice || 0);
+
           const itemTax = it.taxAmount ?? (Math.round((grpTax * (it.quantity / groupItemCount)) * 100) / 100);
           const itemShipping = it.shippingAmount ?? (Math.round((grpShipping * (it.quantity / groupItemCount)) * 100) / 100);
           const itemDiscount = it.discountAmount ?? (Math.round((grpDiscount * (it.quantity / groupItemCount)) * 100) / 100);
@@ -224,7 +272,7 @@ export class CartService {
             itemName: it.itemName,
             sizeCode: it.sizeCode,
             quantity: it.quantity,
-            unitPrice: it.unitPrice,
+            unitPrice: effectivePrice,
             tax: itemTax,
             shippingCost: itemShipping,
             discount: itemDiscount

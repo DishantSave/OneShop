@@ -1,0 +1,539 @@
+<div
+  [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '100%', boxSizing: 'border-box', padding: '0.25rem' }">
+
+  <!-- Header Banner -->
+  <div [ngStyle]="{
+         background: 'var(--card-bg, #ffffff)', border: '1px solid var(--border-color, #e2e8f0)',
+         borderRadius: '16px', padding: '1.5rem 1.75rem', display: 'flex', alignItems: 'center',
+         justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.25rem',
+         boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
+       }">
+    <div>
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.65rem' }">
+        <span [ngStyle]="{
+                background: 'linear-gradient(135deg, #05517e, #033654)', color: '#ffffff',
+                width: '36px', height: '36px', borderRadius: '10px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }">
+          <i class="pi pi-chart-line" [ngStyle]="{ fontSize: '1.2rem' }"></i>
+        </span>
+        <h2 [ngStyle]="{ margin: '0', fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-color)' }">
+          Executive Analytics &amp; Sales Intelligence
+        </h2>
+      </div>
+      <p [ngStyle]="{ margin: '0.35rem 0 0', fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.7' }">
+        Real-time financial performance, product demand ranking, discount absorption, customer acquisition, and
+        next-month sales forecasting
+      </p>
+    </div>
+
+    <!-- Company Filter & Refresh Controls -->
+    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }">
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.4rem' }">
+        <label [ngStyle]="{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.8' }">
+          Company:
+        </label>
+        <select [ngModel]="selectedCompany()" (ngModelChange)="selectedCompany.set($event)" [ngStyle]="{
+                  padding: '0.55rem 0.85rem', borderRadius: '8px', border: '1px solid var(--border-color)',
+                  background: 'var(--input-bg)', color: 'var(--text-color)', fontSize: '0.85rem', fontWeight: '600'
+                }">
+          <option value="ALL">All Companies</option>
+          <option *ngFor="let c of companies()" [value]="c.code">
+            {{ c.name }} ({{ c.code }})
+          </option>
+        </select>
+      </div>
+
+      <a routerLink="/dashboard/orders" [ngStyle]="{
+           background: 'linear-gradient(135deg, #05517e, #033654)', color: '#ffffff', textDecoration: 'none',
+           padding: '0.55rem 1rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: '700',
+           display: 'flex', alignItems: 'center', gap: '0.45rem', boxShadow: '0 3px 10px rgba(5, 81, 126, 0.25)'
+         }">
+        <i class="pi pi-shopping-bag"></i>
+        <span>View Orders</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- 1. Key Sales Timeframes KPI Grid (Last Working Day, Last Week, Last Month, Last Year) -->
+  <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1rem' }">
+
+    <!-- Last Working Day -->
+    <div [ngStyle]="{
+           background: 'var(--card-bg, #ffffff)', border: '1px solid var(--border-color, #e2e8f0)',
+           borderRadius: '14px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.65rem',
+           boxShadow: '0 2px 10px rgba(0,0,0,0.03)', position: 'relative', overflow: 'hidden'
+         }">
+      <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }">
+        <span [ngStyle]="{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.75' }">
+          LAST WORKING DAY
+        </span>
+        <span [ngStyle]="{
+                background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', borderRadius: '6px',
+                padding: '0.2rem 0.5rem', fontSize: '0.72rem', fontWeight: '800'
+              }">
+          <i class="pi pi-calendar"></i> Daily
+        </span>
+      </div>
+      <div [ngStyle]="{ fontSize: '1.75rem', fontWeight: '900', color: 'var(--text-color)' }">
+        ${{ salesMetrics().lastWorkingDay.revenue | number:'1.2-2' }}
+      </div>
+      <div
+        [ngStyle]="{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.8' }">
+        <span>Orders: <strong>{{ salesMetrics().lastWorkingDay.orderCount }}</strong></span>
+        <span>AOV: <strong>${{ salesMetrics().lastWorkingDay.avgOrderValue | number:'1.0-0' }}</strong></span>
+      </div>
+    </div>
+
+    <!-- Last Week -->
+    <div [ngStyle]="{
+           background: 'var(--card-bg, #ffffff)', border: '1px solid var(--border-color, #e2e8f0)',
+           borderRadius: '14px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.65rem',
+           boxShadow: '0 2px 10px rgba(0,0,0,0.03)', position: 'relative', overflow: 'hidden'
+         }">
+      <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }">
+        <span [ngStyle]="{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.75' }">
+          LAST 7 DAYS (WEEK)
+        </span>
+        <span [ngStyle]="{
+                background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', borderRadius: '6px',
+                padding: '0.2rem 0.5rem', fontSize: '0.72rem', fontWeight: '800'
+              }">
+          <i class="pi pi-arrow-up-right"></i> +{{ salesMetrics().lastWeek.growthPct }}%
+        </span>
+      </div>
+      <div [ngStyle]="{ fontSize: '1.75rem', fontWeight: '900', color: '#10b981' }">
+        ${{ salesMetrics().lastWeek.revenue | number:'1.2-2' }}
+      </div>
+      <div
+        [ngStyle]="{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.8' }">
+        <span>Orders: <strong>{{ salesMetrics().lastWeek.orderCount }}</strong></span>
+        <span>AOV: <strong>${{ salesMetrics().lastWeek.avgOrderValue | number:'1.0-0' }}</strong></span>
+      </div>
+    </div>
+
+    <!-- Last Month -->
+    <div [ngStyle]="{
+           background: 'var(--card-bg, #ffffff)', border: '1px solid var(--border-color, #e2e8f0)',
+           borderRadius: '14px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.65rem',
+           boxShadow: '0 2px 10px rgba(0,0,0,0.03)', position: 'relative', overflow: 'hidden'
+         }">
+      <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }">
+        <span [ngStyle]="{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.75' }">
+          LAST 30 DAYS (MONTH)
+        </span>
+        <span [ngStyle]="{
+                background: 'rgba(99, 102, 241, 0.1)', color: '#6366f1', borderRadius: '6px',
+                padding: '0.2rem 0.5rem', fontSize: '0.72rem', fontWeight: '800'
+              }">
+          <i class="pi pi-arrow-up-right"></i> +{{ salesMetrics().lastMonth.growthPct }}%
+        </span>
+      </div>
+      <div [ngStyle]="{ fontSize: '1.75rem', fontWeight: '900', color: '#6366f1' }">
+        ${{ salesMetrics().lastMonth.revenue | number:'1.2-2' }}
+      </div>
+      <div
+        [ngStyle]="{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.8' }">
+        <span>Orders: <strong>{{ salesMetrics().lastMonth.orderCount }}</strong></span>
+        <span>AOV: <strong>${{ salesMetrics().lastMonth.avgOrderValue | number:'1.0-0' }}</strong></span>
+      </div>
+    </div>
+
+    <!-- Last Year -->
+    <div [ngStyle]="{
+           background: 'var(--card-bg, #ffffff)', border: '1px solid var(--border-color, #e2e8f0)',
+           borderRadius: '14px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.65rem',
+           boxShadow: '0 2px 10px rgba(0,0,0,0.03)', position: 'relative', overflow: 'hidden'
+         }">
+      <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }">
+        <span [ngStyle]="{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.75' }">
+          LAST YEAR (365 DAYS)
+        </span>
+        <span [ngStyle]="{
+                background: 'rgba(245, 158, 11, 0.1)', color: '#d97706', borderRadius: '6px',
+                padding: '0.2rem 0.5rem', fontSize: '0.72rem', fontWeight: '800'
+              }">
+          <i class="pi pi-chart-pie"></i> Annual
+        </span>
+      </div>
+      <div [ngStyle]="{ fontSize: '1.75rem', fontWeight: '900', color: '#05517e' }">
+        ${{ salesMetrics().lastYear.revenue | number:'1.2-2' }}
+      </div>
+      <div
+        [ngStyle]="{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.8' }">
+        <span>Orders: <strong>{{ salesMetrics().lastYear.orderCount }}</strong></span>
+        <span>AOV: <strong>${{ salesMetrics().lastYear.avgOrderValue | number:'1.0-0' }}</strong></span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 2. Visual Charts Row: Sales Revenue Bar Graph + Customer vs Vendor Order Breakdown -->
+  <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '1.25rem' }">
+
+    <!-- Interactive Sales Trend Bar Graph -->
+    <div [ngStyle]="{
+           background: 'var(--card-bg, #ffffff)', border: '1px solid var(--border-color, #e2e8f0)',
+           borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem',
+           boxShadow: '0 4px 15px rgba(0,0,0,0.03)'
+         }">
+      <div
+        [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }">
+        <div>
+          <h3 [ngStyle]="{ margin: '0', fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-color)' }">
+            Revenue Performance Trend
+          </h3>
+          <span [ngStyle]="{ fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.65' }">
+            Comparative bar distribution across recent periods
+          </span>
+        </div>
+
+        <!-- Mode Toggle (Daily vs Monthly) -->
+        <div
+          [ngStyle]="{ display: 'flex', background: 'var(--input-bg, #f1f5f9)', borderRadius: '8px', padding: '0.2rem' }">
+          <button (click)="setChartViewMode('DAILY')" type="button" [ngStyle]="{
+                    background: chartViewMode() === 'DAILY' ? 'var(--card-bg, #ffffff)' : 'transparent',
+                    border: 'none', padding: '0.35rem 0.75rem', borderRadius: '6px', fontSize: '0.78rem',
+                    fontWeight: chartViewMode() === 'DAILY' ? '800' : '600',
+                    color: chartViewMode() === 'DAILY' ? '#05517e' : 'var(--text-color)',
+                    cursor: 'pointer', boxShadow: chartViewMode() === 'DAILY' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none'
+                  }">
+            Daily (7D)
+          </button>
+          <button (click)="setChartViewMode('MONTHLY')" type="button" [ngStyle]="{
+                    background: chartViewMode() === 'MONTHLY' ? 'var(--card-bg, #ffffff)' : 'transparent',
+                    border: 'none', padding: '0.35rem 0.75rem', borderRadius: '6px', fontSize: '0.78rem',
+                    fontWeight: chartViewMode() === 'MONTHLY' ? '800' : '600',
+                    color: chartViewMode() === 'MONTHLY' ? '#05517e' : 'var(--text-color)',
+                    cursor: 'pointer', boxShadow: chartViewMode() === 'MONTHLY' ? '0 2px 6px rgba(0,0,0,0.08)' : 'none'
+                  }">
+            Monthly (6M)
+          </button>
+        </div>
+      </div>
+
+      <!-- Bar Graph Visualization -->
+      <div [ngStyle]="{
+             height: '220px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between',
+             gap: '0.75rem', padding: '1rem 0.5rem 0.5rem', borderBottom: '2px solid var(--border-color, #cbd5e1)'
+           }">
+        <div *ngFor="let bar of chartBars()" [ngStyle]="{
+               flex: '1', display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%',
+               justifyContent: 'flex-end', gap: '0.5rem'
+             }">
+          <!-- Bar Tooltip / Value on Hover -->
+          <div
+            [ngStyle]="{ fontSize: '0.72rem', fontWeight: '800', color: bar.isPeak ? '#05517e' : 'var(--text-color)', opacity: '0.85' }">
+            ${{ bar.value | number:'1.0-0' }}
+          </div>
+
+          <!-- Vertical Bar -->
+          <div [title]="bar.label + ': $' + bar.value + ' (' + bar.orderCount + ' orders)'" [ngStyle]="{
+                 width: '100%', maxWidth: '38px', height: bar.barHeightPct + '%',
+                 background: bar.isPeak
+                   ? 'linear-gradient(180deg, #05517e, #033654)'
+                   : 'linear-gradient(180deg, #6366f1, #4f46e5)',
+                 borderRadius: '6px 6px 0 0',
+                 transition: 'height 0.4s ease, transform 0.2s ease',
+                 cursor: 'pointer',
+                 boxShadow: bar.isPeak ? '0 4px 12px rgba(5, 81, 126, 0.3)' : 'none'
+               }">
+          </div>
+
+          <!-- Label -->
+          <span [ngStyle]="{ fontSize: '0.76rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.75' }">
+            {{ bar.label }}
+          </span>
+        </div>
+      </div>
+
+      <div
+        [ngStyle]="{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.7' }">
+        <span><i class="pi pi-circle-fill" [ngStyle]="{ color: '#05517e', fontSize: '0.65rem' }"></i> Peak Revenue
+          Period</span>
+        <span><i class="pi pi-circle-fill" [ngStyle]="{ color: '#6366f1', fontSize: '0.65rem' }"></i> Standard Trading
+          Volume</span>
+      </div>
+    </div>
+
+    <!-- Customer-Generated Revenue vs Vendor Direct Orders -->
+    <div [ngStyle]="{
+           background: 'var(--card-bg, #ffffff)', border: '1px solid var(--border-color, #e2e8f0)',
+           borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem',
+           boxShadow: '0 4px 15px rgba(0,0,0,0.03)'
+         }">
+      <div>
+        <h3 [ngStyle]="{ margin: '0', fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-color)' }">
+          Customer Orders vs. Vendor Direct Sales
+        </h3>
+        <span [ngStyle]="{ fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.65' }">
+          Amount generated organically by customers vs vendor administrative orders
+        </span>
+      </div>
+
+      <!-- Big Comparison Ratio Bar -->
+      <div>
+        <div
+          [ngStyle]="{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.45rem', fontSize: '0.85rem', fontWeight: '700' }">
+          <span [ngStyle]="{ color: '#10b981' }">
+            <i class="pi pi-user"></i> Customer Portal: {{ customerVsVendorBreakdown().customerPercentage }}%
+          </span>
+          <span [ngStyle]="{ color: '#05517e' }">
+            <i class="pi pi-building"></i> Vendor/Direct: {{ customerVsVendorBreakdown().vendorPercentage }}%
+          </span>
+        </div>
+
+        <div [ngStyle]="{
+               width: '100%', height: '14px', borderRadius: '999px', overflow: 'hidden',
+               display: 'flex', background: '#e2e8f0'
+             }">
+          <div [ngStyle]="{
+                 width: customerVsVendorBreakdown().customerPercentage + '%',
+                 background: 'linear-gradient(90deg, #10b981, #059669)',
+                 transition: 'width 0.4s ease'
+               }">
+          </div>
+          <div [ngStyle]="{
+                 width: customerVsVendorBreakdown().vendorPercentage + '%',
+                 background: 'linear-gradient(90deg, #05517e, #033654)',
+                 transition: 'width 0.4s ease'
+               }">
+          </div>
+        </div>
+      </div>
+
+      <!-- Financial Detail Comparison Cards -->
+      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }">
+        <div [ngStyle]="{
+               background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)',
+               borderRadius: '12px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.35rem'
+             }">
+          <span [ngStyle]="{ fontSize: '0.76rem', fontWeight: '800', color: '#10b981' }">
+            CUSTOMER ONLINE ORDERS
+          </span>
+          <div [ngStyle]="{ fontSize: '1.4rem', fontWeight: '900', color: '#047857' }">
+            ${{ customerVsVendorBreakdown().customerRevenue | number:'1.2-2' }}
+          </div>
+          <span [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.75' }">
+            {{ customerVsVendorBreakdown().customerOrderCount }} total orders via online checkout
+          </span>
+        </div>
+
+        <div [ngStyle]="{
+               background: 'rgba(5, 81, 126, 0.08)', border: '1px solid rgba(5, 81, 126, 0.25)',
+               borderRadius: '12px', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.35rem'
+             }">
+          <span [ngStyle]="{ fontSize: '0.76rem', fontWeight: '800', color: '#05517e' }">
+            VENDOR DIRECT ORDERS
+          </span>
+          <div [ngStyle]="{ fontSize: '1.4rem', fontWeight: '900', color: '#033654' }">
+            ${{ customerVsVendorBreakdown().vendorRevenue | number:'1.2-2' }}
+          </div>
+          <span [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.75' }">
+            {{ customerVsVendorBreakdown().vendorOrderCount }} manual/sub-login orders
+          </span>
+        </div>
+      </div>
+
+      <div [ngStyle]="{
+             fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.8',
+             background: 'var(--input-bg, #f8fafc)', padding: '0.75rem', borderRadius: '8px',
+             borderLeft: '4px solid #10b981'
+           }">
+        <strong>Audited Insight:</strong> Customer direct orders account for ${{
+        customerVsVendorBreakdown().customerRevenue | number:'1.2-2' }} in verified self-checkout sales.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 3. Bottom Grid: Most Ordered Items, Overall Discounts Provided, and Next Month Forecast -->
+  <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.25rem' }">
+
+    <!-- Most Ordered Items (Top Demand Ranking) -->
+    <div [ngStyle]="{
+           background: 'var(--card-bg, #ffffff)', border: '1px solid var(--border-color, #e2e8f0)',
+           borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem',
+           boxShadow: '0 4px 15px rgba(0,0,0,0.03)'
+         }">
+      <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }">
+        <div>
+          <h3 [ngStyle]="{ margin: '0', fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-color)' }">
+            Most Ordered Items
+          </h3>
+          <span [ngStyle]="{ fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.65' }">
+            Ranked by total quantity sold across orders
+          </span>
+        </div>
+        <a routerLink="/dashboard/items"
+          [ngStyle]="{ fontSize: '0.78rem', fontWeight: '700', color: '#05517e', textDecoration: 'none' }">
+          All Items &rarr;
+        </a>
+      </div>
+
+      <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }">
+        <div *ngFor="let item of topSellingItems(); let idx = index" [ngStyle]="{
+               display: 'flex', flexDirection: 'column', gap: '0.35rem',
+               paddingBottom: '0.65rem', borderBottom: idx < topSellingItems().length - 1 ? '1px solid var(--border-color, #f1f5f9)' : 'none'
+             }">
+          <div
+            [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.84rem' }">
+            <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.45rem', overflow: 'hidden' }">
+              <span [ngStyle]="{
+                      width: '20px', height: '20px', borderRadius: '50%',
+                      background: idx === 0 ? '#f59e0b' : (idx === 1 ? '#94a3b8' : (idx === 2 ? '#b45309' : '#e2e8f0')),
+                      color: idx < 3 ? '#ffffff' : '#64748b', fontSize: '0.7rem', fontWeight: '800',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: '0'
+                    }">
+                {{ idx + 1 }}
+              </span>
+              <span
+                [ngStyle]="{ fontWeight: '700', color: 'var(--text-color)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }">
+                {{ item.itemName }}
+              </span>
+            </div>
+            <span [ngStyle]="{ fontWeight: '800', color: '#05517e', flexShrink: '0' }">
+              {{ item.quantitySold }} units (${{ item.revenue | number:'1.0-0' }})
+            </span>
+          </div>
+
+          <!-- Progress Bar of Item Share -->
+          <div
+            [ngStyle]="{ width: '100%', height: '6px', borderRadius: '999px', background: '#f1f5f9', overflow: 'hidden' }">
+            <div [ngStyle]="{
+                   width: item.percentOfTotal + '%',
+                   height: '100%',
+                   background: idx === 0 ? '#05517e' : (idx === 1 ? '#6366f1' : '#10b981'),
+                   borderRadius: '999px'
+                 }">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Overall Discounts Provided to Users -->
+    <div [ngStyle]="{
+           background: 'var(--card-bg, #ffffff)', border: '1px solid var(--border-color, #e2e8f0)',
+           borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem',
+           boxShadow: '0 4px 15px rgba(0,0,0,0.03)'
+         }">
+      <div>
+        <h3 [ngStyle]="{ margin: '0', fontSize: '1.1rem', fontWeight: '800', color: 'var(--text-color)' }">
+          Discounts &amp; Promotional Absorption
+        </h3>
+        <span [ngStyle]="{ fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.65' }">
+          Total savings passed to customers via vouchers &amp; wholesale pricing
+        </span>
+      </div>
+
+      <!-- Discount Highlight Card -->
+      <div [ngStyle]="{
+             background: 'rgba(239, 68, 68, 0.07)', border: '1px solid rgba(239, 68, 68, 0.25)',
+             borderRadius: '12px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+           }">
+        <div>
+          <span [ngStyle]="{ fontSize: '0.75rem', fontWeight: '800', color: '#ef4444' }">
+            TOTAL DISCOUNTS SAVINGS
+          </span>
+          <div [ngStyle]="{ fontSize: '1.6rem', fontWeight: '900', color: '#dc2626', marginTop: '0.2rem' }">
+            ${{ discountSummary().totalDiscounts | number:'1.2-2' }}
+          </div>
+        </div>
+        <div [ngStyle]="{ textAlign: 'right' }">
+          <span [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.7' }">Effective Discount
+            Rate</span>
+          <div [ngStyle]="{ fontSize: '1.25rem', fontWeight: '800', color: '#dc2626' }">
+            {{ discountSummary().discountRate }}%
+          </div>
+        </div>
+      </div>
+
+      <!-- Promo Codes Breakdown -->
+      <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }">
+        <span [ngStyle]="{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.8' }">
+          Promo Code Voucher Breakdown:
+        </span>
+        <div *ngIf="discountSummary().promoBreakdown.length > 0"
+          [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }">
+          <div *ngFor="let p of discountSummary().promoBreakdown" [ngStyle]="{
+                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                 padding: '0.45rem 0.65rem', borderRadius: '6px', background: 'var(--input-bg, #f8fafc)',
+                 fontSize: '0.82rem'
+               }">
+            <span [ngStyle]="{ fontFamily: 'monospace', fontWeight: '800', color: '#10b981' }">
+              <i class="pi pi-ticket"></i> {{ p.code }}
+            </span>
+            <span [ngStyle]="{ color: 'var(--text-color)' }">
+              <strong>{{ p.count }}</strong> uses | <strong>${{ p.savings | number:'1.2-2' }}</strong> saved
+            </span>
+          </div>
+        </div>
+        <div *ngIf="discountSummary().promoBreakdown.length === 0" [ngStyle]="{
+               fontSize: '0.8rem', color: 'var(--text-color)', opacity: '0.6', fontStyle: 'italic', padding: '0.5rem 0'
+             }">
+          Active promo codes: DIWALI (₹100 off), WELCOME10, FESTIVE500.
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Next-Month Sales Forecasting -->
+    <div [ngStyle]="{
+           background: 'linear-gradient(145deg, #05517e, #02253b)', color: '#ffffff',
+           borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem',
+           boxShadow: '0 6px 20px rgba(5, 81, 126, 0.35)', position: 'relative', overflow: 'hidden'
+         }">
+      <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }">
+        <div>
+          <span [ngStyle]="{ fontSize: '0.72rem', fontWeight: '800', letterSpacing: '0.05em', color: '#38bdf8' }">
+            AI PREDICTIVE ANALYTICS
+          </span>
+          <h3 [ngStyle]="{ margin: '0.2rem 0 0', fontSize: '1.15rem', fontWeight: '800', color: '#ffffff' }">
+            Estimated Next Month Sales
+          </h3>
+        </div>
+        <span [ngStyle]="{
+                background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', borderRadius: '8px',
+                padding: '0.25rem 0.6rem', fontSize: '0.75rem', fontWeight: '800', border: '1px solid rgba(56, 189, 248, 0.4)'
+              }">
+          {{ salesForecast().confidenceScore }}% Confidence
+        </span>
+      </div>
+
+      <div [ngStyle]="{ fontSize: '2.1rem', fontWeight: '900', color: '#38bdf8', letterSpacing: '-0.02em' }">
+        ${{ salesForecast().estimatedNextMonthSales | number:'1.2-2' }}
+      </div>
+
+      <p [ngStyle]="{ margin: '0', fontSize: '0.8rem', color: '#e0f2fe', lineHeight: '1.4', opacity: '0.9' }">
+        Calculated using historical order run-rate, customer acquisition trend, and seasonality index. Projected growth:
+        <strong [ngStyle]="{ color: '#4ade80' }">+{{ salesForecast().growthRateProjected }}% MoM</strong>.
+      </p>
+
+      <!-- Projected Target Progress Meter -->
+      <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }">
+        <div [ngStyle]="{ display: 'flex', justifyContent: 'space-between', fontSize: '0.76rem', color: '#bae6fd' }">
+          <span>Current Baseline: ${{ salesForecast().lastMonthActual | number:'1.0-0' }}</span>
+          <span>Target Forecast: ${{ salesForecast().estimatedNextMonthSales | number:'1.0-0' }}</span>
+        </div>
+        <div
+          [ngStyle]="{ width: '100%', height: '8px', borderRadius: '999px', background: 'rgba(255,255,255,0.2)', overflow: 'hidden' }">
+          <div [ngStyle]="{
+                 width: salesForecast().targetProgressPct + '%',
+                 height: '100%',
+                 background: 'linear-gradient(90deg, #38bdf8, #4ade80)',
+                 borderRadius: '999px'
+               }">
+          </div>
+        </div>
+      </div>
+
+      <div
+        [ngStyle]="{ display: 'flex', justifyContent: 'space-between', fontSize: '0.76rem', color: '#bae6fd', paddingTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.15)' }">
+        <span>Estimated Orders: <strong>~{{ salesForecast().estimatedOrders }}</strong></span>
+        <span>Run-Rate: <strong>Accelerating</strong></span>
+      </div>
+    </div>
+
+  </div>
+
+</div>

@@ -19,7 +19,9 @@
         </h2>
       </div>
       <p [ngStyle]="{ margin: '0.35rem 0 0', fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.65' }">
-        {{ isCustomer() ? 'Track package arrivals, inspect item-level details, download official invoices, and reorder from catalogs' : 'Create, track, and manage company-specific fulfillment orders, segregated batches, and retail sales' }}
+        {{ isCustomer() ? 'Track package arrivals, inspect item-level details, download official invoices, and reorder
+        from catalogs' : 'Create, track, and manage company-specific fulfillment orders, segregated batches, and retail
+        sales' }}
       </p>
     </div>
 
@@ -56,7 +58,8 @@
         background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px',
         padding: '1.25rem 1.5rem', boxShadow: '0 4px 18px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', gap: '0.85rem'
       }">
-      <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }">
+      <div
+        [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }">
         <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.65rem' }">
           <div [ngStyle]="{
               background: notifService.unreadCount() > 0 ? 'rgba(245, 158, 11, 0.15)' : 'rgba(5, 81, 126, 0.1)',
@@ -66,7 +69,8 @@
             <i class="pi pi-bell" [ngStyle]="{ fontSize: '1.1rem' }"></i>
           </div>
           <div>
-            <div [ngStyle]="{ fontWeight: '800', fontSize: '0.98rem', color: 'var(--text-color)', display: 'flex', alignItems: 'center', gap: '0.5rem' }">
+            <div
+              [ngStyle]="{ fontWeight: '800', fontSize: '0.98rem', color: 'var(--text-color)', display: 'flex', alignItems: 'center', gap: '0.5rem' }">
               <span>Order Alerts &amp; Shipment Updates</span>
               <span *ngIf="notifService.unreadCount() > 0" [ngStyle]="{
                   background: '#f59e0b', color: '#1a1a1a', padding: '0.1rem 0.5rem', borderRadius: '10px',
@@ -81,7 +85,8 @@
           </div>
         </div>
 
-        <div *ngIf="notifService.notifications().length > 0" [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
+        <div *ngIf="notifService.notifications().length > 0"
+          [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
           <button (click)="markAllAlertsRead()" type="button" [ngStyle]="{
               background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-color)',
               padding: '0.35rem 0.75rem', borderRadius: '8px', fontSize: '0.75rem', fontWeight: '700', cursor: 'pointer'
@@ -93,9 +98,8 @@
 
       <!-- Alerts List (if any) -->
       <div *ngIf="notifService.notifications().length > 0; else noAlertsTpl"
-           [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginTop: '0.25rem' }">
-        <div *ngFor="let alert of notifService.recentNotifications()"
-             [ngStyle]="{
+        [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginTop: '0.25rem' }">
+        <div *ngFor="let alert of notifService.recentNotifications()" [ngStyle]="{
                background: alert.isRead ? 'var(--input-bg)' : 'rgba(5, 81, 126, 0.05)',
                border: alert.isRead ? '1px solid var(--border-color)' : '1px solid rgba(5, 81, 126, 0.25)',
                borderRadius: '10px', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center',
@@ -107,10 +111,12 @@
                 background: alert.isRead ? 'transparent' : '#05517e', flexShrink: 0
               }"></span>
             <div>
-              <div [ngStyle]="{ fontWeight: alert.isRead ? '600' : '800', fontSize: '0.85rem', color: 'var(--text-color)' }">
+              <div
+                [ngStyle]="{ fontWeight: alert.isRead ? '600' : '800', fontSize: '0.85rem', color: 'var(--text-color)' }">
                 {{ alert.title }}
               </div>
-              <div [ngStyle]="{ fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.75', marginTop: '0.15rem' }">
+              <div
+                [ngStyle]="{ fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.75', marginTop: '0.15rem' }">
                 {{ alert.message }}
               </div>
             </div>
@@ -120,12 +126,13 @@
             <span [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.55' }">
               {{ alert.timeAgo }}
             </span>
-            <button *ngIf="!alert.isRead" (click)="markAlertRead(alert.orderId, $event)" type="button" title="Mark as read"
-                    [ngStyle]="{ background: 'transparent', border: 'none', color: '#05517e', cursor: 'pointer', fontSize: '0.78rem', fontWeight: '700' }">
+            <button *ngIf="!alert.isRead" (click)="markAlertRead(alert.orderId, $event)" type="button"
+              title="Mark as read"
+              [ngStyle]="{ background: 'transparent', border: 'none', color: '#05517e', cursor: 'pointer', fontSize: '0.78rem', fontWeight: '700' }">
               <i class="pi pi-check"></i>
             </button>
             <button (click)="dismissAlert(alert.orderId, $event)" type="button" title="Dismiss alert"
-                    [ngStyle]="{ background: 'transparent', border: 'none', color: 'var(--text-color)', opacity: '0.45', cursor: 'pointer', fontSize: '0.78rem' }">
+              [ngStyle]="{ background: 'transparent', border: 'none', color: 'var(--text-color)', opacity: '0.45', cursor: 'pointer', fontSize: '0.78rem' }">
               <i class="pi pi-times"></i>
             </button>
           </div>
@@ -192,9 +199,10 @@
         }">
         <i class="pi pi-search" [ngStyle]="{ color: 'var(--text-color)', opacity: '0.5', fontSize: '0.85rem' }"></i>
         <input type="text" placeholder="Search orders by Order ID or item..." [value]="searchQuery()"
-               (input)="searchQuery.set($any($event.target).value)"
-               [ngStyle]="{ border: 'none', outline: 'none', background: 'transparent', color: 'var(--input-text)', fontSize: '0.85rem', width: '100%' }" />
-        <button *ngIf="searchQuery()" (click)="searchQuery.set('')" type="button" [ngStyle]="{ background: 'transparent', border: 'none', color: 'var(--text-color)', opacity: '0.5', cursor: 'pointer' }">
+          (input)="searchQuery.set($any($event.target).value)"
+          [ngStyle]="{ border: 'none', outline: 'none', background: 'transparent', color: 'var(--input-text)', fontSize: '0.85rem', width: '100%' }" />
+        <button *ngIf="searchQuery()" (click)="searchQuery.set('')" type="button"
+          [ngStyle]="{ background: 'transparent', border: 'none', color: 'var(--text-color)', opacity: '0.5', cursor: 'pointer' }">
           <i class="pi pi-times"></i>
         </button>
       </div>
@@ -204,8 +212,7 @@
     <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }">
 
       <!-- Empty State -->
-      <div *ngIf="filteredOrders().length === 0"
-           [ngStyle]="{
+      <div *ngIf="filteredOrders().length === 0" [ngStyle]="{
              background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px',
              padding: '4rem 1.5rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.85rem'
            }">
@@ -219,7 +226,8 @@
           No Orders Found
         </div>
         <div [ngStyle]="{ fontSize: '0.86rem', color: 'var(--text-color)', opacity: '0.65', maxWidth: '400px' }">
-          You haven't placed any orders matching this view yet. Browse our catalog and add products to your cart to check out!
+          You haven't placed any orders matching this view yet. Browse our catalog and add products to your cart to
+          check out!
         </div>
         <button (click)="goToDashboard()" type="button" [ngStyle]="{
             background: 'linear-gradient(135deg, #05517e, #033654)', color: '#fff', border: 'none',
@@ -232,8 +240,7 @@
       </div>
 
       <!-- Each Order Card -->
-      <div *ngFor="let order of filteredOrders()"
-           [ngStyle]="{
+      <div *ngFor="let order of filteredOrders()" [ngStyle]="{
              background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px',
              boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)', overflow: 'hidden', display: 'flex', flexDirection: 'column'
            }">
@@ -246,16 +253,19 @@
           <!-- Left details (Placed, Total, Ship To, Seller) -->
           <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '2rem', flexWrap: 'wrap' }">
             <div>
-              <div [ngStyle]="{ fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: '700', color: 'var(--text-color)', opacity: '0.6' }">
+              <div
+                [ngStyle]="{ fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: '700', color: 'var(--text-color)', opacity: '0.6' }">
                 ORDER PLACED
               </div>
-              <div [ngStyle]="{ fontSize: '0.86rem', fontWeight: '800', color: 'var(--text-color)', marginTop: '0.15rem' }">
+              <div
+                [ngStyle]="{ fontSize: '0.86rem', fontWeight: '800', color: 'var(--text-color)', marginTop: '0.15rem' }">
                 {{ order.orderDate | date:'mediumDate' }}
               </div>
             </div>
 
             <div>
-              <div [ngStyle]="{ fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: '700', color: 'var(--text-color)', opacity: '0.6' }">
+              <div
+                [ngStyle]="{ fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: '700', color: 'var(--text-color)', opacity: '0.6' }">
                 TOTAL
               </div>
               <div [ngStyle]="{ fontSize: '0.86rem', fontWeight: '900', color: '#05517e', marginTop: '0.15rem' }">
@@ -264,20 +274,25 @@
             </div>
 
             <div>
-              <div [ngStyle]="{ fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: '700', color: 'var(--text-color)', opacity: '0.6' }">
+              <div
+                [ngStyle]="{ fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: '700', color: 'var(--text-color)', opacity: '0.6' }">
                 SHIP TO
               </div>
-              <div [ngStyle]="{ fontSize: '0.86rem', fontWeight: '700', color: 'var(--text-color)', marginTop: '0.15rem' }"
-                   [title]="order.shippingAddress || 'Standard Delivery Address'">
-                {{ order.customerName || 'You' }} <i class="pi pi-chevron-down" [ngStyle]="{ fontSize: '0.65rem', opacity: '0.6' }"></i>
+              <div
+                [ngStyle]="{ fontSize: '0.86rem', fontWeight: '700', color: 'var(--text-color)', marginTop: '0.15rem' }"
+                [title]="order.shippingAddress || 'Standard Delivery Address'">
+                {{ order.customerName || 'You' }} <i class="pi pi-chevron-down"
+                  [ngStyle]="{ fontSize: '0.65rem', opacity: '0.6' }"></i>
               </div>
             </div>
 
             <div>
-              <div [ngStyle]="{ fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: '700', color: 'var(--text-color)', opacity: '0.6' }">
+              <div
+                [ngStyle]="{ fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: '700', color: 'var(--text-color)', opacity: '0.6' }">
                 MERCHANT / STORE
               </div>
-              <div [ngStyle]="{ fontSize: '0.86rem', fontWeight: '700', color: 'var(--text-color)', marginTop: '0.15rem' }">
+              <div
+                [ngStyle]="{ fontSize: '0.86rem', fontWeight: '700', color: 'var(--text-color)', marginTop: '0.15rem' }">
                 {{ order.companyName || order.companyCode }} ({{ order.locationName || order.locationCode }})
               </div>
             </div>
@@ -286,10 +301,12 @@
           <!-- Right details (Order #, Status, Top Actions) -->
           <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }">
             <div [ngStyle]="{ textAlign: 'right' }">
-              <div [ngStyle]="{ fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: '700', color: 'var(--text-color)', opacity: '0.6' }">
+              <div
+                [ngStyle]="{ fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: '700', color: 'var(--text-color)', opacity: '0.6' }">
                 ORDER # {{ order.orderId }}
               </div>
-              <div [ngStyle]="{ marginTop: '0.2rem', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.45rem' }">
+              <div
+                [ngStyle]="{ marginTop: '0.2rem', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.45rem' }">
                 <span [ngStyle]="{
                     background: getStatusBadgeColor(order.status).bg,
                     color: getStatusBadgeColor(order.status).color,
@@ -309,8 +326,7 @@
             </div>
 
             <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
-              <button (click)="viewOrderInvoice(order)" type="button" title="View Order Invoice"
-                      [ngStyle]="{
+              <button (click)="viewOrderInvoice(order)" type="button" title="View Order Invoice" [ngStyle]="{
                         background: 'transparent', border: '1px solid var(--border-color)', color: 'var(--text-color)',
                         padding: '0.45rem 0.75rem', borderRadius: '8px', fontSize: '0.78rem', fontWeight: '700',
                         cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem'
@@ -319,8 +335,8 @@
                 <span>Invoice</span>
               </button>
 
-              <button *ngIf="canCustomerCancelOrder(order)" (click)="cancelOrderAsCustomer(order)" type="button" title="Cancel this order"
-                      [ngStyle]="{
+              <button *ngIf="canCustomerCancelOrder(order)" (click)="cancelOrderAsCustomer(order)" type="button"
+                title="Cancel this order" [ngStyle]="{
                         background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)',
                         color: '#ef4444', padding: '0.45rem 0.75rem', borderRadius: '8px', fontSize: '0.78rem',
                         fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem'
@@ -342,21 +358,41 @@
               borderRadius: '12px', padding: '0.75rem 1.15rem', display: 'flex', alignItems: 'center', gap: '0.75rem'
             }">
             <i [class]="getEstimatedArrivalInfo(order).icon"
-               [ngStyle]="{ color: getEstimatedArrivalInfo(order).color, fontSize: '1.2rem' }"></i>
+              [ngStyle]="{ color: getEstimatedArrivalInfo(order).color, fontSize: '1.2rem' }"></i>
             <div>
               <div [ngStyle]="{ fontWeight: '800', fontSize: '0.92rem', color: getEstimatedArrivalInfo(order).color }">
                 {{ getEstimatedArrivalInfo(order).dateText }}
               </div>
-              <div *ngIf="getEstimatedArrivalInfo(order).isProcessing" [ngStyle]="{ fontSize: '0.76rem', color: 'var(--text-color)', opacity: '0.7', marginTop: '0.1rem' }">
-                Once the fulfillment partner ({{ order.deliveryPartner || 'Courier Partner' }}) dispatches the package, the live delivery schedule will update here.
+              <div *ngIf="getEstimatedArrivalInfo(order).isProcessing"
+                [ngStyle]="{ fontSize: '0.76rem', color: 'var(--text-color)', opacity: '0.7', marginTop: '0.1rem' }">
+                Once the fulfillment partner ({{ order.deliveryPartner || 'Courier Partner' }}) dispatches the package,
+                the live delivery schedule will update here.
+              </div>
+              <div *ngIf="order.status.toLowerCase() === 'shipped'"
+                [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.35rem', flexWrap: 'wrap' }">
+                <a *ngIf="parseTrackingFromOrder(order).url as tUrl" [href]="tUrl" target="_blank"
+                  rel="noopener noreferrer" title="Track package in live courier portal" [ngStyle]="{
+                     background: '#05517e', color: '#ffffff', padding: '0.25rem 0.65rem', borderRadius: '6px',
+                     fontSize: '0.74rem', fontWeight: '800', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.35rem'
+                   }">
+                  <i class="pi pi-external-link"></i>
+                  <span>Track Package</span>
+                </a>
+                <span *ngIf="parseTrackingFromOrder(order).awb as tAwb"
+                  [ngStyle]="{ fontSize: '0.74rem', color: 'var(--text-color)', opacity: '0.8', fontWeight: '600' }">
+                  Tracking #: <strong>{{ tAwb }}</strong>
+                </span>
+                <span *ngIf="order.locationName || order.locationCode"
+                  [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.6' }">
+                  (Dispatched from: {{ order.locationName || order.locationCode }})
+                </span>
               </div>
             </div>
           </div>
 
           <!-- Items List -->
           <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }">
-            <div *ngFor="let item of order.items"
-                 [ngStyle]="{
+            <div *ngFor="let item of order.items" [ngStyle]="{
                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                    paddingBottom: '1.25rem', borderBottom: '1px solid var(--border-color)', gap: '1rem', flexWrap: 'wrap'
                  }">
@@ -369,9 +405,9 @@
                     display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
                   }">
                   <img *ngIf="getItemImage(item.itemNumber) as imgUrl" [src]="imgUrl" [alt]="item.itemName"
-                       [ngStyle]="{ width: '100%', height: '100%', objectFit: 'cover' }" />
+                    [ngStyle]="{ width: '100%', height: '100%', objectFit: 'cover' }" />
                   <i *ngIf="!getItemImage(item.itemNumber)" class="pi pi-box"
-                     [ngStyle]="{ fontSize: '2rem', color: '#05517e', opacity: '0.6' }"></i>
+                    [ngStyle]="{ fontSize: '2rem', color: '#05517e', opacity: '0.6' }"></i>
                 </div>
 
                 <!-- Info -->
@@ -379,17 +415,20 @@
                   <div [ngStyle]="{ fontWeight: '800', fontSize: '1rem', color: 'var(--text-color)' }">
                     {{ item.itemName }}
                   </div>
-                  <div [ngStyle]="{ fontSize: '0.8rem', color: 'var(--text-color)', opacity: '0.7', display: 'flex', alignItems: 'center', gap: '0.65rem' }">
+                  <div
+                    [ngStyle]="{ fontSize: '0.8rem', color: 'var(--text-color)', opacity: '0.7', display: 'flex', alignItems: 'center', gap: '0.65rem' }">
                     <span>Item #: <strong>{{ item.itemNumber }}</strong></span>
                     <span>&bull;</span>
                     <span>Size: <strong>{{ item.sizeCode || 'Standard' }}</strong></span>
                   </div>
                   <div [ngStyle]="{ fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.65' }">
-                    Sold by: {{ order.companyName || order.companyCode }} &bull; Fulfill from {{ order.locationName || order.locationCode }}
+                    Sold by: {{ order.companyName || order.companyCode }} &bull; Fulfill from {{ order.locationName ||
+                    order.locationCode }}
                   </div>
                   <div [ngStyle]="{ fontSize: '0.92rem', fontWeight: '800', color: '#05517e', marginTop: '0.2rem' }">
                     ${{ item.unitPrice | number:'1.2-2' }} &times; {{ item.quantity }}
-                    <span [ngStyle]="{ color: 'var(--text-color)', opacity: '0.6', fontWeight: '500', fontSize: '0.82rem' }">
+                    <span
+                      [ngStyle]="{ color: 'var(--text-color)', opacity: '0.6', fontWeight: '500', fontSize: '0.82rem' }">
                       = ${{ (item.totalPrice || (item.unitPrice * item.quantity)) | number:'1.2-2' }}
                     </span>
                   </div>
@@ -419,33 +458,45 @@
             }">
             <!-- Financial Tally Breakdown -->
             <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flex: '1 1 320px' }">
-              <div [ngStyle]="{ fontSize: '0.8rem', fontWeight: '800', textTransform: 'uppercase', color: 'var(--text-color)', opacity: '0.7', letterSpacing: '0.04em' }">
+              <div
+                [ngStyle]="{ fontSize: '0.8rem', fontWeight: '800', textTransform: 'uppercase', color: 'var(--text-color)', opacity: '0.7', letterSpacing: '0.04em' }">
                 Invoice &amp; Financial Summary
               </div>
-              <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem', marginTop: '0.35rem' }">
+              <div
+                [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem', marginTop: '0.35rem' }">
                 <div>
-                  <span [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.6' }">Items Subtotal</span>
-                  <div [ngStyle]="{ fontWeight: '700', fontSize: '0.88rem', color: 'var(--text-color)' }">${{ order.subTotal | number:'1.2-2' }}</div>
+                  <span [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.6' }">Items
+                    Subtotal</span>
+                  <div [ngStyle]="{ fontWeight: '700', fontSize: '0.88rem', color: 'var(--text-color)' }">${{
+                    order.subTotal | number:'1.2-2' }}</div>
                 </div>
                 <div *ngIf="order.discount && order.discount > 0">
                   <span [ngStyle]="{ fontSize: '0.72rem', color: '#10b981' }">Discount</span>
-                  <div [ngStyle]="{ fontWeight: '700', fontSize: '0.88rem', color: '#10b981' }">-${{ order.discount | number:'1.2-2' }}</div>
+                  <div [ngStyle]="{ fontWeight: '700', fontSize: '0.88rem', color: '#10b981' }">-${{ order.discount |
+                    number:'1.2-2' }}</div>
                 </div>
                 <div>
-                  <span [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.6' }">Item Taxes</span>
-                  <div [ngStyle]="{ fontWeight: '700', fontSize: '0.88rem', color: 'var(--text-color)' }">+${{ order.tax | number:'1.2-2' }}</div>
+                  <span [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.6' }">Item
+                    Taxes</span>
+                  <div [ngStyle]="{ fontWeight: '700', fontSize: '0.88rem', color: 'var(--text-color)' }">+${{ order.tax
+                    | number:'1.2-2' }}</div>
                 </div>
                 <div>
-                  <span [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.6' }">Delivery / Shipping</span>
-                  <div [ngStyle]="{ fontWeight: '700', fontSize: '0.88rem', color: 'var(--text-color)' }">+${{ order.shippingCost | number:'1.2-2' }}</div>
+                  <span [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.6' }">Delivery /
+                    Shipping</span>
+                  <div [ngStyle]="{ fontWeight: '700', fontSize: '0.88rem', color: 'var(--text-color)' }">+${{
+                    order.shippingCost | number:'1.2-2' }}</div>
                 </div>
                 <div *ngIf="order.platformFee && order.platformFee > 0">
-                  <span [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.6' }">Platform Fee</span>
-                  <div [ngStyle]="{ fontWeight: '700', fontSize: '0.88rem', color: 'var(--text-color)' }">+${{ order.platformFee | number:'1.2-2' }}</div>
+                  <span [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.6' }">Platform
+                    Fee</span>
+                  <div [ngStyle]="{ fontWeight: '700', fontSize: '0.88rem', color: 'var(--text-color)' }">+${{
+                    order.platformFee | number:'1.2-2' }}</div>
                 </div>
                 <div>
                   <span [ngStyle]="{ fontSize: '0.72rem', fontWeight: '800', color: '#05517e' }">Order Total</span>
-                  <div [ngStyle]="{ fontWeight: '900', fontSize: '1.05rem', color: '#05517e' }">${{ order.totalAmount | number:'1.2-2' }}</div>
+                  <div [ngStyle]="{ fontWeight: '900', fontSize: '1.05rem', color: '#05517e' }">${{ order.totalAmount |
+                    number:'1.2-2' }}</div>
                 </div>
               </div>
             </div>
@@ -477,13 +528,13 @@
     </div>
 
     <!-- 4. Recommended Products Section at End of Orders (Amazon-Style) -->
-    <div *ngIf="suggestedProducts().length > 0"
-         [ngStyle]="{
+    <div *ngIf="suggestedProducts().length > 0" [ngStyle]="{
            background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '16px',
            padding: '1.75rem', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)', display: 'flex', flexDirection: 'column', gap: '1.25rem',
            marginTop: '0.5rem'
          }">
-      <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }">
+      <div
+        [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }">
         <div>
           <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
             <span [ngStyle]="{
@@ -510,9 +561,9 @@
       </div>
 
       <!-- Suggested Products Grid -->
-      <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.25rem' }">
-        <div *ngFor="let item of suggestedProducts()"
-             [ngStyle]="{
+      <div
+        [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.25rem' }">
+        <div *ngFor="let item of suggestedProducts()" [ngStyle]="{
                background: 'var(--input-bg)', border: '1px solid var(--border-color)', borderRadius: '14px',
                padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem',
                transition: 'all 0.2s ease', position: 'relative'
@@ -524,9 +575,9 @@
               display: 'flex', alignItems: 'center', justifyContent: 'center'
             }">
             <img *ngIf="getItemImage(item.itemNumber) as pImg" [src]="pImg" [alt]="item.name"
-                 [ngStyle]="{ width: '100%', height: '100%', objectFit: 'cover' }" />
+              [ngStyle]="{ width: '100%', height: '100%', objectFit: 'cover' }" />
             <i *ngIf="!getItemImage(item.itemNumber)" class="pi pi-box"
-               [ngStyle]="{ fontSize: '2.5rem', color: '#05517e', opacity: '0.5' }"></i>
+              [ngStyle]="{ fontSize: '2.5rem', color: '#05517e', opacity: '0.5' }"></i>
           </div>
 
           <!-- Product Details -->
@@ -547,7 +598,9 @@
             <!-- Rating Stars (Amazon style) -->
             <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.25rem', marginTop: '0.2rem' }">
               <span [ngStyle]="{ color: '#f59e0b', fontSize: '0.75rem' }">★★★★★</span>
-              <span [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.6', fontWeight: '600' }">4.8 (82)</span>
+              <span
+                [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.6', fontWeight: '600' }">4.8
+                (82)</span>
             </div>
 
             <div [ngStyle]="{ fontWeight: '900', fontSize: '1.05rem', color: '#05517e', marginTop: '0.35rem' }">
@@ -576,338 +629,338 @@
   <!-- ========================================== -->
   <ng-container *ngIf="!isCustomer()">
 
-  <!-- KPI Stats Bar -->
-  <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }">
-    <!-- Total Orders -->
-    <div [ngStyle]="{
+    <!-- KPI Stats Bar -->
+    <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }">
+      <!-- Total Orders -->
+      <div [ngStyle]="{
         background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '12px',
         padding: '1.1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.35rem'
       }">
-      <span [ngStyle]="{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.6' }">
-        TOTAL ORDERS
-      </span>
-      <div [ngStyle]="{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }">
-        <span [ngStyle]="{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--text-color)' }">
-          {{ orderStats().totalCount }}
+        <span [ngStyle]="{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.6' }">
+          TOTAL ORDERS
         </span>
-        <span [ngStyle]="{ fontSize: '0.72rem', color: '#10b981', fontWeight: '600' }">active</span>
+        <div [ngStyle]="{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }">
+          <span [ngStyle]="{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--text-color)' }">
+            {{ orderStats().totalCount }}
+          </span>
+          <span [ngStyle]="{ fontSize: '0.72rem', color: '#10b981', fontWeight: '600' }">active</span>
+        </div>
       </div>
-    </div>
 
-    <!-- Pending Orders -->
-    <div [ngStyle]="{
+      <!-- Pending Orders -->
+      <div [ngStyle]="{
         background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '12px',
         padding: '1.1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.35rem'
       }">
-      <span [ngStyle]="{ fontSize: '0.75rem', fontWeight: '700', color: '#f59e0b' }">
-        PENDING CONFIRMATION
-      </span>
-      <div [ngStyle]="{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }">
-        <span [ngStyle]="{ fontSize: '1.6rem', fontWeight: '800', color: '#f59e0b' }">
-          {{ orderStats().pendingCount }}
+        <span [ngStyle]="{ fontSize: '0.75rem', fontWeight: '700', color: '#f59e0b' }">
+          PENDING CONFIRMATION
         </span>
+        <div [ngStyle]="{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }">
+          <span [ngStyle]="{ fontSize: '1.6rem', fontWeight: '800', color: '#f59e0b' }">
+            {{ orderStats().pendingCount }}
+          </span>
+        </div>
       </div>
-    </div>
 
-    <!-- Processing Orders -->
-    <div [ngStyle]="{
+      <!-- Processing Orders -->
+      <div [ngStyle]="{
         background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '12px',
         padding: '1.1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.35rem'
       }">
-      <span [ngStyle]="{ fontSize: '0.75rem', fontWeight: '700', color: '#6366f1' }">
-        IN PROCESSING
-      </span>
-      <div [ngStyle]="{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }">
-        <span [ngStyle]="{ fontSize: '1.6rem', fontWeight: '800', color: '#6366f1' }">
-          {{ orderStats().processingCount }}
+        <span [ngStyle]="{ fontSize: '0.75rem', fontWeight: '700', color: '#6366f1' }">
+          IN PROCESSING
         </span>
+        <div [ngStyle]="{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }">
+          <span [ngStyle]="{ fontSize: '1.6rem', fontWeight: '800', color: '#6366f1' }">
+            {{ orderStats().processingCount }}
+          </span>
+        </div>
       </div>
-    </div>
 
-    <!-- Completed Orders -->
-    <div [ngStyle]="{
+      <!-- Completed Orders -->
+      <div [ngStyle]="{
         background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '12px',
         padding: '1.1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.35rem'
       }">
-      <span [ngStyle]="{ fontSize: '0.75rem', fontWeight: '700', color: '#10b981' }">
-        DELIVERED / COMPLETED
-      </span>
-      <div [ngStyle]="{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }">
-        <span [ngStyle]="{ fontSize: '1.6rem', fontWeight: '800', color: '#10b981' }">
-          {{ orderStats().completedCount }}
+        <span [ngStyle]="{ fontSize: '0.75rem', fontWeight: '700', color: '#10b981' }">
+          DELIVERED / COMPLETED
         </span>
+        <div [ngStyle]="{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }">
+          <span [ngStyle]="{ fontSize: '1.6rem', fontWeight: '800', color: '#10b981' }">
+            {{ orderStats().completedCount }}
+          </span>
+        </div>
       </div>
-    </div>
 
-    <!-- Total Sales Volume -->
-    <div [ngStyle]="{
+      <!-- Total Sales Volume -->
+      <div [ngStyle]="{
         background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '12px',
         padding: '1.1rem 1.25rem', display: 'flex', flexDirection: 'column', gap: '0.35rem'
       }">
-      <span [ngStyle]="{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--sidebar-link-active-bg, #05517e)' }">
-        TOTAL SALES VALUE
-      </span>
-      <div [ngStyle]="{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }">
-        <span [ngStyle]="{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--sidebar-link-active-bg, #05517e)' }">
-          ${{ orderStats().totalVolume | number:'1.2-2' }}
+        <span [ngStyle]="{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--sidebar-link-active-bg, #05517e)' }">
+          TOTAL SALES VALUE
         </span>
+        <div [ngStyle]="{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }">
+          <span [ngStyle]="{ fontSize: '1.6rem', fontWeight: '800', color: 'var(--sidebar-link-active-bg, #05517e)' }">
+            ${{ orderStats().totalVolume | number:'1.2-2' }}
+          </span>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Filters Toolbar -->
-  <div [ngStyle]="{
+    <!-- Filters Toolbar -->
+    <div [ngStyle]="{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', flexWrap: 'wrap',
       background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '1rem 1.25rem'
     }">
-    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', flex: '1 1 320px' }">
-      <!-- Search Input -->
-      <div [ngStyle]="{
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', flex: '1 1 320px' }">
+        <!-- Search Input -->
+        <div [ngStyle]="{
           display: 'flex', alignItems: 'center', gap: '0.5rem', flex: '1 1 240px',
           background: 'var(--input-bg)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem 0.85rem'
         }">
-        <i class="pi pi-search" [ngStyle]="{ color: 'var(--text-color)', opacity: '0.5', fontSize: '0.85rem' }"></i>
-        <input type="text" placeholder="Search by Order ID, customer, location, item..." [value]="searchQuery()"
-          (input)="searchQuery.set($any($event.target).value)"
-          [ngStyle]="{ border: 'none', outline: 'none', background: 'transparent', color: 'var(--input-text)', fontSize: '0.85rem', width: '100%' }" />
+          <i class="pi pi-search" [ngStyle]="{ color: 'var(--text-color)', opacity: '0.5', fontSize: '0.85rem' }"></i>
+          <input type="text" placeholder="Search by Order ID, customer, location, item..." [value]="searchQuery()"
+            (input)="searchQuery.set($any($event.target).value)"
+            [ngStyle]="{ border: 'none', outline: 'none', background: 'transparent', color: 'var(--input-text)', fontSize: '0.85rem', width: '100%' }" />
+        </div>
+
+        <!-- Company Filter -->
+        <select [ngModel]="selectedCompanyFilter()" (ngModelChange)="selectedCompanyFilter.set($event)" [ngStyle]="{
+                background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--input-text)',
+                borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.85rem', outline: 'none', cursor: 'pointer'
+              }">
+          <option value="ALL">All Companies</option>
+          <option *ngFor="let c of companies()" [value]="c.code">{{ c.code }} — {{ c.name }}</option>
+        </select>
+
+        <!-- Status Filter -->
+        <select [ngModel]="selectedStatusFilter()" (ngModelChange)="selectedStatusFilter.set($event)" [ngStyle]="{
+                background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--input-text)',
+                borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.85rem', outline: 'none', cursor: 'pointer'
+              }">
+          <option value="ALL">All Statuses</option>
+          <option value="Pending">Pending</option>
+          <option value="Confirmed">Confirmed</option>
+          <option value="Processing">Processing</option>
+          <option value="Shipped">Shipped</option>
+          <option value="Delivered">Delivered</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+
+        <!-- Channel Filter -->
+        <select [ngModel]="selectedChannelFilter()" (ngModelChange)="selectedChannelFilter.set($event)" [ngStyle]="{
+                background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--input-text)',
+                borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.85rem', outline: 'none', cursor: 'pointer'
+              }">
+          <option value="ALL">All Channels</option>
+          <option value="B2B">B2B Wholesale</option>
+          <option value="B2C">B2C Retail</option>
+        </select>
       </div>
 
-      <!-- Company Filter -->
-      <select [ngModel]="selectedCompanyFilter()" (ngModelChange)="selectedCompanyFilter.set($event)" [ngStyle]="{
-                background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--input-text)',
-                borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.85rem', outline: 'none', cursor: 'pointer'
-              }">
-        <option value="ALL">All Companies</option>
-        <option *ngFor="let c of companies()" [value]="c.code">{{ c.code }} — {{ c.name }}</option>
-      </select>
-
-      <!-- Status Filter -->
-      <select [ngModel]="selectedStatusFilter()" (ngModelChange)="selectedStatusFilter.set($event)" [ngStyle]="{
-                background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--input-text)',
-                borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.85rem', outline: 'none', cursor: 'pointer'
-              }">
-        <option value="ALL">All Statuses</option>
-        <option value="Pending">Pending</option>
-        <option value="Confirmed">Confirmed</option>
-        <option value="Processing">Processing</option>
-        <option value="Shipped">Shipped</option>
-        <option value="Delivered">Delivered</option>
-        <option value="Cancelled">Cancelled</option>
-      </select>
-
-      <!-- Channel Filter -->
-      <select [ngModel]="selectedChannelFilter()" (ngModelChange)="selectedChannelFilter.set($event)" [ngStyle]="{
-                background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--input-text)',
-                borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.85rem', outline: 'none', cursor: 'pointer'
-              }">
-        <option value="ALL">All Channels</option>
-        <option value="B2B">B2B Wholesale</option>
-        <option value="B2C">B2C Retail</option>
-      </select>
-    </div>
-
-    <!-- Right Side: Scoping & Persona controls -->
-    <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }">
-      <!-- Role Persona Badge -->
-      <span [ngStyle]="{
+      <!-- Right Side: Scoping & Persona controls -->
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }">
+        <!-- Role Persona Badge -->
+        <span [ngStyle]="{
           background: isMaster() ? 'rgba(5, 81, 126, 0.12)' : (isSupport() ? 'rgba(99, 102, 241, 0.12)' : 'rgba(16, 185, 129, 0.12)'),
           color: isMaster() ? 'var(--sidebar-link-active-bg, #05517e)' : (isSupport() ? '#6366f1' : '#10b981'),
           border: '1px solid ' + (isMaster() ? 'rgba(5, 81, 126, 0.3)' : (isSupport() ? 'rgba(99, 102, 241, 0.3)' : 'rgba(16, 185, 129, 0.3)')),
           padding: '0.4rem 0.75rem', borderRadius: '8px', fontSize: '0.78rem', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '0.4rem'
         }">
-        <i class="pi" [ngClass]="isMaster() ? 'pi-shield' : (isSupport() ? 'pi-headphones' : 'pi-user')"></i>
-        {{ userRoleLabel() }}
-      </span>
+          <i class="pi" [ngClass]="isMaster() ? 'pi-shield' : (isSupport() ? 'pi-headphones' : 'pi-user')"></i>
+          {{ userRoleLabel() }}
+        </span>
 
-      <!-- Scope Switch for Master & Support -->
-      <div *ngIf="!isCustomer()" [ngStyle]="{
+        <!-- Scope Switch for Master & Support -->
+        <div *ngIf="!isCustomer()" [ngStyle]="{
           display: 'flex', alignItems: 'center', background: 'var(--input-bg)', border: '1px solid var(--border-color)',
           borderRadius: '8px', overflow: 'hidden'
         }">
-        <button (click)="toggleMyOrdersOnly(false)" type="button" [ngStyle]="{
+          <button (click)="toggleMyOrdersOnly(false)" type="button" [ngStyle]="{
             background: !showMyOrdersOnly() ? 'var(--sidebar-link-active-bg, #05517e)' : 'transparent',
             color: !showMyOrdersOnly() ? '#fff' : 'var(--text-color)',
             border: 'none', padding: '0.42rem 0.8rem', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', transition: 'all 0.15s ease'
           }">
-          All Orders
-        </button>
-        <button (click)="toggleMyOrdersOnly(true)" type="button" [ngStyle]="{
+            All Orders
+          </button>
+          <button (click)="toggleMyOrdersOnly(true)" type="button" [ngStyle]="{
             background: showMyOrdersOnly() ? 'var(--sidebar-link-active-bg, #05517e)' : 'transparent',
             color: showMyOrdersOnly() ? '#fff' : 'var(--text-color)',
             border: 'none', padding: '0.42rem 0.8rem', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer', transition: 'all 0.15s ease'
           }">
-          My Orders
-        </button>
-      </div>
+            My Orders
+          </button>
+        </div>
 
-      <!-- Scope Badge for End-Users / Customer Login -->
-      <div *ngIf="isCustomer()" [ngStyle]="{
+        <!-- Scope Badge for End-Users / Customer Login -->
+        <div *ngIf="isCustomer()" [ngStyle]="{
           background: 'rgba(16, 185, 129, 0.12)', border: '1px solid rgba(16, 185, 129, 0.3)',
           color: '#10b981', padding: '0.4rem 0.75rem', borderRadius: '8px', fontSize: '0.78rem', fontWeight: '700',
           display: 'flex', alignItems: 'center', gap: '0.4rem'
         }">
-        <i class="pi pi-lock"></i>
-        <span>My Placed Orders Only</span>
-      </div>
+          <i class="pi pi-lock"></i>
+          <span>My Placed Orders Only</span>
+        </div>
 
-      <span [ngStyle]="{ fontSize: '0.8rem', color: 'var(--text-color)', opacity: '0.7' }">
-        {{ filteredOrders().length }} orders
-      </span>
+        <span [ngStyle]="{ fontSize: '0.8rem', color: 'var(--text-color)', opacity: '0.7' }">
+          {{ filteredOrders().length }} orders
+        </span>
 
-      <button (click)="refreshData()" type="button" title="Refresh Orders" [ngStyle]="{
+        <button (click)="refreshData()" type="button" title="Refresh Orders" [ngStyle]="{
           background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--text-color)',
           borderRadius: '8px', padding: '0.45rem 0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center'
         }">
-        <i class="pi pi-refresh" [ngClass]="{ 'pi-spin': loading() }" [ngStyle]="{ fontSize: '0.85rem' }"></i>
-      </button>
+          <i class="pi pi-refresh" [ngClass]="{ 'pi-spin': loading() }" [ngStyle]="{ fontSize: '0.85rem' }"></i>
+        </button>
+      </div>
     </div>
-  </div>
 
-  <!-- Orders Table -->
-  <div [ngStyle]="{
+    <!-- Orders Table -->
+    <div [ngStyle]="{
       background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '14px',
       overflow: 'hidden', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.04)'
     }">
-    <div [ngStyle]="{ overflowX: 'auto' }">
-      <table [ngStyle]="{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }">
-        <thead>
-          <tr [ngStyle]="{
+      <div [ngStyle]="{ overflowX: 'auto' }">
+        <table [ngStyle]="{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '0.88rem' }">
+          <thead>
+            <tr [ngStyle]="{
               background: 'var(--input-bg)', borderBottom: '1px solid var(--border-color)',
               color: 'var(--text-color)', opacity: '0.8', fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.04em'
             }">
-            <th [ngStyle]="{ padding: '0.85rem 1.15rem' }">Order ID</th>
-            <th [ngStyle]="{ padding: '0.85rem 1rem' }">Company</th>
-            <th [ngStyle]="{ padding: '0.85rem 1rem' }">Destination / Location</th>
-            <th [ngStyle]="{ padding: '0.85rem 1rem' }">Channel</th>
-            <th [ngStyle]="{ padding: '0.85rem 1rem' }">Items</th>
-            <th [ngStyle]="{ padding: '0.85rem 1rem' }">Total</th>
-            <th [ngStyle]="{ padding: '0.85rem 1rem' }">Status</th>
-            <th [ngStyle]="{ padding: '0.85rem 1rem' }">Date</th>
-            <th [ngStyle]="{ padding: '0.85rem 1.15rem', textAlign: 'right' }">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Empty State -->
-          <tr *ngIf="filteredOrders().length === 0">
-            <td colspan="9"
-              [ngStyle]="{ textAlign: 'center', padding: '3.5rem 1rem', color: 'var(--text-color)', opacity: '0.65' }">
-              <i class="pi pi-inbox"
-                [ngStyle]="{ fontSize: '2.5rem', display: 'block', marginBottom: '0.75rem', opacity: '0.4' }"></i>
-              <div [ngStyle]="{ fontSize: '1rem', fontWeight: '700' }">No orders found</div>
-              <div [ngStyle]="{ fontSize: '0.82rem', marginTop: '0.25rem' }">Create a manual order or place orders
-                through the Catalog Hub</div>
-            </td>
-          </tr>
+              <th [ngStyle]="{ padding: '0.85rem 1.15rem' }">Order ID</th>
+              <th [ngStyle]="{ padding: '0.85rem 1rem' }">Company</th>
+              <th [ngStyle]="{ padding: '0.85rem 1rem' }">Destination / Location</th>
+              <th [ngStyle]="{ padding: '0.85rem 1rem' }">Channel</th>
+              <th [ngStyle]="{ padding: '0.85rem 1rem' }">Items</th>
+              <th [ngStyle]="{ padding: '0.85rem 1rem' }">Total</th>
+              <th [ngStyle]="{ padding: '0.85rem 1rem' }">Status</th>
+              <th [ngStyle]="{ padding: '0.85rem 1rem' }">Date</th>
+              <th [ngStyle]="{ padding: '0.85rem 1.15rem', textAlign: 'right' }">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Empty State -->
+            <tr *ngIf="filteredOrders().length === 0">
+              <td colspan="9"
+                [ngStyle]="{ textAlign: 'center', padding: '3.5rem 1rem', color: 'var(--text-color)', opacity: '0.65' }">
+                <i class="pi pi-inbox"
+                  [ngStyle]="{ fontSize: '2.5rem', display: 'block', marginBottom: '0.75rem', opacity: '0.4' }"></i>
+                <div [ngStyle]="{ fontSize: '1rem', fontWeight: '700' }">No orders found</div>
+                <div [ngStyle]="{ fontSize: '0.82rem', marginTop: '0.25rem' }">Create a manual order or place orders
+                  through the Catalog Hub</div>
+              </td>
+            </tr>
 
-          <!-- Rows -->
-          <tr *ngFor="let order of filteredOrders()" [ngStyle]="{
+            <!-- Rows -->
+            <tr *ngFor="let order of filteredOrders()" [ngStyle]="{
                 borderBottom: '1px solid var(--border-color)', transition: 'background 0.15s ease',
                 background: order.parentOrderId ? 'rgba(5, 81, 126, 0.02)' : 'transparent'
               }">
-            <!-- Order ID -->
-            <td [ngStyle]="{ padding: '0.9rem 1.15rem' }">
-              <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }">
-                <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.45rem' }">
-                  <span [ngStyle]="{
+              <!-- Order ID -->
+              <td [ngStyle]="{ padding: '0.9rem 1.15rem' }">
+                <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }">
+                  <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.45rem' }">
+                    <span [ngStyle]="{
                       fontFamily: 'monospace', fontWeight: '800', fontSize: '0.88rem',
                       color: 'var(--sidebar-link-active-bg, #05517e)', cursor: 'pointer'
                     }" (click)="openOrderDetails(order)">
-                    {{ order.orderId }}
-                  </span>
-                  <!-- Segregated Sub-order Badge -->
-                  <span *ngIf="isSegregatedSubOrder(order.orderId)" title="Segregated Batch Order" [ngStyle]="{
+                      {{ order.orderId }}
+                    </span>
+                    <!-- Segregated Sub-order Badge -->
+                    <span *ngIf="isSegregatedSubOrder(order.orderId)" title="Segregated Batch Order" [ngStyle]="{
                           background: 'rgba(139, 92, 246, 0.12)', color: '#8b5cf6',
                           border: '1px solid rgba(139, 92, 246, 0.25)', fontSize: '0.68rem',
                           fontWeight: '800', padding: '0.1rem 0.35rem', borderRadius: '4px'
                         }">
-                    Segregated
+                      Segregated
+                    </span>
+                  </div>
+                  <span *ngIf="order.customerName"
+                    [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.65' }">
+                    Customer: {{ order.customerName }}
                   </span>
                 </div>
-                <span *ngIf="order.customerName"
-                  [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.65' }">
-                  Customer: {{ order.customerName }}
-                </span>
-              </div>
-            </td>
+              </td>
 
-            <!-- Company -->
-            <td [ngStyle]="{ padding: '0.9rem 1rem' }">
-              <span [ngStyle]="{
+              <!-- Company -->
+              <td [ngStyle]="{ padding: '0.9rem 1rem' }">
+                <span [ngStyle]="{
                   background: 'var(--input-bg)', border: '1px solid var(--border-color)',
                   fontWeight: '700', fontSize: '0.75rem', padding: '0.2rem 0.5rem', borderRadius: '6px'
                 }">
-                {{ order.companyCode }}
-              </span>
-              <span
-                [ngStyle]="{ display: 'block', fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.65', marginTop: '0.2rem' }">
-                {{ order.companyName }}
-              </span>
-            </td>
-
-            <!-- Location -->
-            <td [ngStyle]="{ padding: '0.9rem 1rem' }">
-              <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.4rem' }">
-                <i [class]="order.locationType === 'Store' ? 'pi pi-shopping-bag' : 'pi pi-building'"
-                  [ngStyle]="{ color: order.locationType === 'Store' ? '#10b981' : '#3b82f6', fontSize: '0.85rem' }"></i>
-                <span [ngStyle]="{ fontWeight: '600', fontSize: '0.82rem' }">
-                  {{ order.locationName || order.locationCode }}
+                  {{ order.companyCode }}
                 </span>
-              </div>
-              <span
-                [ngStyle]="{ fontSize: '0.7rem', color: 'var(--text-color)', opacity: '0.55', display: 'block', marginLeft: '1.25rem' }">
-                {{ order.locationType }} ({{ order.locationCode }})
-              </span>
-              <!-- Logistics badge in table row -->
-              <div *ngIf="order.shipVia"
-                [ngStyle]="{ fontSize: '0.72rem', color: '#3b82f6', fontWeight: '700', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }">
-                <i class="pi pi-truck"></i> Ship Via: {{ order.shipVia }}
-              </div>
-              <div *ngIf="order.deliveryPartner"
-                [ngStyle]="{ fontSize: '0.72rem', color: '#10b981', fontWeight: '700', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }">
-                <i class="pi pi-send"></i> Partner: {{ order.deliveryPartner }}
-              </div>
-            </td>
+                <span
+                  [ngStyle]="{ display: 'block', fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.65', marginTop: '0.2rem' }">
+                  {{ order.companyName }}
+                </span>
+              </td>
 
-            <!-- Channel -->
-            <td [ngStyle]="{ padding: '0.9rem 1rem' }">
-              <span [ngStyle]="{
+              <!-- Location -->
+              <td [ngStyle]="{ padding: '0.9rem 1rem' }">
+                <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.4rem' }">
+                  <i [class]="order.locationType === 'Store' ? 'pi pi-shopping-bag' : 'pi pi-building'"
+                    [ngStyle]="{ color: order.locationType === 'Store' ? '#10b981' : '#3b82f6', fontSize: '0.85rem' }"></i>
+                  <span [ngStyle]="{ fontWeight: '600', fontSize: '0.82rem' }">
+                    {{ order.locationName || order.locationCode }}
+                  </span>
+                </div>
+                <span
+                  [ngStyle]="{ fontSize: '0.7rem', color: 'var(--text-color)', opacity: '0.55', display: 'block', marginLeft: '1.25rem' }">
+                  {{ order.locationType }} ({{ order.locationCode }})
+                </span>
+                <!-- Logistics badge in table row -->
+                <div *ngIf="order.shipVia"
+                  [ngStyle]="{ fontSize: '0.72rem', color: '#3b82f6', fontWeight: '700', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }">
+                  <i class="pi pi-truck"></i> Ship Via: {{ order.shipVia }}
+                </div>
+                <div *ngIf="order.deliveryPartner"
+                  [ngStyle]="{ fontSize: '0.72rem', color: '#10b981', fontWeight: '700', marginTop: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }">
+                  <i class="pi pi-send"></i> Partner: {{ order.deliveryPartner }}
+                </div>
+              </td>
+
+              <!-- Channel -->
+              <td [ngStyle]="{ padding: '0.9rem 1rem' }">
+                <span [ngStyle]="{
                   fontSize: '0.74rem', fontWeight: '700', padding: '0.2rem 0.5rem', borderRadius: '6px',
                   background: order.channel === 'B2B' ? 'rgba(59, 130, 246, 0.12)' : (order.channel === 'B2C' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(139, 92, 246, 0.12)'),
                   color: order.channel === 'B2B' ? '#3b82f6' : (order.channel === 'B2C' ? '#10b981' : '#8b5cf6')
                 }">
-                {{ order.channel }}
-              </span>
-            </td>
+                  {{ order.channel }}
+                </span>
+              </td>
 
-            <!-- Items -->
-            <td [ngStyle]="{ padding: '0.9rem 1rem' }">
-              <span [ngStyle]="{ fontWeight: '700', color: 'var(--text-color)' }">
-                {{ order.totalItems }} units
-              </span>
-              <span [ngStyle]="{ display: 'block', fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.6' }">
-                {{ order.items?.length || 0 }} line items
-              </span>
-            </td>
+              <!-- Items -->
+              <td [ngStyle]="{ padding: '0.9rem 1rem' }">
+                <span [ngStyle]="{ fontWeight: '700', color: 'var(--text-color)' }">
+                  {{ order.totalItems }} units
+                </span>
+                <span [ngStyle]="{ display: 'block', fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.6' }">
+                  {{ order.items?.length || 0 }} line items
+                </span>
+              </td>
 
-            <!-- Total -->
-            <td [ngStyle]="{ padding: '0.9rem 1rem' }">
-              <span
-                [ngStyle]="{ fontWeight: '800', color: 'var(--sidebar-link-active-bg, #05517e)', fontSize: '0.92rem' }">
-                ${{ order.totalAmount | number:'1.2-2' }}
-              </span>
-              <span *ngIf="order.discount && order.discount > 0"
-                [ngStyle]="{ display: 'block', fontSize: '0.7rem', color: '#10b981', fontWeight: '700' }">
-                -Saved ${{ order.discount | number:'1.2-2' }}
-              </span>
-            </td>
+              <!-- Total -->
+              <td [ngStyle]="{ padding: '0.9rem 1rem' }">
+                <span
+                  [ngStyle]="{ fontWeight: '800', color: 'var(--sidebar-link-active-bg, #05517e)', fontSize: '0.92rem' }">
+                  ${{ order.totalAmount | number:'1.2-2' }}
+                </span>
+                <span *ngIf="order.discount && order.discount > 0"
+                  [ngStyle]="{ display: 'block', fontSize: '0.7rem', color: '#10b981', fontWeight: '700' }">
+                  -Saved ${{ order.discount | number:'1.2-2' }}
+                </span>
+              </td>
 
-            <!-- Status: Interactive Status Changer on Master Screen -->
-            <td [ngStyle]="{ padding: '0.9rem 1rem' }">
-              <div [ngStyle]="{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }">
-                <select [ngModel]="order.status" (ngModelChange)="changeOrderStatus(order, $event)"
-                  [disabled]="isOrderLocked(order) || isCustomer()"
-                  [title]="isOrderLocked(order) ? 'Order status locked (' + order.status + ')' : 'Click to update status on master screen'"
-                  [ngStyle]="{
+              <!-- Status: Interactive Status Changer on Master Screen -->
+              <td [ngStyle]="{ padding: '0.9rem 1rem' }">
+                <div [ngStyle]="{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }">
+                  <select [ngModel]="order.status" (ngModelChange)="changeOrderStatus(order, $event)"
+                    [disabled]="isOrderLocked(order) || isCustomer()"
+                    [title]="isOrderLocked(order) ? 'Order status locked (' + order.status + ')' : 'Click to update status on master screen'"
+                    [ngStyle]="{
                           background: getStatusBadgeColor(order.status).bg,
                           color: getStatusBadgeColor(order.status).color,
                           border: '1px solid ' + getStatusBadgeColor(order.status).border,
@@ -917,59 +970,75 @@
                           opacity: (isOrderLocked(order) || isCustomer()) ? '0.85' : '1',
                           transition: 'all 0.15s ease'
                         }">
-                  <option value="Pending">Pending</option>
-                  <option value="Confirmed">Confirmed</option>
-                  <option value="Processing">Processing</option>
-                  <option value="Shipped">Shipped</option>
-                  <option value="Delivered">Delivered</option>
-                  <option value="Cancelled">Cancelled</option>
-                </select>
-                <i *ngIf="isOrderLocked(order)" class="pi pi-lock" title="Status locked - cannot modify"
-                  [ngStyle]="{ color: '#ef4444', fontSize: '0.75rem' }"></i>
-              </div>
-            </td>
+                    <option value="Pending">Pending</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Shipped">Shipped</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                  <i *ngIf="isOrderLocked(order)" class="pi pi-lock" title="Status locked - cannot modify"
+                    [ngStyle]="{ color: '#ef4444', fontSize: '0.75rem' }"></i>
+                </div>
+              </td>
 
-            <!-- Date -->
-            <td [ngStyle]="{ padding: '0.9rem 1rem', fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.7' }">
-              {{ order.orderDate | date:'mediumDate' }}
-            </td>
+              <!-- Date -->
+              <td
+                [ngStyle]="{ padding: '0.9rem 1rem', fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.7' }">
+                {{ order.orderDate | date:'mediumDate' }}
+              </td>
 
-            <!-- Actions: View, Edit, Delete directly on Master Screen -->
-            <td [ngStyle]="{ padding: '0.9rem 1.15rem', textAlign: 'right' }">
-              <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.45rem' }">
-                <!-- View Details Button -->
-                <button (click)="openOrderDetails(order)" type="button" title="View Order Details" [ngStyle]="{
+              <!-- Actions: View, Edit, Delete directly on Master Screen -->
+              <td [ngStyle]="{ padding: '0.9rem 1.15rem', textAlign: 'right' }">
+                <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.45rem' }">
+                  <!-- View Details Button -->
+                  <button (click)="openOrderDetails(order)" type="button" title="View Order Details" [ngStyle]="{
                     background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--sidebar-link-active-bg, #05517e)',
                     borderRadius: '6px', padding: '0.35rem 0.6rem', fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer',
                     display: 'flex', alignItems: 'center', gap: '0.3rem'
                   }">
-                  <i class="pi pi-eye"></i> View
-                </button>
+                    <i class="pi pi-eye"></i> View
+                  </button>
 
-                <!-- View / Download Invoice Button (Accessible to all) -->
-                <button (click)="viewOrderInvoice(order)" type="button" title="View & Download Invoice" [ngStyle]="{
+                  <!-- View / Download Invoice Button (Accessible to all) -->
+                  <button (click)="viewOrderInvoice(order)" type="button" title="View & Download Invoice" [ngStyle]="{
                     background: 'rgba(5, 81, 126, 0.08)', border: '1px solid rgba(5, 81, 126, 0.25)',
                     color: '#05517e', borderRadius: '6px', padding: '0.35rem 0.6rem', fontSize: '0.78rem',
                     fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem'
                   }">
-                  <i class="pi pi-file-pdf"></i> Invoice
-                </button>
+                    <i class="pi pi-file-pdf"></i> Invoice
+                  </button>
 
-                <!-- Customer Cancel Order Button (Only if NOT in Shipped/Delivered/Cancelled state) -->
-                <button *ngIf="isCustomer() && canCustomerCancelOrder(order)" (click)="cancelOrderAsCustomer(order)"
-                  type="button" title="Cancel this Order" [ngStyle]="{
+                  <!-- Customer Cancel Order Button (Only if NOT in Shipped/Delivered/Cancelled state) -->
+                  <button *ngIf="isCustomer() && canCustomerCancelOrder(order)" (click)="cancelOrderAsCustomer(order)"
+                    type="button" title="Cancel this Order" [ngStyle]="{
                     background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.3)',
                     color: '#ef4444', borderRadius: '6px', padding: '0.35rem 0.6rem', fontSize: '0.78rem',
                     fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem'
                   }">
-                  <i class="pi pi-times-circle"></i> Cancel
-                </button>
+                    <i class="pi pi-times-circle"></i> Cancel
+                  </button>
 
-                <!-- Edit Order Directly from Master Screen (Vendor / Staff) -->
-                <button *ngIf="!isCustomer()" (click)="openEditOrder(order)" type="button"
-                  [disabled]="isOrderLocked(order)"
-                  [title]="isOrderLocked(order) ? 'Cannot edit: Order is ' + order.status : 'Edit Order Details'"
-                  [ngStyle]="{
+                  <!-- Process Shipping Label & Logistics Tracking (Vendor / Fulfillment) -->
+                  <button *ngIf="!isCustomer() && order.status !== 'Cancelled'" (click)="openShippingLabelModal(order)"
+                    type="button"
+                    [title]="order.status === 'Shipped' ? 'View/Print Shipping Label & Tracking' : 'Process Shipping Label & Tracking Details'"
+                    [ngStyle]="{
+                      background: order.status === 'Shipped' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(5, 81, 126, 0.12)',
+                      border: '1px solid ' + (order.status === 'Shipped' ? 'rgba(16, 185, 129, 0.35)' : 'rgba(5, 81, 126, 0.35)'),
+                      color: order.status === 'Shipped' ? '#059669' : '#05517e',
+                      borderRadius: '6px', padding: '0.35rem 0.65rem', fontSize: '0.78rem', fontWeight: '700',
+                      cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', transition: 'all 0.15s ease'
+                    }">
+                    <i class="pi pi-truck"></i>
+                    <span>{{ order.status === 'Shipped' ? 'Label/AWB' : 'Ship & Label' }}</span>
+                  </button>
+
+                  <!-- Edit Order Directly from Master Screen (Vendor / Staff) -->
+                  <button *ngIf="!isCustomer()" (click)="openEditOrder(order)" type="button"
+                    [disabled]="isOrderLocked(order)"
+                    [title]="isOrderLocked(order) ? 'Cannot edit: Order is ' + order.status : 'Edit Order Details'"
+                    [ngStyle]="{
                           background: isOrderLocked(order) ? 'var(--input-bg)' : 'rgba(5, 81, 126, 0.1)',
                           border: '1px solid ' + (isOrderLocked(order) ? 'var(--border-color)' : 'rgba(5, 81, 126, 0.3)'),
                           color: isOrderLocked(order) ? 'var(--text-color)' : 'var(--sidebar-link-active-bg, #05517e)',
@@ -978,24 +1047,24 @@
                           opacity: isOrderLocked(order) ? '0.45' : '1',
                           display: 'flex', alignItems: 'center', gap: '0.3rem', transition: 'all 0.15s ease'
                         }">
-                  <i class="pi pi-pencil"></i> Edit
-                </button>
+                    <i class="pi pi-pencil"></i> Edit
+                  </button>
 
-                <!-- Delete Order (Vendor / Staff) -->
-                <button *ngIf="!isCustomer()" (click)="confirmDeleteOrder(order)" type="button" title="Delete Order"
-                  [ngStyle]="{
+                  <!-- Delete Order (Vendor / Staff) -->
+                  <button *ngIf="!isCustomer()" (click)="confirmDeleteOrder(order)" type="button" title="Delete Order"
+                    [ngStyle]="{
                     background: 'transparent', border: 'none', color: '#ef4444',
                     padding: '0.35rem', cursor: 'pointer', borderRadius: '4px', opacity: '0.75'
                   }">
-                  <i class="pi pi-trash"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
-  </div>
   </ng-container>
 
   <!-- Create Order Modal -->
@@ -2396,6 +2465,345 @@
           Delete
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- VENDOR SHIPPING LABEL & DISPATCH PROCESSING MODAL       -->
+  <!-- ======================================================= -->
+  <div *ngIf="showShippingLabelModal() && selectedOrderForLabel() as labelOrder" [ngStyle]="{
+      position: 'fixed', top: '0', left: '0', width: '100%', height: '100%',
+      background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(4px)', zIndex: '1050',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1.5rem',
+      overflowY: 'auto', boxSizing: 'border-box'
+    }">
+    <div [ngStyle]="{
+        background: 'var(--card-bg, #ffffff)', border: '1px solid var(--border-color)', borderRadius: '18px',
+        maxWidth: '960px', width: '100%', display: 'flex', flexDirection: 'column',
+        maxHeight: '92vh', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.25)',
+        boxSizing: 'border-box', margin: 'auto'
+      }">
+
+      <!-- Modal Header -->
+      <div [ngStyle]="{
+          padding: '1.25rem 1.75rem', borderBottom: '1px solid var(--border-color)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          background: 'linear-gradient(135deg, rgba(5, 81, 126, 0.04), rgba(5, 81, 126, 0.08))'
+        }">
+        <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem' }">
+          <div [ngStyle]="{
+              width: '38px', height: '38px', borderRadius: '10px',
+              background: 'linear-gradient(135deg, #05517e, #033654)', color: '#fff',
+              display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }">
+            <i class="pi pi-truck" [ngStyle]="{ fontSize: '1.2rem' }"></i>
+          </div>
+          <div>
+            <h3 [ngStyle]="{ margin: '0', fontSize: '1.2rem', fontWeight: '800', color: 'var(--text-color)' }">
+              Fulfillment &amp; Shipping Label Processing
+            </h3>
+            <span [ngStyle]="{ fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.7' }">
+              Order #<strong>{{ labelOrder.orderId }}</strong> &bull; Sold by {{ labelOrder.companyName ||
+              labelOrder.companyCode }} &bull; Customer: {{ labelOrder.customerName || 'Customer' }}
+            </span>
+          </div>
+        </div>
+
+        <button (click)="closeShippingLabelModal()" type="button" [ngStyle]="{
+            background: 'transparent', border: 'none', color: 'var(--text-color)',
+            fontSize: '1.25rem', cursor: 'pointer', padding: '0.25rem'
+          }">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Two Column Layout: Form on Left, Live 4x6 Label on Right) -->
+      <div
+        [ngStyle]="{ flex: '1 1 auto', overflowY: 'auto', padding: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '1.5rem' }">
+
+        <!-- Column 1: Logistics & Fulfillment Setup Form -->
+        <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1rem' }">
+
+          <!-- Facility Selection (Warehouse vs Store) -->
+          <div [ngStyle]="{
+              background: 'var(--input-bg)', border: '1px solid var(--border-color)', borderRadius: '12px',
+              padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.65rem'
+            }">
+            <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }">
+              <span
+                [ngStyle]="{ fontSize: '0.82rem', fontWeight: '800', color: '#05517e', textTransform: 'uppercase' }">
+                1. Fulfillment Center / Origin
+              </span>
+              <span [ngStyle]="{
+                  fontSize: '0.7rem', fontWeight: '800', padding: '0.15rem 0.45rem', borderRadius: '4px',
+                  background: labelFacilityType() === 'Warehouse' ? 'rgba(59, 130, 246, 0.12)' : 'rgba(16, 185, 129, 0.12)',
+                  color: labelFacilityType() === 'Warehouse' ? '#3b82f6' : '#10b981'
+                }">
+                {{ labelFacilityType() }}
+              </span>
+            </div>
+
+            <label [ngStyle]="{ fontSize: '0.76rem', color: 'var(--text-color)', opacity: '0.8' }">
+              Vendor Facility to Dispatch From:
+            </label>
+            <select (change)="onLabelFacilityChanged($event)" [ngStyle]="{
+                width: '100%', padding: '0.55rem 0.75rem', borderRadius: '8px',
+                border: '1px solid var(--border-color)', background: 'var(--card-bg)',
+                color: 'var(--text-color)', fontSize: '0.84rem', fontWeight: '600'
+              }">
+              <optgroup label="Warehouses (Distribution Centers)">
+                <option *ngFor="let wh of warehouses()" [value]="'Warehouse::' + wh.code + '::' + wh.name"
+                  [selected]="labelFacilityCode() === wh.code && labelFacilityType() === 'Warehouse'">
+                  [Warehouse] {{ wh.name }} ({{ wh.code }}) - {{ wh.city }}, {{ wh.stateCode }}
+                </option>
+              </optgroup>
+              <optgroup label="Retail Stores">
+                <option *ngFor="let st of stores()" [value]="'Store::' + st.code + '::' + st.name"
+                  [selected]="labelFacilityCode() === st.code && labelFacilityType() === 'Store'">
+                  [Store] {{ st.name }} ({{ st.code }}) - {{ st.city }}, {{ st.stateCode }}
+                </option>
+              </optgroup>
+            </select>
+          </div>
+
+          <!-- Courier Partner & Shipping Mode -->
+          <div [ngStyle]="{
+              background: 'var(--input-bg)', border: '1px solid var(--border-color)', borderRadius: '12px',
+              padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem'
+            }">
+            <span [ngStyle]="{ fontSize: '0.82rem', fontWeight: '800', color: '#05517e', textTransform: 'uppercase' }">
+              2. Carrier &amp; Delivery Logistics
+            </span>
+
+            <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }">
+              <div>
+                <label [ngStyle]="{ fontSize: '0.74rem', fontWeight: '700', color: 'var(--text-color)' }">Delivery
+                  Partner:</label>
+                <select [ngModel]="labelDeliveryPartner()" (ngModelChange)="labelDeliveryPartner.set($event)"
+                  [ngStyle]="{ width: '100%', padding: '0.5rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-color)', fontSize: '0.82rem', marginTop: '0.25rem' }">
+                  <option value="Delhivery">Delhivery Express</option>
+                  <option value="BlueDart">Blue Dart Express</option>
+                  <option value="FedEx">FedEx Logistics</option>
+                  <option value="Road Freight Logistics">Road Freight Logistics (Bulk B2B)</option>
+                  <option value="DHL Express">DHL Express</option>
+                  <option value="India Post">India Post Speed Post</option>
+                </select>
+              </div>
+
+              <div>
+                <label [ngStyle]="{ fontSize: '0.74rem', fontWeight: '700', color: 'var(--text-color)' }">Ship Via /
+                  Mode:</label>
+                <select [ngModel]="labelShipVia()" (ngModelChange)="labelShipVia.set($event)"
+                  [ngStyle]="{ width: '100%', padding: '0.5rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-color)', fontSize: '0.82rem', marginTop: '0.25rem' }">
+                  <option value="Road Freight">Road Freight (Heavy Volume)</option>
+                  <option value="Surface Express">Surface Express</option>
+                  <option value="Air Cargo">Air Cargo Express</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Tracking Number & URL -->
+            <div>
+              <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }">
+                <label [ngStyle]="{ fontSize: '0.74rem', fontWeight: '700', color: 'var(--text-color)' }">Tracking
+                  Number / AWB:</label>
+                <button (click)="generateNewAwb()" type="button" [ngStyle]="{
+                    background: 'transparent', border: 'none', color: '#05517e',
+                    fontSize: '0.72rem', fontWeight: '800', cursor: 'pointer', padding: '0'
+                  }">
+                  Generate AWB ⟳
+                </button>
+              </div>
+              <input type="text" [ngModel]="labelTrackingNumber()" (ngModelChange)="labelTrackingNumber.set($event)"
+                placeholder="e.g. AWB-98471928"
+                [ngStyle]="{ width: '100%', padding: '0.5rem 0.65rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-color)', fontSize: '0.84rem', marginTop: '0.25rem', boxSizing: 'border-box', fontFamily: 'monospace', fontWeight: '700' }" />
+            </div>
+
+            <div>
+              <label [ngStyle]="{ fontSize: '0.74rem', fontWeight: '700', color: 'var(--text-color)' }">Live Tracking
+                URL:</label>
+              <input type="text" [ngModel]="labelTrackingUrl()" (ngModelChange)="labelTrackingUrl.set($event)"
+                placeholder="https://track.carrier.com/..."
+                [ngStyle]="{ width: '100%', padding: '0.5rem 0.65rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-color)', fontSize: '0.82rem', marginTop: '0.25rem', boxSizing: 'border-box' }" />
+            </div>
+
+            <!-- Package Specs -->
+            <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }">
+              <div>
+                <label [ngStyle]="{ fontSize: '0.74rem', color: 'var(--text-color)' }">Package Weight:</label>
+                <input type="text" [ngModel]="labelPackageWeight()" (ngModelChange)="labelPackageWeight.set($event)"
+                  [ngStyle]="{ width: '100%', padding: '0.45rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-color)', fontSize: '0.8rem', marginTop: '0.2rem', boxSizing: 'border-box' }" />
+              </div>
+              <div>
+                <label [ngStyle]="{ fontSize: '0.74rem', color: 'var(--text-color)' }">Dimensions:</label>
+                <input type="text" [ngModel]="labelPackageDimensions()"
+                  (ngModelChange)="labelPackageDimensions.set($event)"
+                  [ngStyle]="{ width: '100%', padding: '0.45rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-color)', fontSize: '0.8rem', marginTop: '0.2rem', boxSizing: 'border-box' }" />
+              </div>
+            </div>
+
+            <div>
+              <label [ngStyle]="{ fontSize: '0.74rem', color: 'var(--text-color)' }">Handling Instructions / Dispatch
+                Notes:</label>
+              <textarea [ngModel]="labelDispatchNotes()" (ngModelChange)="labelDispatchNotes.set($event)" rows="2"
+                placeholder="e.g. Fragile contents, keep dry, bulk carton lot..."
+                [ngStyle]="{ width: '100%', padding: '0.45rem', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--card-bg)', color: 'var(--text-color)', fontSize: '0.8rem', marginTop: '0.2rem', boxSizing: 'border-box' }"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 2: 4x6 Printable Shipping Label Preview -->
+        <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }">
+          <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }">
+            <span [ngStyle]="{ fontSize: '0.82rem', fontWeight: '800', color: '#05517e', textTransform: 'uppercase' }">
+              3. Standard 4x6" Shipping Label
+            </span>
+            <button (click)="printShippingLabel()" type="button" [ngStyle]="{
+                background: 'rgba(5, 81, 126, 0.1)', border: '1px solid rgba(5, 81, 126, 0.3)',
+                color: '#05517e', padding: '0.35rem 0.75rem', borderRadius: '6px',
+                fontSize: '0.76rem', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.35rem'
+              }">
+              <i class="pi pi-print"></i>
+              <span>Print Label</span>
+            </button>
+          </div>
+
+          <!-- Printable Shipping Label Card (4x6 Aspect Ratio) -->
+          <div id="oneshop-shipping-label" [ngStyle]="{
+              background: '#ffffff', color: '#000000', border: '2px solid #000000', borderRadius: '8px',
+              padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.75rem',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.1)', fontFamily: 'Arial, sans-serif'
+            }">
+
+            <!-- Carrier Header & Priority Badge -->
+            <div
+              [ngStyle]="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid #000000', paddingBottom: '0.5rem' }">
+              <div>
+                <div [ngStyle]="{ fontSize: '1.25rem', fontWeight: '900', letterSpacing: '0.05em' }">
+                  {{ labelDeliveryPartner() }}
+                </div>
+                <div [ngStyle]="{ fontSize: '0.72rem', fontWeight: '700' }">
+                  STANDARD LOGISTICS DISPATCH &bull; {{ labelShipVia() }}
+                </div>
+              </div>
+              <div [ngStyle]="{
+                  border: '2px solid #000000', padding: '0.25rem 0.6rem',
+                  fontSize: '0.9rem', fontWeight: '900', letterSpacing: '0.08em'
+                }">
+                PRIORITY
+              </div>
+            </div>
+
+            <!-- Barcode Graphic Simulation -->
+            <div [ngStyle]="{ textAlign: 'center', padding: '0.4rem 0', borderBottom: '1px solid #000000' }">
+              <div [ngStyle]="{ fontFamily: 'monospace', letterSpacing: '4px', fontSize: '1.5rem', fontWeight: '900' }">
+                |||| || | |||| || ||||| ||| ||||
+              </div>
+              <div
+                [ngStyle]="{ fontSize: '0.78rem', fontWeight: '800', fontFamily: 'monospace', marginTop: '0.15rem' }">
+                {{ labelTrackingNumber() }}
+              </div>
+            </div>
+
+            <!-- Ship From & Ship To Sections -->
+            <div
+              [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', borderBottom: '1px solid #000000', paddingBottom: '0.6rem', fontSize: '0.75rem' }">
+              <!-- Ship From -->
+              <div>
+                <div [ngStyle]="{ fontWeight: '900', textTransform: 'uppercase', marginBottom: '0.2rem' }">
+                  SHIP FROM:
+                </div>
+                <div [ngStyle]="{ fontWeight: '700' }">{{ labelOrder.companyName || labelOrder.companyCode }}</div>
+                <div>{{ labelFacilityName() }}</div>
+                <div [ngStyle]="{ opacity: '0.8' }">{{ labelFacilityType() }} Facility</div>
+              </div>
+
+              <!-- Ship To -->
+              <div>
+                <div [ngStyle]="{ fontWeight: '900', textTransform: 'uppercase', marginBottom: '0.2rem' }">
+                  SHIP TO:
+                </div>
+                <div [ngStyle]="{ fontWeight: '900' }">{{ labelOrder.customerName || 'Customer' }}</div>
+                <div>{{ labelOrder.shippingAddress || 'Standard Delivery Address' }}</div>
+                <div>{{ labelOrder.shippingState }}</div>
+                <div *ngIf="labelOrder.customerPhone">Tel: {{ labelOrder.customerPhone }}</div>
+              </div>
+            </div>
+
+            <!-- Package & Routing Info -->
+            <div
+              [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', fontSize: '0.74rem', borderBottom: '1px solid #000000', paddingBottom: '0.5rem' }">
+              <div>
+                <strong>Order #:</strong> {{ labelOrder.orderId }}<br />
+                <strong>Weight:</strong> {{ labelPackageWeight() }}
+              </div>
+              <div>
+                <strong>Dimensions:</strong> {{ labelPackageDimensions() }}<br />
+                <strong>Date:</strong> {{ labelOrder.orderDate | date:'shortDate' }}
+              </div>
+            </div>
+
+            <!-- Items Summary on Label -->
+            <div [ngStyle]="{ fontSize: '0.7rem', color: '#333333' }">
+              <strong>Items ({{ labelOrder.totalItems }} pcs):</strong>
+              <ng-container *ngIf="labelOrder.items && labelOrder.items.length > 0">
+                {{ labelOrder.items[0].itemName }} ({{ labelOrder.items[0].sizeCode }}) x{{ labelOrder.items[0].quantity
+                }}
+                <span *ngIf="labelOrder.items.length > 1">+ {{ labelOrder.items.length - 1 }} more item(s)</span>
+              </ng-container>
+            </div>
+
+            <!-- QR Code Simulation -->
+            <div
+              [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.25rem' }">
+              <span [ngStyle]="{ fontSize: '0.65rem', fontFamily: 'monospace' }">
+                REF: {{ labelOrder.companyCode }}-{{ labelOrder.orderId }}
+              </span>
+              <span [ngStyle]="{ fontSize: '0.65rem', fontWeight: '800' }">
+                ONE-SHOP LOGISTICS VERIFIED
+              </span>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div [ngStyle]="{
+          padding: '1rem 1.75rem', borderTop: '1px solid var(--border-color)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          background: 'var(--card-bg)', flexShrink: '0'
+        }">
+        <div [ngStyle]="{ fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.7' }">
+          Status will update to <strong>Shipped</strong> and notify <strong>{{ labelOrder.customerName || 'customer'
+            }}</strong>.
+        </div>
+
+        <div [ngStyle]="{ display: 'flex', gap: '0.75rem', alignItems: 'center' }">
+          <button (click)="closeShippingLabelModal()" type="button" [ngStyle]="{
+              background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+              color: 'var(--text-color)', padding: '0.55rem 1.15rem', borderRadius: '8px',
+              fontSize: '0.84rem', fontWeight: '600', cursor: 'pointer'
+            }">
+            Cancel
+          </button>
+
+          <button (click)="saveTrackingAndDispatch()" type="button" [disabled]="savingShippingLabel()" [ngStyle]="{
+              background: 'linear-gradient(135deg, #10b981, #059669)', color: '#ffffff',
+              border: 'none', padding: '0.55rem 1.35rem', borderRadius: '8px',
+              fontSize: '0.84rem', fontWeight: '800', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', gap: '0.45rem',
+              boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+              opacity: savingShippingLabel() ? '0.7' : '1'
+            }">
+            <i *ngIf="savingShippingLabel()" class="pi pi-spin pi-spinner"></i>
+            <i *ngIf="!savingShippingLabel()" class="pi pi-check"></i>
+            <span>{{ savingShippingLabel() ? 'Processing Dispatch...' : 'Confirm Dispatch & Notify Customer' }}</span>
+          </button>
+        </div>
+      </div>
+
     </div>
   </div>
 

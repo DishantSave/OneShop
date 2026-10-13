@@ -71,6 +71,18 @@ export const routes: Routes = [
         component: DashboardHome
       },
       {
+        path: 'products',
+        component: DashboardHome
+      },
+      {
+        path: 'analytics',
+        loadComponent: () => import('./features/analytics/analytics-dashboard/analytics-dashboard').then(m => m.AnalyticsDashboard)
+      },
+      {
+        path: 'tutorials',
+        loadComponent: () => import('./features/tutorials/tutorials-portal/tutorials-portal').then(m => m.TutorialsPortal)
+      },
+      {
         path: 'orders',
         component: OrderMaster,
         children: [

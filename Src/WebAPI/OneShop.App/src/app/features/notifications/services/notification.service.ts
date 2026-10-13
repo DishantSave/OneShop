@@ -50,7 +50,7 @@ export class NotificationService {
       if (dismissedRaw) {
         this.dismissedOrderIds.set(new Set<string>(JSON.parse(dismissedRaw)));
       }
-    } catch {}
+    } catch { }
   }
 
   private savePersistedState() {
@@ -59,7 +59,7 @@ export class NotificationService {
       const userKey = user?.userName || 'global';
       localStorage.setItem(`read_notifs_${userKey}`, JSON.stringify(Array.from(this.readOrderIds())));
       localStorage.setItem(`dismissed_notifs_${userKey}`, JSON.stringify(Array.from(this.dismissedOrderIds())));
-    } catch {}
+    } catch { }
   }
 
   private rebuildNotifications(orders: Order[]) {
@@ -87,8 +87,16 @@ export class NotificationService {
       let message: string;
 
       if (isCustomer) {
-        title = `Order ${o.orderId} Placed`;
-        message = `Your order for ${unitsText} (${amountText}) is currently ${o.status}. Fulfilling from ${o.companyName || o.companyCode}.`;
+        if ((o.status || '').toLowerCase() === 'shipped') {
+          title = `Order #${o.orderId} Shipped & Dispatched!`;
+          message = o.notes ? `Your package is on its way! ${o.notes}` : `Your order for ${unitsText} has been dispatched!`;
+        } else if ((o.status || '').toLowerCase() === 'delivered') {
+          title = `Order #${o.orderId} Delivered`;
+          message = `Your order for ${unitsText} has been delivered successfully.`;
+        } else {
+          title = `Order ${o.orderId} Placed`;
+          message = `Your order for ${unitsText} (${amountText}) is currently ${o.status}. Fulfilling from ${o.companyName || o.companyCode}.`;
+        }
       } else {
         title = `New Order Received: ${o.orderId}`;
         message = `${custName} ordered ${unitsText} totaling ${amountText} via ${o.channel || 'Retail'}. Status: ${o.status}.`;
@@ -212,11 +220,50 @@ export class NotificationService {
     this.rebuildNotifications(this.orderService.orders());
   }
 
+  addNotification(notif: any): void {
+    if (!notif) return;
+    const orderId = (notif.orderId || '').toUpperCase();
+    if (orderId) {
+      this.dismissedOrderIds.update(set => {
+        const next = new Set(set);
+        next.delete(orderId);
+        return next;
+      });
+      this.readOrderIds.update(set => {
+        const next = new Set(set);
+        next.delete(orderId);
+        return next;
+      });
+      this.savePersistedState();
+    }
+
+    if (notif.title && notif.message) {
+      const newNotif: OrderNotification = {
+        id: notif.id || `custom-${Date.now()}`,
+        orderId: notif.orderId || 'ALERT',
+        companyCode: notif.companyCode || '',
+        customerName: notif.customerName || 'Customer',
+        customerEmail: notif.customerEmail || '',
+        channel: 'Retail',
+        totalAmount: 0,
+        totalItems: 0,
+        status: 'Shipped',
+        paymentStatus: 'Paid',
+        isRead: false,
+        title: notif.title,
+        message: notif.message,
+        timeAgo: 'Just now',
+        dateCreated: new Date().toISOString()
+      };
+      this.notifications.update(curr => [newNotif, ...curr.filter(c => c.id !== newNotif.id)]);
+    }
+  }
+
   private startPolling(): void {
     if (this.timerId) clearInterval(this.timerId);
     // Poll every 25 seconds for new orders
     this.timerId = setInterval(() => {
-      this.refresh().catch(() => {});
+      this.refresh().catch(() => { });
     }, 25000);
   }
 }

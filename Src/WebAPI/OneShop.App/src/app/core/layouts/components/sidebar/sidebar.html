@@ -12,7 +12,7 @@
 
     <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }">
       <a *ngFor="let item of menuItems" [routerLink]="item.route" routerLinkActive="active-link"
-        [routerLinkActiveOptions]="{ exact: true }"
+        [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
         [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'space-between', padding: '0.5rem 0.75rem', textDecoration: 'none', borderRadius: '6px', color: 'var(--sidebar-link-color)', position: 'relative' }">
         <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }">
           <i [class]="item.icon" [ngStyle]="{ fontSize: '1.1rem', flexShrink: '0' }"></i>
@@ -34,6 +34,32 @@
   </div>
 
   <div>
+    <!-- Notifications item directly above user account & logout -->
+    <a routerLink="/dashboard/notifications" routerLinkActive="active-link" title="Notifications & Alerts" [ngStyle]="{
+         display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'space-between',
+         padding: '0.5rem 0.75rem', textDecoration: 'none', borderRadius: '6px',
+         color: 'var(--sidebar-link-color)', marginBottom: '0.5rem',
+         background: unreadNotifs() > 0 ? 'rgba(239, 68, 68, 0.08)' : 'transparent',
+         border: unreadNotifs() > 0 ? '1px solid rgba(239, 68, 68, 0.25)' : '1px solid transparent',
+         transition: 'all 0.15s ease', position: 'relative'
+       }">
+      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem', overflow: 'hidden' }">
+        <i class="pi pi-bell"
+          [ngStyle]="{ fontSize: '1.1rem', flexShrink: '0', color: unreadNotifs() > 0 ? '#ef4444' : 'inherit' }"></i>
+        <span *ngIf="!collapsed"
+          [ngStyle]="{ fontWeight: '600', fontSize: '0.85rem', whiteSpace: 'nowrap' }">Notifications</span>
+      </div>
+      <span *ngIf="unreadNotifs() > 0" [ngStyle]="{
+              background: '#ef4444', color: '#ffffff', borderRadius: '10px',
+              padding: '0.1rem 0.45rem', fontSize: '0.7rem', fontWeight: '800',
+              position: collapsed ? 'absolute' : 'static',
+              top: collapsed ? '4px' : 'auto',
+              right: collapsed ? '8px' : 'auto'
+            }">
+        {{ unreadNotifs() }}
+      </span>
+    </a>
+
     <!-- Account card: only shown when expanded -->
     <div *ngIf="!collapsed"
       [ngStyle]="{ padding: '0.5rem', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid var(--border-color)', marginBottom: '0.5rem' }">
