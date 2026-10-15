@@ -498,6 +498,28 @@ export class DashboardHome implements OnInit {
     return parts[0]?.trim() || null;
   }
 
+  quickViewItem = signal<Item | null>(null);
+  quickViewActiveImageIndex = signal<number>(0);
+
+  getQuickViewImages(item: Item): string[] {
+    if (!item.images) return [];
+    return item.images.split(',').map(s => s.trim()).filter(Boolean);
+  }
+
+  openQuickView(item: Item, event?: Event) {
+    if (event) event.stopPropagation();
+    this.quickViewItem.set(item);
+    this.quickViewActiveImageIndex.set(0);
+  }
+
+  closeQuickView() {
+    this.quickViewItem.set(null);
+  }
+
+  setQuickViewImage(index: number) {
+    this.quickViewActiveImageIndex.set(index);
+  }
+
   addToCart(item: Item) {
     const size = this.getSelectedSize(item);
     const qty = this.getQuantity(item);

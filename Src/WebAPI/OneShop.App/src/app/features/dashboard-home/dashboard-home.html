@@ -905,13 +905,13 @@
         </div>
 
         <!-- Item Image / Fallback Graphic -->
-        <div [ngStyle]="{
-             width: '100%', height: '140px', borderRadius: '10px',
+        <div (click)="openQuickView(item, $event)" title="Click for Actual Product View & High-Res Details" [ngStyle]="{
+             width: '100%', height: '150px', borderRadius: '10px',
              background: 'linear-gradient(135deg, rgba(5, 81, 126, 0.06), rgba(35, 162, 197, 0.12))',
-             display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden'
+             display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', cursor: 'pointer', position: 'relative'
            }">
           <img *ngIf="getItemImage(item)" [src]="getItemImage(item)" [alt]="item.name"
-            [ngStyle]="{ width: '100%', height: '100%', objectFit: 'cover' }" />
+            [ngStyle]="{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.2s ease' }" />
           <div *ngIf="!getItemImage(item)"
             [ngStyle]="{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem', color: '#05517e', opacity: '0.75' }">
             <i class="pi pi-box" [ngStyle]="{ fontSize: '2.5rem' }"></i>
@@ -919,10 +919,17 @@
               {{ item.itemNumber }}
             </span>
           </div>
+          <span [ngStyle]="{
+                  position: 'absolute', bottom: '6px', right: '6px', background: 'rgba(0,0,0,0.65)',
+                  color: '#ffffff', borderRadius: '4px', padding: '0.15rem 0.45rem', fontSize: '0.68rem',
+                  display: 'flex', alignItems: 'center', gap: '0.25rem', backdropFilter: 'blur(4px)'
+                }">
+            <i class="pi pi-eye"></i> Quick View
+          </span>
         </div>
 
         <!-- Item Info -->
-        <div>
+        <div (click)="openQuickView(item, $event)" title="Click for details" [ngStyle]="{ cursor: 'pointer' }">
           <h4
             [ngStyle]="{ margin: '0 0 0.25rem', fontSize: '1rem', fontWeight: '800', color: 'var(--text-color)', lineHeight: '1.3' }">
             {{ item.name }}
@@ -1051,4 +1058,223 @@
     </div>
 
   </div>
+
+  <!-- Customer Product Quick View & High-Res Image Modal -->
+  <div *ngIf="quickViewItem()" (click)="closeQuickView()" [ngStyle]="{
+         position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh',
+         background: 'rgba(0, 0, 0, 0.75)', backdropFilter: 'blur(8px)', zIndex: '9999',
+         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem', boxSizing: 'border-box'
+       }">
+    <div (click)="$event.stopPropagation()" [ngStyle]="{
+           position: 'relative', width: '100%', maxWidth: '880px', maxHeight: '90vh',
+           background: 'var(--card-bg, #ffffff)', borderRadius: '16px', overflowY: 'auto',
+           boxShadow: '0 24px 60px rgba(0,0,0,0.4)', border: '1px solid var(--border-color)',
+           display: 'flex', flexDirection: 'column'
+         }">
+
+      <!-- Close Button -->
+      <button (click)="closeQuickView()" type="button" title="Close" [ngStyle]="{
+                position: 'absolute', top: '14px', right: '14px', background: 'var(--input-bg)',
+                border: '1px solid var(--border-color)', color: 'var(--text-color)', width: '36px', height: '36px',
+                borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', zIndex: '10'
+              }">
+        <i class="pi pi-times"></i>
+      </button>
+
+      <!-- Modal Body (Two-Column Layout) -->
+      <div
+        [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem', padding: '1.75rem' }">
+
+        <!-- Left Column: Product Photos & Gallery -->
+        <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }">
+
+          <!-- Large High-Res Image Frame -->
+          <div [ngStyle]="{
+                 width: '100%', height: '320px', borderRadius: '12px', overflow: 'hidden',
+                 background: '#f8fafc', border: '1px solid var(--border-color)',
+                 display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative'
+               }">
+            <img *ngIf="getQuickViewImages(quickViewItem()!).length > 0"
+              [src]="getQuickViewImages(quickViewItem()!)[quickViewActiveImageIndex()] || getItemImage(quickViewItem()!)"
+              [alt]="quickViewItem()!.name" [ngStyle]="{ width: '100%', height: '100%', objectFit: 'contain' }" />
+
+            <img *ngIf="getQuickViewImages(quickViewItem()!).length === 0 && getItemImage(quickViewItem()!)"
+              [src]="getItemImage(quickViewItem()!)!" [alt]="quickViewItem()!.name"
+              [ngStyle]="{ width: '100%', height: '100%', objectFit: 'contain' }" />
+
+            <div *ngIf="!getItemImage(quickViewItem()!)" [ngStyle]="{
+                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', color: '#05517e', opacity: '0.6'
+                 }">
+              <i class="pi pi-box" [ngStyle]="{ fontSize: '3.5rem' }"></i>
+              <span [ngStyle]="{ fontSize: '0.85rem', fontWeight: '700' }">{{ quickViewItem()!.itemNumber }}</span>
+            </div>
+
+            <span [ngStyle]="{
+                    position: 'absolute', top: '10px', left: '10px', background: 'rgba(5, 81, 126, 0.85)',
+                    color: '#ffffff', borderRadius: '6px', padding: '0.2rem 0.5rem', fontSize: '0.72rem', fontWeight: '700'
+                  }">
+              {{ quickViewItem()!.companyCode }}
+            </span>
+          </div>
+
+          <!-- Multi-Image Gallery Thumbnails (if multiple images attached) -->
+          <div *ngIf="getQuickViewImages(quickViewItem()!).length > 1"
+            [ngStyle]="{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }">
+            <div *ngFor="let imgUrl of getQuickViewImages(quickViewItem()!); let idx = index"
+              (click)="setQuickViewImage(idx)" [ngStyle]="{
+                   width: '60px', height: '60px', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer',
+                   border: '2px solid ' + (quickViewActiveImageIndex() === idx ? '#05517e' : 'var(--border-color)'),
+                   opacity: quickViewActiveImageIndex() === idx ? '1' : '0.65', transition: 'all 0.15s ease'
+                 }">
+              <img [src]="imgUrl" alt="Thumbnail" [ngStyle]="{ width: '100%', height: '100%', objectFit: 'cover' }" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Product Details & Live Ordering -->
+        <div [ngStyle]="{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '1rem' }">
+
+          <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }">
+            <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }">
+              <span
+                [ngStyle]="{ background: 'rgba(5, 81, 126, 0.1)', color: '#05517e', fontSize: '0.75rem', fontWeight: '800', padding: '0.2rem 0.5rem', borderRadius: '4px' }">
+                {{ quickViewItem()!.category }}
+              </span>
+              <span *ngIf="quickViewItem()!.brand"
+                [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.7' }">
+                Brand: <strong>{{ quickViewItem()!.brand }}</strong>
+              </span>
+              <span *ngIf="quickViewItem()!.season"
+                [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.7' }">
+                &bull; Season: {{ quickViewItem()!.season }}
+              </span>
+            </div>
+
+            <h3
+              [ngStyle]="{ margin: '0', fontSize: '1.4rem', fontWeight: '800', color: 'var(--text-color)', lineHeight: '1.25' }">
+              {{ quickViewItem()!.name }}
+            </h3>
+
+            <span
+              [ngStyle]="{ fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.6', fontFamily: 'monospace' }">
+              SKU: {{ quickViewItem()!.itemNumber }} &bull; Unit: {{ quickViewItem()!.unitOfMeasure }}
+            </span>
+
+            <!-- Pricing Box -->
+            <div [ngStyle]="{
+                   background: isWholesaleActive(quickViewItem()!) ? 'rgba(16, 185, 129, 0.1)' : 'var(--input-bg)',
+                   border: '1px solid ' + (isWholesaleActive(quickViewItem()!) ? '#10b981' : 'var(--border-color)'),
+                   borderRadius: '10px', padding: '0.85rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.35rem', marginTop: '0.25rem'
+                 }">
+              <div [ngStyle]="{ display: 'flex', alignItems: 'baseline', gap: '0.65rem' }">
+                <span
+                  [ngStyle]="{ fontSize: '1.45rem', fontWeight: '900', color: isWholesaleActive(quickViewItem()!) ? '#059669' : '#05517e' }">
+                  ${{ getPrice(quickViewItem()!) | number:'1.2-2' }}
+                </span>
+                <span *ngIf="quickViewItem()!.b2cCompareAtPrice"
+                  [ngStyle]="{ fontSize: '0.9rem', textDecoration: 'line-through', opacity: '0.5' }">
+                  ${{ quickViewItem()!.b2cCompareAtPrice | number:'1.2-2' }}
+                </span>
+                <span [ngStyle]="{ fontSize: '0.8rem', color: 'var(--text-color)', opacity: '0.75' }">
+                  / {{ quickViewItem()!.unitOfMeasure }}
+                </span>
+              </div>
+
+              <!-- Wholesale Tier Notice -->
+              <div *ngIf="quickViewItem()!.b2bPrice && quickViewItem()!.b2bPrice > 0"
+                [ngStyle]="{ fontSize: '0.78rem', color: isWholesaleActive(quickViewItem()!) ? '#059669' : '#3b82f6', fontWeight: '700' }">
+                <i class="pi pi-bolt"></i>
+                Wholesale Price: ${{ quickViewItem()!.b2bPrice | number:'1.2-2' }} (MOQ: {{
+                quickViewItem()!.b2bMinQuantity || 10 }} units)
+                <span *ngIf="!isWholesaleActive(quickViewItem()!)"
+                  [ngStyle]="{ opacity: '0.85', fontWeight: 'normal' }">
+                  &mdash; Increase quantity to activate wholesale pricing!
+                </span>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div *ngIf="quickViewItem()!.description"
+              [ngStyle]="{ fontSize: '0.84rem', color: 'var(--text-color)', opacity: '0.85', lineHeight: '1.5', marginTop: '0.25rem' }">
+              {{ quickViewItem()!.description }}
+            </div>
+
+            <!-- Size Selector -->
+            <div [ngStyle]="{ marginTop: '0.35rem' }">
+              <span
+                [ngStyle]="{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-color)', display: 'block', marginBottom: '0.35rem' }">
+                Select Size:
+              </span>
+              <div [ngStyle]="{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }">
+                <button *ngFor="let sz of getItemSizes(quickViewItem()!)" (click)="selectSize(quickViewItem()!, sz)"
+                  type="button" [ngStyle]="{
+                          padding: '0.35rem 0.65rem', borderRadius: '6px', border: '1px solid',
+                          borderColor: getSelectedSize(quickViewItem()!) === sz ? '#05517e' : 'var(--border-color)',
+                          background: getSelectedSize(quickViewItem()!) === sz ? '#05517e' : 'var(--card-bg)',
+                          color: getSelectedSize(quickViewItem()!) === sz ? '#ffffff' : 'var(--text-color)',
+                          fontSize: '0.78rem', fontWeight: '700', cursor: 'pointer'
+                        }">
+                  {{ sz }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Destination Selector -->
+            <div>
+              <span
+                [ngStyle]="{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-color)', display: 'block', marginBottom: '0.35rem' }">
+                Fulfill Via:
+              </span>
+              <select (change)="onDestinationSelect(quickViewItem()!, $event)" [ngStyle]="{
+                        width: '100%', background: 'var(--input-bg)', border: '1px solid var(--border-color)',
+                        color: 'var(--input-text)', padding: '0.45rem 0.65rem', borderRadius: '6px', fontSize: '0.82rem', outline: 'none'
+                      }">
+                <option *ngFor="let dest of getDestinationsForItem(quickViewItem()!)"
+                  [value]="dest.type + '::' + dest.code + '::' + dest.name"
+                  [selected]="getSelectedDestination(quickViewItem()!).code === dest.code">
+                  {{ dest.type }}: {{ dest.name }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Quantity Adjuster & Add To Cart Button -->
+          <div
+            [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: '0.5rem' }">
+            <div [ngStyle]="{
+                   display: 'inline-flex', alignItems: 'center', border: '1px solid var(--border-color)',
+                   borderRadius: '8px', background: 'var(--input-bg)', padding: '0.2rem'
+                 }">
+              <button (click)="adjustQuantity(quickViewItem()!, -1)" type="button"
+                [ngStyle]="{ width: '32px', height: '32px', border: 'none', background: 'transparent', cursor: 'pointer', fontWeight: '700', color: 'var(--text-color)' }">
+                -
+              </button>
+              <input type="number" min="1" [value]="getQuantity(quickViewItem()!)"
+                (change)="setManualQuantity(quickViewItem()!, $event)"
+                [ngStyle]="{ width: '50px', border: 'none', background: 'transparent', textAlign: 'center', fontWeight: '800', color: 'var(--text-color)', outline: 'none' }" />
+              <button (click)="adjustQuantity(quickViewItem()!, 1)" type="button"
+                [ngStyle]="{ width: '32px', height: '32px', border: 'none', background: 'transparent', cursor: 'pointer', fontWeight: '700', color: 'var(--text-color)' }">
+                +
+              </button>
+            </div>
+
+            <button (click)="addToCart(quickViewItem()!); closeQuickView();" type="button" [ngStyle]="{
+                      flex: '1', background: isWholesaleActive(quickViewItem()!) ? 'linear-gradient(135deg, #059669, #047857)' : 'linear-gradient(135deg, #05517e, #033654)',
+                      color: '#ffffff', border: 'none', padding: '0.75rem 1.25rem', borderRadius: '8px', fontSize: '0.9rem',
+                      fontWeight: '800', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                      boxShadow: '0 4px 14px rgba(5, 81, 126, 0.3)'
+                    }">
+              <i class="pi pi-cart-plus"></i>
+              <span>{{ isWholesaleActive(quickViewItem()!) ? 'Add Wholesale to Cart' : 'Add to Cart' }}</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
 </div>

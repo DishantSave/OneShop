@@ -1,7 +1,9 @@
-<div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '1150px', margin: '0 auto', paddingBottom: '3rem' }">
+<div
+  [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '1150px', margin: '0 auto', paddingBottom: '3rem' }">
 
   <!-- Top Navigation & Tabs Header -->
-  <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }">
+  <div
+    [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }">
     <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.85rem' }">
       <div [ngStyle]="{
           width: '46px', height: '46px', borderRadius: '12px',
@@ -13,7 +15,8 @@
         <i class="pi pi-box" [ngStyle]="{ fontSize: '1.35rem' }"></i>
       </div>
       <div>
-        <h2 [ngStyle]="{ margin: '0', fontSize: '1.45rem', fontWeight: '700', color: 'var(--text-color)' }">Items & Catalog</h2>
+        <h2 [ngStyle]="{ margin: '0', fontSize: '1.45rem', fontWeight: '700', color: 'var(--text-color)' }">Items &
+          Catalog</h2>
         <span [ngStyle]="{ fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.65' }">
           Manage B2C retail and B2B wholesale product lines, tiered pricing, and collections
         </span>
@@ -23,9 +26,7 @@
     <!-- Right Controls: Company Dropdown & Search -->
     <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }">
       <!-- Company Dropdown -->
-      <select [ngModel]="selectedCompanyCode()"
-              (ngModelChange)="selectedCompanyCode.set($event); refresh();"
-              [ngStyle]="{
+      <select [ngModel]="selectedCompanyCode()" (ngModelChange)="selectedCompanyCode.set($event); refresh();" [ngStyle]="{
                 background: 'var(--input-bg)', border: '1px solid var(--border-color)',
                 color: 'var(--input-text)', borderRadius: '8px', padding: '0.55rem 0.85rem',
                 fontSize: '0.88rem', outline: 'none', cursor: 'pointer'
@@ -37,10 +38,8 @@
       </select>
 
       <!-- Collection Filter Dropdown (when on Items tab) -->
-      <select *ngIf="activeTab() === 'items'"
-              [ngModel]="selectedCollectionFilter()"
-              (ngModelChange)="selectedCollectionFilter.set($event)"
-              [ngStyle]="{
+      <select *ngIf="activeTab() === 'items'" [ngModel]="selectedCollectionFilter()"
+        (ngModelChange)="selectedCollectionFilter.set($event)" [ngStyle]="{
                 background: 'var(--input-bg)', border: '1px solid var(--border-color)',
                 color: 'var(--input-text)', borderRadius: '8px', padding: '0.55rem 0.85rem',
                 fontSize: '0.88rem', outline: 'none', cursor: 'pointer'
@@ -58,21 +57,18 @@
           borderRadius: '8px', padding: '0.55rem 0.85rem', width: '230px'
         }">
         <i class="pi pi-search" [ngStyle]="{ color: 'var(--text-color)', opacity: '0.5', fontSize: '0.85rem' }"></i>
-        <input type="text"
-               placeholder="Search items, style #, tags…"
-               [value]="searchTerm()"
-               (input)="searchTerm.set($any($event.target).value)"
-               [ngStyle]="{ border: 'none', outline: 'none', background: 'transparent', color: 'var(--input-text)', fontSize: '0.88rem', width: '100%' }" />
-        <button *ngIf="searchTerm()" (click)="searchTerm.set('')" type="button" [ngStyle]="{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '0', color: 'var(--text-color)', opacity: '0.5' }">
+        <input type="text" placeholder="Search items, style #, tags…" [value]="searchTerm()"
+          (input)="searchTerm.set($any($event.target).value)"
+          [ngStyle]="{ border: 'none', outline: 'none', background: 'transparent', color: 'var(--input-text)', fontSize: '0.88rem', width: '100%' }" />
+        <button *ngIf="searchTerm()" (click)="searchTerm.set('')" type="button"
+          [ngStyle]="{ background: 'transparent', border: 'none', cursor: 'pointer', padding: '0', color: 'var(--text-color)', opacity: '0.5' }">
           <i class="pi pi-times" [ngStyle]="{ fontSize: '0.75rem' }"></i>
         </button>
       </div>
 
       <!-- Action Buttons -->
-      <button *ngIf="activeTab() === 'items' && permissions().canCreate"
-              (click)="openCreateItem()"
-              type="button"
-              [ngStyle]="{
+      <button *ngIf="activeTab() === 'items' && permissions().canCreate" (click)="openCreateItem()" type="button"
+        [ngStyle]="{
                 background: 'var(--sidebar-link-active-bg, #05517e)', color: '#fff',
                 border: 'none', borderRadius: '8px', padding: '0.55rem 1.1rem',
                 fontSize: '0.88rem', fontWeight: '600', display: 'flex', alignItems: 'center',
@@ -82,10 +78,8 @@
         New Item
       </button>
 
-      <button *ngIf="activeTab() === 'collections' && permissions().canCreate"
-              (click)="openCreateCollection()"
-              type="button"
-              [ngStyle]="{
+      <button *ngIf="activeTab() === 'collections' && permissions().canCreate" (click)="openCreateCollection()"
+        type="button" [ngStyle]="{
                 background: 'var(--sidebar-link-active-bg, #05517e)', color: '#fff',
                 border: 'none', borderRadius: '8px', padding: '0.55rem 1.1rem',
                 fontSize: '0.88rem', fontWeight: '600', display: 'flex', alignItems: 'center',
@@ -129,7 +123,8 @@
 
     <!-- Channel Filter Pills -->
     <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap' }">
-      <span [ngStyle]="{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.7', marginRight: '0.2rem' }">Channel:</span>
+      <span
+        [ngStyle]="{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.7', marginRight: '0.2rem' }">Channel:</span>
 
       <button (click)="channelFilter.set('ALL')" type="button" [ngStyle]="{
           padding: '0.35rem 0.85rem', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '600', cursor: 'pointer', border: '1px solid',
@@ -169,7 +164,8 @@
     </div>
 
     <!-- Loading State -->
-    <div *ngIf="loading()" [ngStyle]="{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-color)', opacity: '0.7' }">
+    <div *ngIf="loading()"
+      [ngStyle]="{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-color)', opacity: '0.7' }">
       <i class="pi pi-spin pi-spinner" [ngStyle]="{ fontSize: '1.5rem', marginBottom: '0.5rem', display: 'block' }"></i>
       Loading items...
     </div>
@@ -179,10 +175,12 @@
         textAlign: 'center', padding: '3.5rem 1rem', background: 'var(--card-bg)',
         border: '1px dashed var(--border-color)', borderRadius: '12px'
       }">
-      <i class="pi pi-box" [ngStyle]="{ fontSize: '2.5rem', color: 'var(--text-color)', opacity: '0.3', marginBottom: '0.75rem', display: 'block' }"></i>
+      <i class="pi pi-box"
+        [ngStyle]="{ fontSize: '2.5rem', color: 'var(--text-color)', opacity: '0.3', marginBottom: '0.75rem', display: 'block' }"></i>
       <h3 [ngStyle]="{ margin: '0 0 0.5rem', fontSize: '1.15rem', color: 'var(--text-color)' }">No items found</h3>
       <p [ngStyle]="{ margin: '0 0 1.25rem', fontSize: '0.88rem', color: 'var(--text-color)', opacity: '0.6' }">
-        {{ searchTerm() ? 'No items match your search criteria.' : 'Create items to configure retail and wholesale wholesale prices and variants.' }}
+        {{ searchTerm() ? 'No items match your search criteria.' : 'Create items to configure retail and wholesale
+        wholesale prices and variants.' }}
       </p>
       <button *ngIf="permissions().canCreate" (click)="openCreateItem()" type="button" [ngStyle]="{
           background: 'var(--sidebar-link-active-bg, #05517e)', color: '#fff', border: 'none',
@@ -250,7 +248,8 @@
               }">
               <i class="pi pi-pencil" [ngStyle]="{ fontSize: '0.8rem' }"></i>
             </button>
-            <button *ngIf="permissions().canDelete" (click)="confirmDeleteItem(itm)" title="Delete Item" type="button" [ngStyle]="{
+            <button *ngIf="permissions().canDelete" (click)="confirmDeleteItem(itm)" title="Delete Item" type="button"
+              [ngStyle]="{
                 background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '6px',
                 width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: '#ef4444', cursor: 'pointer'
@@ -260,13 +259,40 @@
           </div>
         </div>
 
+        <!-- Product Photo Banner / Thumbnail -->
+        <div (click)="openImagePreview(itm, $event)" title="Click to view full photo" [ngStyle]="{
+               width: '100%', height: '140px', borderRadius: '8px', overflow: 'hidden',
+               background: 'var(--input-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+               cursor: getItemImage(itm) ? 'pointer' : 'default', border: '1px solid var(--border-color)', position: 'relative'
+             }">
+          <img *ngIf="getItemImage(itm)" [src]="getItemImage(itm)!" [alt]="itm.name" [ngStyle]="{
+                 width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.2s ease'
+               }" />
+          <div *ngIf="!getItemImage(itm)" [ngStyle]="{
+                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem',
+                 color: 'var(--text-color)', opacity: '0.4'
+               }">
+            <i class="pi pi-image" [ngStyle]="{ fontSize: '2rem' }"></i>
+            <span [ngStyle]="{ fontSize: '0.72rem', fontWeight: '700' }">No Photo Attached</span>
+          </div>
+          <span *ngIf="getItemImage(itm)" [ngStyle]="{
+                  position: 'absolute', bottom: '6px', right: '6px', background: 'rgba(0,0,0,0.65)',
+                  color: '#ffffff', borderRadius: '4px', padding: '0.2rem 0.45rem', fontSize: '0.7rem',
+                  display: 'flex', alignItems: 'center', gap: '0.25rem', backdropFilter: 'blur(4px)'
+                }">
+            <i class="pi pi-search-plus"></i> View Photo
+          </span>
+        </div>
+
         <!-- Item Title & Category -->
         <div>
           <h4 [ngStyle]="{ margin: '0 0 0.25rem', fontSize: '1.05rem', fontWeight: '700', color: 'var(--text-color)' }">
             {{ itm.name }}
           </h4>
-          <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.65rem', fontSize: '0.82rem', color: 'var(--text-color)', opacity: '0.7' }">
-            <span><i class="pi pi-tag" [ngStyle]="{ fontSize: '0.75rem', marginRight: '0.25rem' }"></i>{{ itm.category }}</span>
+          <div
+            [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.65rem', fontSize: '0.82rem', color: 'var(--text-color)', opacity: '0.7' }">
+            <span><i class="pi pi-tag" [ngStyle]="{ fontSize: '0.75rem', marginRight: '0.25rem' }"></i>{{ itm.category
+              }}</span>
             <span *ngIf="itm.brand">&bull; {{ itm.brand }}</span>
             <span>&bull; {{ itm.unitOfMeasure }}</span>
           </div>
@@ -278,18 +304,21 @@
             padding: '0.75rem 0.85rem', display: 'flex', flexDirection: 'column', gap: '0.45rem'
           }">
           <!-- B2C Retail Price -->
-          <div *ngIf="itm.salesChannel === 'B2C' || itm.salesChannel === 'Both'" [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.84rem' }">
+          <div *ngIf="itm.salesChannel === 'B2C' || itm.salesChannel === 'Both'"
+            [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.84rem' }">
             <span [ngStyle]="{ color: 'var(--text-color)', opacity: '0.7' }">Retail (B2C):</span>
             <span [ngStyle]="{ fontWeight: '700', color: '#10b981' }">
               ${{ itm.b2cPrice | number:'1.2-2' }}
-              <span *ngIf="itm.b2cCompareAtPrice" [ngStyle]="{ textDecoration: 'line-line-through', opacity: '0.5', fontSize: '0.75rem', marginLeft: '0.35rem' }">
+              <span *ngIf="itm.b2cCompareAtPrice"
+                [ngStyle]="{ textDecoration: 'line-line-through', opacity: '0.5', fontSize: '0.75rem', marginLeft: '0.35rem' }">
                 ${{ itm.b2cCompareAtPrice | number:'1.2-2' }}
               </span>
             </span>
           </div>
 
           <!-- B2B Wholesale Price & MOQ -->
-          <div *ngIf="itm.salesChannel === 'B2B' || itm.salesChannel === 'Both'" [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.84rem' }">
+          <div *ngIf="itm.salesChannel === 'B2B' || itm.salesChannel === 'Both'"
+            [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.84rem' }">
             <span [ngStyle]="{ color: 'var(--text-color)', opacity: '0.7' }">Wholesale (B2B):</span>
             <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.45rem' }">
               <span [ngStyle]="{ fontWeight: '700', color: '#3b82f6' }">
@@ -306,7 +335,8 @@
         </div>
 
         <!-- Sizes included in currently selected collection filter -->
-        <div *ngIf="selectedCollectionFilter() !== 'ALL' && getItemSizesInSelectedCollection(itm.itemNumber).length > 0" [ngStyle]="{
+        <div *ngIf="selectedCollectionFilter() !== 'ALL' && getItemSizesInSelectedCollection(itm.itemNumber).length > 0"
+          [ngStyle]="{
             background: 'rgba(5, 81, 126, 0.08)', border: '1px solid rgba(5, 81, 126, 0.25)',
             borderRadius: '6px', padding: '0.35rem 0.65rem', display: 'flex', alignItems: 'center', gap: '0.45rem', flexWrap: 'wrap'
           }">
@@ -322,7 +352,8 @@
         </div>
 
         <!-- Variants Pill & Preview Button -->
-        <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.25rem', borderTop: '1px solid var(--border-color)' }">
+        <div
+          [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.25rem', borderTop: '1px solid var(--border-color)' }">
           <div [ngStyle]="{ fontSize: '0.82rem', color: 'var(--text-color)', opacity: '0.75' }">
             <i class="pi pi-clone" [ngStyle]="{ fontSize: '0.8rem', marginRight: '0.3rem' }"></i>
             <strong>{{ itm.variants?.length || 0 }}</strong> Variants
@@ -347,7 +378,8 @@
         textAlign: 'center', padding: '3.5rem 1rem', background: 'var(--card-bg)',
         border: '1px dashed var(--border-color)', borderRadius: '12px'
       }">
-      <i class="pi pi-images" [ngStyle]="{ fontSize: '2.5rem', color: 'var(--text-color)', opacity: '0.3', marginBottom: '0.75rem', display: 'block' }"></i>
+      <i class="pi pi-images"
+        [ngStyle]="{ fontSize: '2.5rem', color: 'var(--text-color)', opacity: '0.3', marginBottom: '0.75rem', display: 'block' }"></i>
       <h3 [ngStyle]="{ margin: '0 0 0.5rem', fontSize: '1.15rem', color: 'var(--text-color)' }">No collections yet</h3>
       <p [ngStyle]="{ margin: '0 0 1.25rem', fontSize: '0.88rem', color: 'var(--text-color)', opacity: '0.6' }">
         Group products into seasonal lookbooks or wholesale catalogs (like Brandboom).
@@ -379,13 +411,15 @@
               }">
               {{ col.companyCode }} &bull; {{ col.code }}
             </span>
-            <span *ngIf="col.season" [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.7', marginLeft: '0.5rem' }">
+            <span *ngIf="col.season"
+              [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.7', marginLeft: '0.5rem' }">
               {{ col.season }}
             </span>
           </div>
 
           <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.35rem' }">
-            <button (click)="openManageCollectionItems(col)" title="Manage Items & Sizes in this Collection / Lookbook" type="button" [ngStyle]="{
+            <button (click)="openManageCollectionItems(col)" title="Manage Items & Sizes in this Collection / Lookbook"
+              type="button" [ngStyle]="{
                 background: 'var(--input-bg)', border: '1px solid var(--border-color)', borderRadius: '6px',
                 padding: '0 0.55rem', height: '30px', display: 'flex', alignItems: 'center', gap: '0.35rem',
                 color: 'var(--sidebar-link-active-bg, #05517e)', cursor: 'pointer', fontSize: '0.78rem', fontWeight: '700'
@@ -393,14 +427,16 @@
               <i class="pi pi-box" [ngStyle]="{ fontSize: '0.8rem' }"></i>
               Sizes ({{ getCollectionSizesCount(col) }})
             </button>
-            <button *ngIf="permissions().canEdit" (click)="openEditCollection(col)" title="Edit Collection" type="button" [ngStyle]="{
+            <button *ngIf="permissions().canEdit" (click)="openEditCollection(col)" title="Edit Collection"
+              type="button" [ngStyle]="{
                 background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '6px',
                 width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: 'var(--text-color)', cursor: 'pointer'
               }">
               <i class="pi pi-pencil" [ngStyle]="{ fontSize: '0.8rem' }"></i>
             </button>
-            <button *ngIf="permissions().canDelete" (click)="confirmDeleteCollection(col)" title="Delete Collection" type="button" [ngStyle]="{
+            <button *ngIf="permissions().canDelete" (click)="confirmDeleteCollection(col)" title="Delete Collection"
+              type="button" [ngStyle]="{
                 background: 'transparent', border: '1px solid var(--border-color)', borderRadius: '6px',
                 width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: '#ef4444', cursor: 'pointer'
@@ -414,7 +450,8 @@
           <h4 [ngStyle]="{ margin: '0 0 0.25rem', fontSize: '1.1rem', fontWeight: '700', color: 'var(--text-color)' }">
             {{ col.name }}
           </h4>
-          <p *ngIf="col.description" [ngStyle]="{ margin: '0', fontSize: '0.82rem', color: 'var(--text-color)', opacity: '0.7' }">
+          <p *ngIf="col.description"
+            [ngStyle]="{ margin: '0', fontSize: '0.82rem', color: 'var(--text-color)', opacity: '0.7' }">
             {{ col.description }}
           </p>
         </div>
@@ -429,11 +466,13 @@
               display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', fontSize: '0.78rem'
             }">
             <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: '0' }">
-              <span [ngStyle]="{ fontWeight: '700', color: 'var(--text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }">
+              <span
+                [ngStyle]="{ fontWeight: '700', color: 'var(--text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }">
                 {{ gi.itemNumber }}
               </span>
             </div>
-            <div [ngStyle]="{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: '0' }">
+            <div
+              [ngStyle]="{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap', justifyContent: 'flex-end', flexShrink: '0' }">
               <span *ngFor="let s of gi.sizes" [ngStyle]="{
                   background: 'var(--card-bg)', border: '1px solid var(--border-color)',
                   padding: '0.1rem 0.4rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '800',
@@ -445,7 +484,8 @@
           </div>
         </div>
 
-        <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }">
+        <div
+          [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }">
           <span [ngStyle]="{
               fontSize: '0.72rem', fontWeight: '700', padding: '0.2rem 0.5rem', borderRadius: '6px',
               background: col.channel === 'B2B' ? 'rgba(59, 130, 246, 0.12)' : (col.channel === 'B2C' ? 'rgba(16, 185, 129, 0.12)' : 'rgba(139, 92, 246, 0.12)'),
@@ -479,10 +519,12 @@
             {{ selectedItemForVariants()?.name }}
           </h3>
           <span [ngStyle]="{ fontSize: '0.82rem', color: 'var(--text-color)', opacity: '0.6' }">
-            Item #: {{ selectedItemForVariants()?.itemNumber }} &bull; {{ selectedItemForVariants()?.variants?.length || 0 }} Variants Configured
+            Item #: {{ selectedItemForVariants()?.itemNumber }} &bull; {{ selectedItemForVariants()?.variants?.length ||
+            0 }} Variants Configured
           </span>
         </div>
-        <button (click)="closeVariantsModal()" type="button" [ngStyle]="{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-color)', opacity: '0.6' }">
+        <button (click)="closeVariantsModal()" type="button"
+          [ngStyle]="{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-color)', opacity: '0.6' }">
           <i class="pi pi-times"></i>
         </button>
       </div>
@@ -500,13 +542,15 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let v of selectedItemForVariants()?.variants" [ngStyle]="{ borderBottom: '1px solid var(--border-color)' }">
+            <tr *ngFor="let v of selectedItemForVariants()?.variants"
+              [ngStyle]="{ borderBottom: '1px solid var(--border-color)' }">
               <td [ngStyle]="{ padding: '0.65rem 0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }">
                 <span [ngStyle]="{
                     width: '14px', height: '14px', borderRadius: '50%',
                     background: v.colourHex || '#888', border: '1px solid var(--border-color)'
                   }"></span>
-                <strong>{{ v.colourCode }}</strong> <span *ngIf="v.colourName" [ngStyle]="{ opacity: '0.7' }">({{ v.colourName }})</span>
+                <strong>{{ v.colourCode }}</strong> <span *ngIf="v.colourName" [ngStyle]="{ opacity: '0.7' }">({{
+                  v.colourName }})</span>
               </td>
               <td [ngStyle]="{ padding: '0.65rem 0.5rem' }">
                 <span [ngStyle]="{
@@ -559,19 +603,19 @@
         <h3 [ngStyle]="{ margin: '0', fontSize: '1.2rem', color: 'var(--text-color)' }">Confirm Delete</h3>
       </div>
 
-      <p [ngStyle]="{ margin: '0', fontSize: '0.88rem', color: 'var(--text-color)', opacity: '0.8', lineHeight: '1.5' }">
-        Are you sure you want to permanently delete item <strong>{{ itemToDelete()?.name }}</strong> ({{ itemToDelete()?.itemNumber }}) along with all its variants?
+      <p
+        [ngStyle]="{ margin: '0', fontSize: '0.88rem', color: 'var(--text-color)', opacity: '0.8', lineHeight: '1.5' }">
+        Are you sure you want to permanently delete item <strong>{{ itemToDelete()?.name }}</strong> ({{
+        itemToDelete()?.itemNumber }}) along with all its variants?
       </p>
 
       <div>
-        <label [ngStyle]="{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+        <label
+          [ngStyle]="{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
           Type <strong>{{ itemToDelete()?.name }}</strong> to confirm:
         </label>
-        <input type="text"
-               [ngModel]="deleteInputText()"
-               (ngModelChange)="deleteInputText.set($event)"
-               placeholder="Type item name here"
-               [ngStyle]="{
+        <input type="text" [ngModel]="deleteInputText()" (ngModelChange)="deleteInputText.set($event)"
+          placeholder="Type item name here" [ngStyle]="{
                  width: '100%', background: 'var(--input-bg)', border: '1px solid var(--border-color)',
                  color: 'var(--input-text)', padding: '0.6rem 0.85rem', borderRadius: '8px', fontSize: '0.9rem', outline: 'none'
                }" />
@@ -585,8 +629,7 @@
           Cancel
         </button>
         <button (click)="executeDeleteItem()" type="button"
-                [disabled]="deleting() || deleteInputText().trim() !== itemToDelete()?.name?.trim()"
-                [ngStyle]="{
+          [disabled]="deleting() || deleteInputText().trim() !== itemToDelete()?.name?.trim()" [ngStyle]="{
                   background: '#ef4444', color: '#fff', border: 'none',
                   padding: '0.55rem 1.1rem', borderRadius: '8px', fontWeight: '600', fontSize: '0.88rem',
                   cursor: (deleting() || deleteInputText().trim() !== itemToDelete()?.name?.trim()) ? 'not-allowed' : 'pointer',
@@ -619,10 +662,12 @@
             {{ collectionToEdit() ? 'Edit Collection' : 'Create Collection / Catalog' }}
           </h3>
           <span [ngStyle]="{ fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.65' }">
-            {{ collectionToEdit() ? 'Update catalog details and configure item size sets' : 'Define catalog metadata and assign items with specific sizes' }}
+            {{ collectionToEdit() ? 'Update catalog details and configure item size sets' : 'Define catalog metadata and
+            assign items with specific sizes' }}
           </span>
         </div>
-        <button (click)="closeCollectionModal()" type="button" [ngStyle]="{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-color)', opacity: '0.6', padding: '0.35rem', borderRadius: '6px' }">
+        <button (click)="closeCollectionModal()" type="button"
+          [ngStyle]="{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-color)', opacity: '0.6', padding: '0.35rem', borderRadius: '6px' }">
           <i class="pi pi-times" [ngStyle]="{ fontSize: '1.1rem' }"></i>
         </button>
       </div>
@@ -639,7 +684,8 @@
 
           <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }">
             <div>
-              <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+              <label
+                [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
                 Company <span [ngStyle]="{ color: '#ef4444' }">*</span>
               </label>
               <select formControlName="companyCode" [ngStyle]="{
@@ -651,7 +697,8 @@
             </div>
 
             <div>
-              <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+              <label
+                [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
                 Collection Code (e.g. SUMMER-2026) <span [ngStyle]="{ color: '#ef4444' }">*</span>
               </label>
               <input type="text" formControlName="code" placeholder="SUMMER-2026" maxlength="30" [ngStyle]="{
@@ -663,7 +710,8 @@
           </div>
 
           <div>
-            <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+            <label
+              [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
               Collection Name <span [ngStyle]="{ color: '#ef4444' }">*</span>
             </label>
             <input type="text" formControlName="name" placeholder="Summer 2026 Capsule Collection" [ngStyle]="{
@@ -674,7 +722,8 @@
 
           <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }">
             <div>
-              <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+              <label
+                [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
                 Season
               </label>
               <input type="text" formControlName="season" placeholder="SS26 / Fall / Core" [ngStyle]="{
@@ -684,7 +733,8 @@
             </div>
 
             <div>
-              <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+              <label
+                [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
                 Channel
               </label>
               <select formControlName="channel" [ngStyle]="{
@@ -703,9 +753,11 @@
               background: 'var(--input-bg)', border: '1px solid var(--border-color)', borderRadius: '10px',
               padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem'
             }">
-            <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }">
+            <div
+              [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }">
               <div>
-                <label [ngStyle]="{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-color)', display: 'block' }">
+                <label
+                  [ngStyle]="{ fontSize: '0.85rem', fontWeight: '700', color: 'var(--text-color)', display: 'block' }">
                   Add Items &amp; Select Sizes for this Collection
                 </label>
                 <span [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.65' }">
@@ -719,7 +771,8 @@
                     fontSize: '0.75rem', fontWeight: '700', padding: '0.2rem 0.55rem', borderRadius: '12px',
                     color: 'var(--sidebar-link-active-bg, #05517e)'
                   }">
-                  {{ selectedSizesSummaryInCollectionModal().totalSizes }} Sizes ({{ selectedSizesSummaryInCollectionModal().distinctItems }} Items)
+                  {{ selectedSizesSummaryInCollectionModal().totalSizes }} Sizes ({{
+                  selectedSizesSummaryInCollectionModal().distinctItems }} Items)
                 </span>
                 <button (click)="selectAllItemsForCollectionModal()" type="button" [ngStyle]="{
                     background: 'transparent', border: 'none', color: 'var(--sidebar-link-active-bg, #05517e)',
@@ -744,18 +797,17 @@
                   background: 'var(--card-bg)', border: '1px solid var(--border-color)',
                   borderRadius: '6px', padding: '0.4rem 0.65rem'
                 }">
-                <i class="pi pi-search" [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.5' }"></i>
-                <input type="text"
-                       placeholder="Filter by name, item #, category..."
-                       [value]="itemSearchInCollectionModal()"
-                       (input)="itemSearchInCollectionModal.set($any($event.target).value)"
-                       [ngStyle]="{ border: 'none', outline: 'none', background: 'transparent', color: 'var(--input-text)', fontSize: '0.82rem', width: '100%' }" />
+                <i class="pi pi-search"
+                  [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.5' }"></i>
+                <input type="text" placeholder="Filter by name, item #, category..."
+                  [value]="itemSearchInCollectionModal()"
+                  (input)="itemSearchInCollectionModal.set($any($event.target).value)"
+                  [ngStyle]="{ border: 'none', outline: 'none', background: 'transparent', color: 'var(--input-text)', fontSize: '0.82rem', width: '100%' }" />
               </div>
 
               <select [ngModel]="channelFilterInCollectionModal()"
-                      (ngModelChange)="channelFilterInCollectionModal.set($event)"
-                      [ngModelOptions]="{standalone: true}"
-                      [ngStyle]="{
+                (ngModelChange)="channelFilterInCollectionModal.set($event)" [ngModelOptions]="{standalone: true}"
+                [ngStyle]="{
                         background: 'var(--card-bg)', border: '1px solid var(--border-color)',
                         color: 'var(--input-text)', borderRadius: '6px', padding: '0.4rem 0.6rem',
                         fontSize: '0.8rem', outline: 'none', cursor: 'pointer'
@@ -771,25 +823,26 @@
                 maxHeight: '260px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.45rem',
                 border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem', background: 'var(--card-bg)'
               }">
-              <div *ngIf="availableItemsForCollectionModal().length === 0" [ngStyle]="{ textAlign: 'center', padding: '1.5rem', fontSize: '0.82rem', color: 'var(--text-color)', opacity: '0.6' }">
+              <div *ngIf="availableItemsForCollectionModal().length === 0"
+                [ngStyle]="{ textAlign: 'center', padding: '1.5rem', fontSize: '0.82rem', color: 'var(--text-color)', opacity: '0.6' }">
                 No items available for this company / search criteria.
               </div>
 
-              <div *ngFor="let itm of availableItemsForCollectionModal()"
-                   [ngStyle]="{
+              <div *ngFor="let itm of availableItemsForCollectionModal()" [ngStyle]="{
                      display: 'flex', flexDirection: 'column', gap: '0.4rem', padding: '0.55rem 0.75rem',
                      borderRadius: '6px',
                      background: isItemFullySelectedInCollection(itm) || isItemPartiallySelectedInCollection(itm) ? 'rgba(5, 81, 126, 0.05)' : 'var(--input-bg)',
                      border: '1px solid', borderColor: isItemFullySelectedInCollection(itm) || isItemPartiallySelectedInCollection(itm) ? 'rgba(5, 81, 126, 0.3)' : 'var(--border-color)'
                    }">
                 <!-- Top Row: Checkbox + Name + Prices -->
-                <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }">
-                  <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.55rem', minWidth: '0', flex: '1 1 auto' }">
-                    <input type="checkbox"
-                           [checked]="isItemFullySelectedInCollection(itm)"
-                           (change)="toggleItemAllSizesInCollection(itm)"
-                           [title]="isItemFullySelectedInCollection(itm) ? 'Uncheck all sizes' : 'Select all sizes'"
-                           [ngStyle]="{ accentColor: 'var(--sidebar-link-active-bg, #05517e)', width: '15px', height: '15px', cursor: 'pointer' }" />
+                <div
+                  [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }">
+                  <div
+                    [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.55rem', minWidth: '0', flex: '1 1 auto' }">
+                    <input type="checkbox" [checked]="isItemFullySelectedInCollection(itm)"
+                      (change)="toggleItemAllSizesInCollection(itm)"
+                      [title]="isItemFullySelectedInCollection(itm) ? 'Uncheck all sizes' : 'Select all sizes'"
+                      [ngStyle]="{ accentColor: 'var(--sidebar-link-active-bg, #05517e)', width: '15px', height: '15px', cursor: 'pointer' }" />
                     <span [ngStyle]="{
                         background: 'var(--card-bg)', border: '1px solid var(--border-color)',
                         fontSize: '0.72rem', fontWeight: '800', color: 'var(--sidebar-link-active-bg, #05517e)',
@@ -797,7 +850,8 @@
                       }">
                       {{ itm.itemNumber }}
                     </span>
-                    <span [ngStyle]="{ fontSize: '0.86rem', fontWeight: '700', color: 'var(--text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }">
+                    <span
+                      [ngStyle]="{ fontSize: '0.86rem', fontWeight: '700', color: 'var(--text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }">
                       {{ itm.name }}
                     </span>
                     <span [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.6' }">
@@ -805,11 +859,14 @@
                     </span>
                   </div>
 
-                  <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexShrink: '0', fontSize: '0.76rem' }">
-                    <span *ngIf="itm.salesChannel === 'B2C' || itm.salesChannel === 'Both'" [ngStyle]="{ color: '#10b981', fontWeight: '700' }">
+                  <div
+                    [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.45rem', flexShrink: '0', fontSize: '0.76rem' }">
+                    <span *ngIf="itm.salesChannel === 'B2C' || itm.salesChannel === 'Both'"
+                      [ngStyle]="{ color: '#10b981', fontWeight: '700' }">
                       ${{ itm.b2cPrice }}
                     </span>
-                    <span *ngIf="itm.salesChannel === 'B2B' || itm.salesChannel === 'Both'" [ngStyle]="{ color: '#3b82f6', fontWeight: '700' }">
+                    <span *ngIf="itm.salesChannel === 'B2B' || itm.salesChannel === 'Both'"
+                      [ngStyle]="{ color: '#3b82f6', fontWeight: '700' }">
                       W: ${{ itm.b2bPrice }} (MOQ: {{ itm.b2bMinQuantity }})
                     </span>
                   </div>
@@ -821,13 +878,12 @@
                     gap: '0.4rem', paddingLeft: '1.65rem', borderTop: '1px dashed var(--border-color)', paddingTop: '0.35rem'
                   }">
                   <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.3rem', flexWrap: 'wrap' }">
-                    <span [ngStyle]="{ fontSize: '0.7rem', fontWeight: '600', color: 'var(--text-color)', opacity: '0.65', marginRight: '0.15rem' }">
+                    <span
+                      [ngStyle]="{ fontSize: '0.7rem', fontWeight: '600', color: 'var(--text-color)', opacity: '0.65', marginRight: '0.15rem' }">
                       Sizes:
                     </span>
-                    <button *ngFor="let sz of getItemSizes(itm)"
-                            type="button"
-                            (click)="toggleSizeInCollection(itm.itemNumber, sz)"
-                            [ngStyle]="{
+                    <button *ngFor="let sz of getItemSizes(itm)" type="button"
+                      (click)="toggleSizeInCollection(itm.itemNumber, sz)" [ngStyle]="{
                               background: isSizeSelectedInCollection(itm.itemNumber, sz) ? 'var(--sidebar-link-active-bg, #05517e)' : 'var(--card-bg)',
                               color: isSizeSelectedInCollection(itm.itemNumber, sz) ? '#ffffff' : 'var(--text-color)',
                               border: '1px solid',
@@ -835,13 +891,15 @@
                               borderRadius: '4px', padding: '0.15rem 0.45rem', fontSize: '0.72rem', fontWeight: '700',
                               cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.2rem', transition: 'all 0.15s ease'
                             }">
-                      <i *ngIf="isSizeSelectedInCollection(itm.itemNumber, sz)" class="pi pi-check" [ngStyle]="{ fontSize: '0.62rem' }"></i>
+                      <i *ngIf="isSizeSelectedInCollection(itm.itemNumber, sz)" class="pi pi-check"
+                        [ngStyle]="{ fontSize: '0.62rem' }"></i>
                       {{ sz }}
                     </button>
                   </div>
 
                   <span [ngStyle]="{ fontSize: '0.7rem', color: 'var(--text-color)', opacity: '0.7' }">
-                    {{ getSelectedSizesForItemInCollection(itm.itemNumber).length }} of {{ getItemSizes(itm).length }} sizes selected
+                    {{ getSelectedSizesForItemInCollection(itm.itemNumber).length }} of {{ getItemSizes(itm).length }}
+                    sizes selected
                   </span>
                 </div>
               </div>
@@ -943,24 +1001,24 @@
           </h3>
         </div>
 
-        <button (click)="closeManageCollectionItems()" type="button" [ngStyle]="{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-color)', opacity: '0.6' }">
+        <button (click)="closeManageCollectionItems()" type="button"
+          [ngStyle]="{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-color)', opacity: '0.6' }">
           <i class="pi pi-times" [ngStyle]="{ fontSize: '1.1rem' }"></i>
         </button>
       </div>
 
       <!-- Controls & Search -->
-      <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }">
+      <div
+        [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }">
         <div [ngStyle]="{
             display: 'flex', alignItems: 'center', gap: '0.45rem', flex: '1 1 240px',
             background: 'var(--input-bg)', border: '1px solid var(--border-color)',
             borderRadius: '8px', padding: '0.45rem 0.75rem'
           }">
           <i class="pi pi-search" [ngStyle]="{ fontSize: '0.82rem', color: 'var(--text-color)', opacity: '0.5' }"></i>
-          <input type="text"
-                 placeholder="Search items by number, name, category…"
-                 [value]="manageItemsSearch()"
-                 (input)="manageItemsSearch.set($any($event.target).value)"
-                 [ngStyle]="{ border: 'none', outline: 'none', background: 'transparent', color: 'var(--input-text)', fontSize: '0.88rem', width: '100%' }" />
+          <input type="text" placeholder="Search items by number, name, category…" [value]="manageItemsSearch()"
+            (input)="manageItemsSearch.set($any($event.target).value)"
+            [ngStyle]="{ border: 'none', outline: 'none', background: 'transparent', color: 'var(--input-text)', fontSize: '0.88rem', width: '100%' }" />
         </div>
 
         <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.5rem' }">
@@ -969,7 +1027,8 @@
               fontSize: '0.8rem', fontWeight: '700', padding: '0.3rem 0.75rem', borderRadius: '14px',
               color: 'var(--sidebar-link-active-bg, #05517e)'
             }">
-            {{ selectedSizesSummaryInQuickManage().totalSizes }} Sizes ({{ selectedSizesSummaryInQuickManage().distinctItems }} Items in Catalog)
+            {{ selectedSizesSummaryInQuickManage().totalSizes }} Sizes ({{
+            selectedSizesSummaryInQuickManage().distinctItems }} Items in Catalog)
           </span>
           <button (click)="selectAllQuickManage()" type="button" [ngStyle]="{
               background: 'var(--input-bg)', border: '1px solid var(--border-color)', borderRadius: '6px',
@@ -991,12 +1050,12 @@
           maxHeight: '380px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem',
           border: '1px solid var(--border-color)', borderRadius: '10px', padding: '0.65rem', background: 'var(--input-bg)'
         }">
-        <div *ngIf="availableItemsForQuickManage().length === 0" [ngStyle]="{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-color)', opacity: '0.6', fontSize: '0.9rem' }">
+        <div *ngIf="availableItemsForQuickManage().length === 0"
+          [ngStyle]="{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-color)', opacity: '0.6', fontSize: '0.9rem' }">
           No items found matching your search.
         </div>
 
-        <div *ngFor="let itm of availableItemsForQuickManage()"
-             [ngStyle]="{
+        <div *ngFor="let itm of availableItemsForQuickManage()" [ngStyle]="{
                display: 'flex', flexDirection: 'column', gap: '0.45rem', padding: '0.65rem 0.85rem',
                borderRadius: '8px', transition: 'all 0.15s ease',
                background: isItemFullySelectedInQuickManage(itm) || isItemPartiallySelectedInQuickManage(itm) ? 'rgba(5, 81, 126, 0.05)' : 'var(--card-bg)',
@@ -1005,11 +1064,10 @@
           <!-- Top Row: Master Checkbox + Name + Pricing -->
           <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.65rem' }">
             <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: '0', flex: '1 1 auto' }">
-              <input type="checkbox"
-                     [checked]="isItemFullySelectedInQuickManage(itm)"
-                     (change)="toggleItemAllSizesInQuickManage(itm)"
-                     [title]="isItemFullySelectedInQuickManage(itm) ? 'Uncheck all sizes' : 'Select all sizes'"
-                     [ngStyle]="{ accentColor: 'var(--sidebar-link-active-bg, #05517e)', width: '16px', height: '16px', cursor: 'pointer' }" />
+              <input type="checkbox" [checked]="isItemFullySelectedInQuickManage(itm)"
+                (change)="toggleItemAllSizesInQuickManage(itm)"
+                [title]="isItemFullySelectedInQuickManage(itm) ? 'Uncheck all sizes' : 'Select all sizes'"
+                [ngStyle]="{ accentColor: 'var(--sidebar-link-active-bg, #05517e)', width: '16px', height: '16px', cursor: 'pointer' }" />
               <div>
                 <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.45rem' }">
                   <span [ngStyle]="{
@@ -1023,17 +1081,21 @@
                     {{ itm.name }}
                   </span>
                 </div>
-                <div [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.65', marginTop: '0.15rem' }">
+                <div
+                  [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.65', marginTop: '0.15rem' }">
                   Category: {{ itm.category }} &bull; {{ itm.variants?.length || 0 }} Variants
                 </div>
               </div>
             </div>
 
-            <div [ngStyle]="{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.2rem', flexShrink: '0', fontSize: '0.8rem' }">
-              <span *ngIf="itm.salesChannel === 'B2C' || itm.salesChannel === 'Both'" [ngStyle]="{ color: '#10b981', fontWeight: '700' }">
+            <div
+              [ngStyle]="{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.2rem', flexShrink: '0', fontSize: '0.8rem' }">
+              <span *ngIf="itm.salesChannel === 'B2C' || itm.salesChannel === 'Both'"
+                [ngStyle]="{ color: '#10b981', fontWeight: '700' }">
                 Retail: ${{ itm.b2cPrice }}
               </span>
-              <span *ngIf="itm.salesChannel === 'B2B' || itm.salesChannel === 'Both'" [ngStyle]="{ color: '#3b82f6', fontWeight: '700' }">
+              <span *ngIf="itm.salesChannel === 'B2B' || itm.salesChannel === 'Both'"
+                [ngStyle]="{ color: '#3b82f6', fontWeight: '700' }">
                 Wholesale: ${{ itm.b2bPrice }} (MOQ: {{ itm.b2bMinQuantity }})
               </span>
             </div>
@@ -1045,13 +1107,12 @@
               gap: '0.45rem', paddingLeft: '1.75rem', borderTop: '1px dashed var(--border-color)', paddingTop: '0.4rem'
             }">
             <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap' }">
-              <span [ngStyle]="{ fontSize: '0.72rem', fontWeight: '600', color: 'var(--text-color)', opacity: '0.65', marginRight: '0.2rem' }">
+              <span
+                [ngStyle]="{ fontSize: '0.72rem', fontWeight: '600', color: 'var(--text-color)', opacity: '0.65', marginRight: '0.2rem' }">
                 Include Sizes:
               </span>
-              <button *ngFor="let sz of getItemSizes(itm)"
-                      type="button"
-                      (click)="toggleSizeInQuickManage(itm.itemNumber, sz)"
-                      [ngStyle]="{
+              <button *ngFor="let sz of getItemSizes(itm)" type="button"
+                (click)="toggleSizeInQuickManage(itm.itemNumber, sz)" [ngStyle]="{
                         background: isSizeSelectedInQuickManage(itm.itemNumber, sz) ? 'var(--sidebar-link-active-bg, #05517e)' : 'var(--card-bg)',
                         color: isSizeSelectedInQuickManage(itm.itemNumber, sz) ? '#ffffff' : 'var(--text-color)',
                         border: '1px solid',
@@ -1059,22 +1120,26 @@
                         borderRadius: '4px', padding: '0.15rem 0.5rem', fontSize: '0.75rem', fontWeight: '700',
                         cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.25rem', transition: 'all 0.15s ease'
                       }">
-                <i *ngIf="isSizeSelectedInQuickManage(itm.itemNumber, sz)" class="pi pi-check" [ngStyle]="{ fontSize: '0.65rem' }"></i>
+                <i *ngIf="isSizeSelectedInQuickManage(itm.itemNumber, sz)" class="pi pi-check"
+                  [ngStyle]="{ fontSize: '0.65rem' }"></i>
                 {{ sz }}
               </button>
             </div>
 
             <span [ngStyle]="{ fontSize: '0.72rem', color: 'var(--text-color)', opacity: '0.7' }">
-              {{ getSelectedSizesForItemInQuickManage(itm.itemNumber).length }} of {{ getItemSizes(itm).length }} sizes active
+              {{ getSelectedSizesForItemInQuickManage(itm.itemNumber).length }} of {{ getItemSizes(itm).length }} sizes
+              active
             </span>
           </div>
         </div>
       </div>
 
       <!-- Footer Buttons -->
-      <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }">
+      <div
+        [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }">
         <span [ngStyle]="{ fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.7' }">
-          {{ selectedSizesSummaryInQuickManage().totalSizes }} size items (across {{ selectedSizesSummaryInQuickManage().distinctItems }} products) linked
+          {{ selectedSizesSummaryInQuickManage().totalSizes }} size items (across {{
+          selectedSizesSummaryInQuickManage().distinctItems }} products) linked
         </span>
 
         <div [ngStyle]="{ display: 'flex', gap: '0.75rem' }">
@@ -1094,6 +1159,28 @@
           </button>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- Fullscreen Image Zoom Preview Modal -->
+  <div *ngIf="previewModalImage()" (click)="closeImagePreview()" [ngStyle]="{
+         position: 'fixed', top: '0', left: '0', width: '100vw', height: '100vh',
+         background: 'rgba(0, 0, 0, 0.85)', backdropFilter: 'blur(8px)', zIndex: '9999',
+         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', boxSizing: 'border-box'
+       }">
+    <div (click)="$event.stopPropagation()" [ngStyle]="{
+           position: 'relative', maxWidth: '850px', maxHeight: '85vh', borderRadius: '12px',
+           overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.5)', background: '#000000'
+         }">
+      <button (click)="closeImagePreview()" type="button" [ngStyle]="{
+                position: 'absolute', top: '12px', right: '12px', background: 'rgba(0,0,0,0.6)',
+                border: 'none', color: '#ffffff', width: '36px', height: '36px', borderRadius: '50%',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', zIndex: '10'
+              }">
+        <i class="pi pi-times"></i>
+      </button>
+      <img [src]="previewModalImage()!" alt="Product Full View"
+        [ngStyle]="{ width: '100%', height: 'auto', maxHeight: '80vh', objectFit: 'contain', display: 'block' }" />
     </div>
   </div>
 

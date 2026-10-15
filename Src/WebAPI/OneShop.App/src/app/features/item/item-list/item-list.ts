@@ -58,6 +58,23 @@ export class ItemList implements OnInit {
   manageItemSizesSelection = signal<string[]>([]);
   savingManageItems = signal<boolean>(false);
   manageItemsSearch = signal<string>('');
+  previewModalImage = signal<string | null>(null);
+
+  getItemImage(itm: Item): string | null {
+    if (!itm || !itm.images) return null;
+    const parts = itm.images.split(',');
+    return parts[0]?.trim() || null;
+  }
+
+  openImagePreview(itm: Item, event?: Event) {
+    if (event) event.stopPropagation();
+    const img = this.getItemImage(itm);
+    if (img) this.previewModalImage.set(img);
+  }
+
+  closeImagePreview() {
+    this.previewModalImage.set(null);
+  }
 
   collectionForm = this.fb.group({
     companyCode: ['', Validators.required],
@@ -78,7 +95,7 @@ export class ItemList implements OnInit {
         if (u.isCustomerAccount && !u.isSellerAccount) {
           return { canView: true, canCreate: false, canEdit: false, canDelete: false };
         }
-      } catch {}
+      } catch { }
     }
     const raw = localStorage.getItem('screenAccess');
     if (!raw) return { canView: true, canCreate: true, canEdit: true, canDelete: true };
