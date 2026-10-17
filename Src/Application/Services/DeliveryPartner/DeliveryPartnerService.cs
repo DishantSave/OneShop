@@ -10,7 +10,17 @@ public class DeliveryPartnerService(IDeliveryPartnerRepository deliveryPartnerRe
 
     public async Task<IEnumerable<DeliveryPartnerDto>> GetDeliveryPartnersAsync(string accountId, string? companyCode = null, string? channel = null, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
-        return await _deliveryPartnerRepository.GetDeliveryPartnersAsync(accountId, companyCode, channel, isCustomer, cancellationToken);
+        if (cancellationToken.IsCancellationRequested)
+            return [];
+
+        try
+        {
+            return await _deliveryPartnerRepository.GetDeliveryPartnersAsync(accountId, companyCode, channel, isCustomer, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return [];
+        }
     }
 
     public async Task<DeliveryPartnerDto?> GetDeliveryPartnerByIdAsync(string accountId, long sequence, CancellationToken cancellationToken = default)

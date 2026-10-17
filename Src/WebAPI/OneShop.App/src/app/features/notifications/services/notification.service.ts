@@ -38,31 +38,97 @@ export class NotificationService {
     this.startPolling();
   }
 
+  private getUserKey(): string {
+    const user = this.account.getUserDetails();
+    const raw = user?.userName || user?.email || user?.userId || 'global';
+    return String(raw).trim().toLowerCase();
+  }
+
   private loadPersistedState() {
     try {
-      const user = this.account.getUserDetails();
-      const userKey = user?.userName || 'global';
-      const readRaw = localStorage.getItem(`read_notifs_${userKey}`);
-      if (readRaw) {
-        this.readOrderIds.set(new Set<string>(JSON.parse(readRaw)));
+      const userKey = this.getUserKey();
+      const readSet = new Set<string>();
+      const dismissedSet = new Set<string>();
+
+      const readKeys = [
+        `read_notifs_${userKey}`,
+        `read_notifs_global`,
+        `read_notifs_${this.account.getUserDetails()?.userName || ''}`
+      ].filter(Boolean);
+
+      for (const k of readKeys) {
+        const raw = localStorage.getItem(k);
+        if (raw) {
+          try {
+            const arr = JSON.parse(raw);
+            if (Array.isArray(arr)) {
+              arr.forEach((id: string) => {
+                if (id) {
+                  const upper = String(id).trim().toUpperCase();
+                  const clean = upper.replace(/^NOTIF-/, '');
+                  readSet.add(upper);
+                  readSet.add(clean);
+                  readSet.add(`NOTIF-${clean}`);
+                }
+              });
+            }
+          } catch { }
+        }
       }
-      const dismissedRaw = localStorage.getItem(`dismissed_notifs_${userKey}`);
-      if (dismissedRaw) {
-        this.dismissedOrderIds.set(new Set<string>(JSON.parse(dismissedRaw)));
+      this.readOrderIds.set(readSet);
+
+      const dismissedKeys = [
+        `dismissed_notifs_${userKey}`,
+        `dismissed_notifs_global`,
+        `dismissed_notifs_${this.account.getUserDetails()?.userName || ''}`
+      ].filter(Boolean);
+
+      for (const k of dismissedKeys) {
+        const raw = localStorage.getItem(k);
+        if (raw) {
+          try {
+            const arr = JSON.parse(raw);
+            if (Array.isArray(arr)) {
+              arr.forEach((id: string) => {
+                if (id) {
+                  const upper = String(id).trim().toUpperCase();
+                  const clean = upper.replace(/^NOTIF-/, '');
+                  dismissedSet.add(upper);
+                  dismissedSet.add(clean);
+                  dismissedSet.add(`NOTIF-${clean}`);
+                }
+              });
+            }
+          } catch { }
+        }
       }
+      this.dismissedOrderIds.set(dismissedSet);
     } catch { }
   }
 
   private savePersistedState() {
     try {
-      const user = this.account.getUserDetails();
-      const userKey = user?.userName || 'global';
-      localStorage.setItem(`read_notifs_${userKey}`, JSON.stringify(Array.from(this.readOrderIds())));
-      localStorage.setItem(`dismissed_notifs_${userKey}`, JSON.stringify(Array.from(this.dismissedOrderIds())));
+      const userKey = this.getUserKey();
+      const readArr = Array.from(this.readOrderIds());
+      const dismissedArr = Array.from(this.dismissedOrderIds());
+
+      localStorage.setItem(`read_notifs_${userKey}`, JSON.stringify(readArr));
+      localStorage.setItem(`dismissed_notifs_${userKey}`, JSON.stringify(dismissedArr));
+      localStorage.setItem(`read_notifs_global`, JSON.stringify(readArr));
+      localStorage.setItem(`dismissed_notifs_global`, JSON.stringify(dismissedArr));
+
+      const rawName = this.account.getUserDetails()?.userName;
+      if (rawName) {
+        localStorage.setItem(`read_notifs_${rawName}`, JSON.stringify(readArr));
+        localStorage.setItem(`dismissed_notifs_${rawName}`, JSON.stringify(dismissedArr));
+      }
     } catch { }
   }
 
   private rebuildNotifications(orders: Order[]) {
+    // Always sync with latest persisted state so refresh preserves read/dismissed
+    this.loadPersistedState();
+
     if (!orders || orders.length === 0) {
       this.notifications.set([]);
       return;
@@ -76,9 +142,22 @@ export class NotificationService {
     const notifs: OrderNotification[] = [];
 
     for (const o of orders) {
-      if (dismissed.has(o.orderId.toUpperCase())) continue;
+      const rawOrderId = String(o.orderId || '').trim();
+      const upperOrderId = rawOrderId.toUpperCase();
+      if (!upperOrderId) continue;
 
-      const isRead = readSet.has(o.orderId.toUpperCase());
+      if (
+        dismissed.has(upperOrderId) ||
+        dismissed.has(`NOTIF-${upperOrderId}`) ||
+        dismissed.has(rawOrderId)
+      ) {
+        continue;
+      }
+
+      const isRead =
+        readSet.has(upperOrderId) ||
+        readSet.has(`NOTIF-${upperOrderId}`) ||
+        readSet.has(rawOrderId);
       const custName = o.customerName || o.createdBy || 'Customer';
       const unitsText = o.totalItems ? `${o.totalItems} unit(s)` : 'Item(s)';
       const amountText = o.totalAmount ? `$${o.totalAmount.toFixed(2)}` : '$0.00';
@@ -166,10 +245,15 @@ export class NotificationService {
   }
 
   markAsRead(orderId: string): void {
-    const norm = orderId.toUpperCase();
+    if (!orderId) return;
+    const clean = String(orderId).trim().toUpperCase();
+    const raw = clean.replace(/^NOTIF-/, '');
+
     this.readOrderIds.update(set => {
       const next = new Set(set);
-      next.add(norm);
+      next.add(clean);
+      next.add(raw);
+      next.add(`NOTIF-${raw}`);
       return next;
     });
     this.savePersistedState();
@@ -177,10 +261,15 @@ export class NotificationService {
   }
 
   markAsUnread(orderId: string): void {
-    const norm = orderId.toUpperCase();
+    if (!orderId) return;
+    const clean = String(orderId).trim().toUpperCase();
+    const raw = clean.replace(/^NOTIF-/, '');
+
     this.readOrderIds.update(set => {
       const next = new Set(set);
-      next.delete(norm);
+      next.delete(clean);
+      next.delete(raw);
+      next.delete(`NOTIF-${raw}`);
       return next;
     });
     this.savePersistedState();
@@ -188,10 +277,24 @@ export class NotificationService {
   }
 
   markAllAsRead(): void {
-    const allIds = this.notifications().map(n => n.orderId.toUpperCase());
+    const allIds: string[] = [];
+    this.notifications().forEach(n => {
+      if (n.orderId) allIds.push(n.orderId);
+      if (n.id) allIds.push(n.id);
+    });
+    this.orderService.orders().forEach(o => {
+      if (o.orderId) allIds.push(o.orderId);
+    });
+
     this.readOrderIds.update(set => {
       const next = new Set(set);
-      allIds.forEach(id => next.add(id));
+      allIds.forEach(id => {
+        const clean = String(id).trim().toUpperCase();
+        const raw = clean.replace(/^NOTIF-/, '');
+        next.add(clean);
+        next.add(raw);
+        next.add(`NOTIF-${raw}`);
+      });
       return next;
     });
     this.savePersistedState();
@@ -199,10 +302,15 @@ export class NotificationService {
   }
 
   dismissNotification(orderId: string): void {
-    const norm = orderId.toUpperCase();
+    if (!orderId) return;
+    const clean = String(orderId).trim().toUpperCase();
+    const raw = clean.replace(/^NOTIF-/, '');
+
     this.dismissedOrderIds.update(set => {
       const next = new Set(set);
-      next.add(norm);
+      next.add(clean);
+      next.add(raw);
+      next.add(`NOTIF-${raw}`);
       return next;
     });
     this.savePersistedState();
@@ -210,10 +318,24 @@ export class NotificationService {
   }
 
   clearAll(): void {
-    const allIds = this.notifications().map(n => n.orderId.toUpperCase());
+    const allIds: string[] = [];
+    this.notifications().forEach(n => {
+      if (n.orderId) allIds.push(n.orderId);
+      if (n.id) allIds.push(n.id);
+    });
+    this.orderService.orders().forEach(o => {
+      if (o.orderId) allIds.push(o.orderId);
+    });
+
     this.dismissedOrderIds.update(set => {
       const next = new Set(set);
-      allIds.forEach(id => next.add(id));
+      allIds.forEach(id => {
+        const clean = String(id).trim().toUpperCase();
+        const raw = clean.replace(/^NOTIF-/, '');
+        next.add(clean);
+        next.add(raw);
+        next.add(`NOTIF-${raw}`);
+      });
       return next;
     });
     this.savePersistedState();

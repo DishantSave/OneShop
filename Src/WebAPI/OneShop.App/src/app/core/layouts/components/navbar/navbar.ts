@@ -45,7 +45,7 @@ export class Navbar implements OnInit, OnDestroy {
 
   goToOrder(notif: OrderNotification, event?: Event) {
     if (event) event.stopPropagation();
-    this.notifService.markAsRead(notif.orderId);
+    this.notifService.markAsRead(notif.orderId || notif.id);
     this.notifDropdownOpen.set(false);
     this.router.navigate(['/dashboard/orders'], { queryParams: { orderId: notif.orderId } });
   }

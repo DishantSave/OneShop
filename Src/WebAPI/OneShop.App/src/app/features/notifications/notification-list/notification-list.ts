@@ -87,15 +87,15 @@ export class NotificationList implements OnInit {
 
   markAsRead(n: OrderNotification, event?: Event) {
     if (event) event.stopPropagation();
-    this.notifService.markAsRead(n.orderId);
+    this.notifService.markAsRead(n.orderId || n.id);
   }
 
   toggleRead(n: OrderNotification, event?: Event) {
     if (event) event.stopPropagation();
     if (n.isRead) {
-      this.notifService.markAsUnread(n.orderId);
+      this.notifService.markAsUnread(n.orderId || n.id);
     } else {
-      this.notifService.markAsRead(n.orderId);
+      this.notifService.markAsRead(n.orderId || n.id);
     }
   }
 
@@ -106,7 +106,7 @@ export class NotificationList implements OnInit {
 
   dismiss(n: OrderNotification, event?: Event) {
     if (event) event.stopPropagation();
-    this.notifService.dismissNotification(n.orderId);
+    this.notifService.dismissNotification(n.orderId || n.id);
   }
 
   clearAll() {

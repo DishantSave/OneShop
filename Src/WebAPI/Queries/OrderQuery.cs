@@ -23,17 +23,27 @@ public class OrderQuery
         ClaimsPrincipal user,
         CancellationToken cancellationToken)
     {
-        var accountId = user.FindFirst("account_id")?.Value
-            ?? throw new GraphQLException("AccountId not found in token.");
+        if (cancellationToken.IsCancellationRequested)
+            return [];
 
-        var isCustomer = await userRoleResolver.IsCustomerAsync(user, cancellationToken);
-        var userName = user.FindFirst(ClaimTypes.Name)?.Value ?? user.FindFirst("user_name")?.Value ?? user.FindFirst("username")?.Value;
-        if (isCustomer && string.IsNullOrWhiteSpace(createdBy))
+        try
         {
-            createdBy = userName;
-        }
+            var accountId = user.FindFirst("account_id")?.Value
+                ?? throw new GraphQLException("AccountId not found in token.");
 
-        return await orderService.GetOrdersAsync(accountId, companyCode, status, locationCode, channel, createdBy, isCustomer, cancellationToken);
+            var isCustomer = await userRoleResolver.IsCustomerAsync(user, cancellationToken);
+            var userName = user.FindFirst(ClaimTypes.Name)?.Value ?? user.FindFirst("user_name")?.Value ?? user.FindFirst("username")?.Value;
+            if (isCustomer && string.IsNullOrWhiteSpace(createdBy))
+            {
+                createdBy = userName;
+            }
+
+            return await orderService.GetOrdersAsync(accountId, companyCode, status, locationCode, channel, createdBy, isCustomer, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return [];
+        }
     }
 
     [Authorize]

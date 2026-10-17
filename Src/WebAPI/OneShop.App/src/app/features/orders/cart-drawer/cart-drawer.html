@@ -485,22 +485,14 @@
           <div>
             <label
               [ngStyle]="{ display: 'block', fontSize: '0.76rem', fontWeight: '700', color: 'var(--text-color)', marginBottom: '0.25rem' }">
-              Destination State (For State Tax)
+              State
             </label>
-            <div [ngStyle]="{ display: 'flex', gap: '0.35rem' }">
-              <input type="text" formControlName="shippingState" (blur)="onStateInputBlur()"
-                placeholder="e.g. Maharashtra, California" [ngStyle]="{
-                       width: '100%', padding: '0.55rem 0.75rem', borderRadius: '6px',
-                       border: '1px solid var(--border-color)', background: 'var(--input-bg)',
-                       color: 'var(--text-color)', fontSize: '0.85rem'
-                     }" />
-              <button type="button" (click)="onStateInputBlur()" title="Recalculate Tax & Shipping" [ngStyle]="{
-                  background: 'var(--sidebar-link-active-bg, #05517e)', color: '#fff', border: 'none',
-                  padding: '0.5rem 0.7rem', borderRadius: '6px', fontSize: '0.75rem', cursor: 'pointer'
-                }">
-                Calc
-              </button>
-            </div>
+            <input type="text" formControlName="shippingState" (input)="onStateInputChange($any($event.target).value)"
+              placeholder="e.g. Maharashtra, California" [ngStyle]="{
+                     width: '100%', padding: '0.55rem 0.75rem', borderRadius: '6px',
+                     border: '1px solid var(--border-color)', background: 'var(--input-bg)',
+                     color: 'var(--text-color)', fontSize: '0.85rem'
+                   }" />
           </div>
         </div>
 

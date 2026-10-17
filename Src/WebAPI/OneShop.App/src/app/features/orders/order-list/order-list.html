@@ -1492,20 +1492,11 @@
             <div>
               <label
                 [ngStyle]="{ display: 'block', fontSize: '0.75rem', fontWeight: '700', marginBottom: '0.25rem', color: 'var(--text-color)' }">
-                Destination State (For Tax Calculation)
+                State
               </label>
-              <div [ngStyle]="{ display: 'flex', gap: '0.4rem' }">
-                <input type="text" [ngModel]="createOrderForm.get('shippingState')?.value"
-                  (ngModelChange)="createOrderForm.get('shippingState')?.setValue($event)" (blur)="onStateInputBlur()"
-                  placeholder="e.g. Maharashtra, California"
-                  [ngStyle]="{ width: '100%', background: 'var(--card-bg)', border: '1px solid var(--border-color)', color: 'var(--input-text)', padding: '0.5rem 0.65rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }" />
-                <button type="button" (click)="onStateInputBlur()" title="Compute State Tax" [ngStyle]="{
-                    background: 'var(--sidebar-link-active-bg, #05517e)', color: '#fff', border: 'none',
-                    padding: '0.5rem 0.75rem', borderRadius: '6px', fontSize: '0.75rem', cursor: 'pointer', whiteSpace: 'nowrap'
-                  }">
-                  Tax
-                </button>
-              </div>
+              <input type="text" [ngModel]="createOrderForm.get('shippingState')?.value"
+                (ngModelChange)="onStateInputChange($event)" placeholder="e.g. Maharashtra, California"
+                [ngStyle]="{ width: '100%', background: 'var(--card-bg)', border: '1px solid var(--border-color)', color: 'var(--input-text)', padding: '0.5rem 0.65rem', borderRadius: '6px', fontSize: '0.85rem', outline: 'none' }" />
             </div>
           </div>
         </div>

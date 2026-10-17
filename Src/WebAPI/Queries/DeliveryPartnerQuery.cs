@@ -20,11 +20,21 @@ public class DeliveryPartnerQuery
         ClaimsPrincipal user,
         CancellationToken cancellationToken)
     {
-        var accountId = user.FindFirst("account_id")?.Value
-            ?? throw new GraphQLException("AccountId not found in token.");
+        if (cancellationToken.IsCancellationRequested)
+            return [];
 
-        var isCustomer = await userRoleResolver.IsCustomerAsync(user, cancellationToken);
-        return await deliveryPartnerService.GetDeliveryPartnersAsync(accountId, companyCode, channel, isCustomer, cancellationToken);
+        try
+        {
+            var accountId = user.FindFirst("account_id")?.Value
+                ?? throw new GraphQLException("AccountId not found in token.");
+
+            var isCustomer = await userRoleResolver.IsCustomerAsync(user, cancellationToken);
+            return await deliveryPartnerService.GetDeliveryPartnersAsync(accountId, companyCode, channel, isCustomer, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return [];
+        }
     }
 
     [Authorize]
@@ -39,9 +49,19 @@ public class DeliveryPartnerQuery
         ClaimsPrincipal user,
         CancellationToken cancellationToken)
     {
-        var accountId = user.FindFirst("account_id")?.Value
-            ?? throw new GraphQLException("AccountId not found in token.");
+        if (cancellationToken.IsCancellationRequested)
+            return new ShippingCalculationResult();
 
-        return await deliveryPartnerService.CalculateShippingAsync(accountId, companyCode, channel, subTotal, totalItems, cancellationToken);
+        try
+        {
+            var accountId = user.FindFirst("account_id")?.Value
+                ?? throw new GraphQLException("AccountId not found in token.");
+
+            return await deliveryPartnerService.CalculateShippingAsync(accountId, companyCode, channel, subTotal, totalItems, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            return new ShippingCalculationResult();
+        }
     }
 }

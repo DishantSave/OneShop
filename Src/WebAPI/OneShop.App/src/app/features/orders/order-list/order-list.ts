@@ -314,6 +314,10 @@ export class OrderList implements OnInit {
     this.promoService.loadPromoCodes(true);
     this.addressService.loadAddresses();
 
+    this.createOrderForm.get('shippingState')?.valueChanges.subscribe(val => {
+      this.calculateStateTax(val || '');
+    });
+
     this.route.queryParams.subscribe(params => {
       const targetOrderId = params['orderId'];
       if (targetOrderId) {
@@ -454,16 +458,23 @@ export class OrderList implements OnInit {
     }
   }
 
-  onStateInputBlur() {
-    const state = this.createOrderForm.get('shippingState')?.value;
-    if (state) {
-      this.calculateStateTax(state);
-    }
+  onStateInputChange(stateVal: string) {
+    this.createOrderForm.patchValue({ shippingState: stateVal }, { emitEvent: false });
+    this.calculateStateTax(stateVal);
   }
 
-  calculateStateTax(stateNameOrCode?: string) {
-    const state = (stateNameOrCode || this.createOrderForm.get('shippingState')?.value || '').trim().toLowerCase();
-    if (!state) return;
+  onStateInputBlur() {
+    const state = this.createOrderForm.get('shippingState')?.value;
+    this.calculateStateTax(state);
+  }
+
+  calculateStateTax(stateNameOrCode?: string | null) {
+    const rawState = stateNameOrCode !== undefined && stateNameOrCode !== null ? stateNameOrCode : (this.createOrderForm.get('shippingState')?.value || '');
+    const state = (rawState || '').trim().toLowerCase();
+    if (!state) {
+      this.createOrderForm.patchValue({ tax: 0 }, { emitEvent: false });
+      return;
+    }
 
     const match = this.taxes().find(t =>
       t.isActive && (
@@ -473,15 +484,13 @@ export class OrderList implements OnInit {
       )
     );
 
+    const sub = this.draftSubtotal();
     if (match) {
-      const sub = this.draftSubtotal();
       const calculatedTax = Math.round((sub * match.taxRate / 100) * 100) / 100;
-      this.createOrderForm.patchValue({ tax: calculatedTax });
-      this.toast.add({
-        severity: 'info',
-        summary: 'Tax Applied',
-        detail: `${match.taxRate}% ${match.taxType} (₹${calculatedTax}) automatically applied for ${match.stateName}.`
-      });
+      this.createOrderForm.patchValue({ tax: calculatedTax }, { emitEvent: false });
+    } else if (state.length >= 3) {
+      const calculatedTax = Math.round((sub * 0.05) * 100) / 100;
+      this.createOrderForm.patchValue({ tax: calculatedTax }, { emitEvent: false });
     }
   }
 

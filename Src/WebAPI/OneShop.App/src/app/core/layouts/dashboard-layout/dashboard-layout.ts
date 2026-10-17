@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, computed } from '@angular/core';
+import { Component, OnInit, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { Navbar } from '../components/navbar/navbar';
@@ -46,8 +46,24 @@ export class DashboardLayout implements OnInit {
     { label: 'Settings', screenKeys: ['Settings'], icon: 'pi pi-cog', route: '/dashboard/settings' }
   ];
 
+  currentUser = signal<any>(this.getStoredUser());
+
+  private getStoredUser(): any {
+    try {
+      const userStr = localStorage.getItem('userDetails');
+      return userStr ? JSON.parse(userStr) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  isCustomer = computed(() => {
+    const u = this.currentUser() || this.userDetails;
+    return !!(u?.isCustomerAccount && !u?.isSellerAccount);
+  });
+
   sidebarItems = computed(() => {
-    const isCustomer = this.userDetails?.isCustomerAccount && !this.userDetails?.isSellerAccount;
+    const isCustomer = this.isCustomer();
     const unread = this.notifService.unreadCount();
 
     return this.allNavItems
@@ -84,14 +100,11 @@ export class DashboardLayout implements OnInit {
       });
   });
 
-  // Top Menu Option: 1st Tab: Global Products, 2nd Tab: Analytics, 3rd Tab: Tutorials
+  // Top Menu Option: Customer has no top menu options (all options reside in Sidebar).
+  // Master/Vendor retains Global Products, Analytics, and Tutorials.
   tabItems = computed(() => {
-    const isCustomer = this.userDetails?.isCustomerAccount && !this.userDetails?.isSellerAccount;
-    if (isCustomer) {
-      return [
-        { label: 'Global Products', route: '/dashboard/products' },
-        { label: 'My Orders', route: '/dashboard/orders' }
-      ];
+    if (this.isCustomer()) {
+      return [];
     }
     return [
       { label: 'Global Products', route: '/dashboard/products' },
@@ -101,8 +114,8 @@ export class DashboardLayout implements OnInit {
   });
 
   ngOnInit() {
-    const userStr = localStorage.getItem('userDetails');
-    if (userStr) this.userDetails = JSON.parse(userStr);
+    this.userDetails = this.getStoredUser();
+    this.currentUser.set(this.userDetails);
 
     this.access.reload();
 

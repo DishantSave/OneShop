@@ -25,40 +25,60 @@ public class DeliveryPartnerRepository(IHttpContextAccessor httpContextAccessor)
 
     public async Task<IEnumerable<DeliveryPartnerDto>> GetDeliveryPartnersAsync(string accountId, string? companyCode = null, string? channel = null, bool isCustomer = false, CancellationToken cancellationToken = default)
     {
-        using IDbConnection db = new SqlConnection(GetConnectionString());
+        if (cancellationToken.IsCancellationRequested)
+            return Enumerable.Empty<DeliveryPartnerDto>();
 
-        const string sql = @"
-            SELECT dp.Sequence, dp.AccountId, dp.CompanyCode, dp.PartnerName, dp.Channel,
-                   dp.ItemCategory, dp.BaseShippingRate, dp.PerItemShippingRate, dp.FreeShippingThreshold,
-                   dp.EstimatedDays, dp.IsDefault, dp.IsActive, dp.DateCreated, dp.DateModified, dp.CreatedBy
-            FROM dbo.DeliveryPartner AS dp
-            WHERE (@IsCustomer = 1 OR dp.AccountId = @AccountId)
-              AND (@CompanyCode IS NULL OR UPPER(dp.CompanyCode) = UPPER(@CompanyCode))
-              AND (@Channel IS NULL OR UPPER(dp.Channel) = UPPER(@Channel) OR UPPER(dp.Channel) = 'BOTH' OR UPPER(@Channel) = 'BOTH')
-              AND dp.IsActive = 1
-            ORDER BY dp.IsDefault DESC, dp.Sequence ASC;";
+        try
+        {
+            using IDbConnection db = new SqlConnection(GetConnectionString());
 
-        return await db.QueryAsync<DeliveryPartnerDto>(new CommandDefinition(
-            sql,
-            new { AccountId = accountId, CompanyCode = companyCode, Channel = channel, IsCustomer = isCustomer ? 1 : 0 },
-            cancellationToken: cancellationToken));
+            const string sql = @"
+                SELECT dp.Sequence, dp.AccountId, dp.CompanyCode, dp.PartnerName, dp.Channel,
+                       dp.ItemCategory, dp.BaseShippingRate, dp.PerItemShippingRate, dp.FreeShippingThreshold,
+                       dp.EstimatedDays, dp.IsDefault, dp.IsActive, dp.DateCreated, dp.DateModified, dp.CreatedBy
+                FROM dbo.DeliveryPartner AS dp
+                WHERE (@IsCustomer = 1 OR dp.AccountId = @AccountId)
+                  AND (@CompanyCode IS NULL OR UPPER(dp.CompanyCode) = UPPER(@CompanyCode))
+                  AND (@Channel IS NULL OR UPPER(dp.Channel) = UPPER(@Channel) OR UPPER(dp.Channel) = 'BOTH' OR UPPER(@Channel) = 'BOTH')
+                  AND dp.IsActive = 1
+                ORDER BY dp.IsDefault DESC, dp.Sequence ASC;";
+
+            return await db.QueryAsync<DeliveryPartnerDto>(new CommandDefinition(
+                sql,
+                new { AccountId = accountId, CompanyCode = companyCode, Channel = channel, IsCustomer = isCustomer ? 1 : 0 },
+                cancellationToken: cancellationToken));
+        }
+        catch (OperationCanceledException)
+        {
+            return Enumerable.Empty<DeliveryPartnerDto>();
+        }
     }
 
     public async Task<DeliveryPartnerDto?> GetDeliveryPartnerByIdAsync(string accountId, long sequence, CancellationToken cancellationToken = default)
     {
-        using IDbConnection db = new SqlConnection(GetConnectionString());
+        if (cancellationToken.IsCancellationRequested)
+            return null;
 
-        const string sql = @"
-            SELECT dp.Sequence, dp.AccountId, dp.CompanyCode, dp.PartnerName, dp.Channel,
-                   dp.ItemCategory, dp.BaseShippingRate, dp.PerItemShippingRate, dp.FreeShippingThreshold,
-                   dp.EstimatedDays, dp.IsDefault, dp.IsActive, dp.DateCreated, dp.DateModified, dp.CreatedBy
-            FROM dbo.DeliveryPartner AS dp
-            WHERE dp.Sequence = @Sequence AND dp.AccountId = @AccountId;";
+        try
+        {
+            using IDbConnection db = new SqlConnection(GetConnectionString());
 
-        return await db.QueryFirstOrDefaultAsync<DeliveryPartnerDto>(new CommandDefinition(
-            sql,
-            new { Sequence = sequence, AccountId = accountId },
-            cancellationToken: cancellationToken));
+            const string sql = @"
+                SELECT dp.Sequence, dp.AccountId, dp.CompanyCode, dp.PartnerName, dp.Channel,
+                       dp.ItemCategory, dp.BaseShippingRate, dp.PerItemShippingRate, dp.FreeShippingThreshold,
+                       dp.EstimatedDays, dp.IsDefault, dp.IsActive, dp.DateCreated, dp.DateModified, dp.CreatedBy
+                FROM dbo.DeliveryPartner AS dp
+                WHERE dp.Sequence = @Sequence AND dp.AccountId = @AccountId;";
+
+            return await db.QueryFirstOrDefaultAsync<DeliveryPartnerDto>(new CommandDefinition(
+                sql,
+                new { Sequence = sequence, AccountId = accountId },
+                cancellationToken: cancellationToken));
+        }
+        catch (OperationCanceledException)
+        {
+            return null;
+        }
     }
 
     public async Task<DeliveryPartnerPayload> SaveDeliveryPartnerAsync(string accountId, string userName, DeliveryPartnerRequest request, long? sequence = null, CancellationToken cancellationToken = default)
@@ -182,62 +202,72 @@ public class DeliveryPartnerRepository(IHttpContextAccessor httpContextAccessor)
 
     public async Task<ShippingCalculationResult> CalculateShippingAsync(string accountId, string companyCode, string channel, decimal orderSubTotal, int totalItems, CancellationToken cancellationToken = default)
     {
-        using IDbConnection db = new SqlConnection(GetConnectionString());
+        if (cancellationToken.IsCancellationRequested)
+            return new ShippingCalculationResult();
 
-        const string sql = @"
-            SELECT TOP 1 *
-            FROM dbo.DeliveryPartner
-            WHERE UPPER(CompanyCode) = UPPER(@CompanyCode)
-              AND (UPPER(Channel) = UPPER(@Channel) OR Channel = 'Both' OR UPPER(@Channel) = 'BOTH')
-              AND IsActive = 1
-            ORDER BY IsDefault DESC, Sequence ASC;";
-
-        var partner = await db.QueryFirstOrDefaultAsync<DeliveryPartnerDto>(new CommandDefinition(
-            sql,
-            new { CompanyCode = companyCode, Channel = channel },
-            cancellationToken: cancellationToken));
-
-        if (partner == null)
+        try
         {
-            // Fallback default
-            var fallbackPartner = channel.Equals("B2B", StringComparison.OrdinalIgnoreCase) ? "BlueDart Cargo B2B" : "Delhivery Express";
-            var freeThreshold = 500.00m;
-            var isFree = orderSubTotal >= freeThreshold;
-            var shipping = isFree ? 0.00m : (5.00m + (Math.Max(1, totalItems) * 1.00m));
+            using IDbConnection db = new SqlConnection(GetConnectionString());
+
+            const string sql = @"
+                SELECT TOP 1 *
+                FROM dbo.DeliveryPartner
+                WHERE UPPER(CompanyCode) = UPPER(@CompanyCode)
+                  AND (UPPER(Channel) = UPPER(@Channel) OR Channel = 'Both' OR UPPER(@Channel) = 'BOTH')
+                  AND IsActive = 1
+                ORDER BY IsDefault DESC, Sequence ASC;";
+
+            var partner = await db.QueryFirstOrDefaultAsync<DeliveryPartnerDto>(new CommandDefinition(
+                sql,
+                new { CompanyCode = companyCode, Channel = channel },
+                cancellationToken: cancellationToken));
+
+            if (partner == null)
+            {
+                // Fallback default
+                var fallbackPartner = channel.Equals("B2B", StringComparison.OrdinalIgnoreCase) ? "BlueDart Cargo B2B" : "Delhivery Express";
+                var freeThreshold = 500.00m;
+                var isFree = orderSubTotal >= freeThreshold;
+                var shipping = isFree ? 0.00m : (5.00m + (Math.Max(1, totalItems) * 1.00m));
+                return new ShippingCalculationResult
+                {
+                    AssignedPartnerName = fallbackPartner,
+                    TotalShippingCost = shipping,
+                    PerItemShippingCost = isFree ? 0.00m : 1.00m,
+                    IsFreeShipping = isFree,
+                    FreeShippingThreshold = freeThreshold,
+                    EstimatedDays = 3
+                };
+            }
+
+            var isFreeShipping = orderSubTotal >= partner.FreeShippingThreshold && partner.FreeShippingThreshold > 0;
+            decimal totalShipping;
+            decimal perItemCost;
+
+            if (isFreeShipping)
+            {
+                totalShipping = 0.00m;
+                perItemCost = 0.00m;
+            }
+            else
+            {
+                perItemCost = partner.PerItemShippingRate;
+                totalShipping = partner.BaseShippingRate + (Math.Max(1, totalItems) * partner.PerItemShippingRate);
+            }
+
             return new ShippingCalculationResult
             {
-                AssignedPartnerName = fallbackPartner,
-                TotalShippingCost = shipping,
-                PerItemShippingCost = isFree ? 0.00m : 1.00m,
-                IsFreeShipping = isFree,
-                FreeShippingThreshold = freeThreshold,
-                EstimatedDays = 3
+                AssignedPartnerName = partner.PartnerName,
+                TotalShippingCost = totalShipping,
+                PerItemShippingCost = perItemCost,
+                IsFreeShipping = isFreeShipping,
+                FreeShippingThreshold = partner.FreeShippingThreshold,
+                EstimatedDays = partner.EstimatedDays
             };
         }
-
-        var isFreeShipping = orderSubTotal >= partner.FreeShippingThreshold && partner.FreeShippingThreshold > 0;
-        decimal totalShipping;
-        decimal perItemCost;
-
-        if (isFreeShipping)
+        catch (OperationCanceledException)
         {
-            totalShipping = 0.00m;
-            perItemCost = 0.00m;
+            return new ShippingCalculationResult();
         }
-        else
-        {
-            perItemCost = partner.PerItemShippingRate;
-            totalShipping = partner.BaseShippingRate + (Math.Max(1, totalItems) * partner.PerItemShippingRate);
-        }
-
-        return new ShippingCalculationResult
-        {
-            AssignedPartnerName = partner.PartnerName,
-            TotalShippingCost = totalShipping,
-            PerItemShippingCost = perItemCost,
-            IsFreeShipping = isFreeShipping,
-            FreeShippingThreshold = partner.FreeShippingThreshold,
-            EstimatedDays = partner.EstimatedDays
-        };
     }
 }

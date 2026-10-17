@@ -157,6 +157,10 @@ export class CartDrawer implements OnInit {
       }
     });
 
+    this.checkoutForm.get('shippingState')?.valueChanges.subscribe(val => {
+      this.calculateStateTax(val || '');
+    });
+
     // Automatically keep shipping rate in sync whenever cart items / subtotal change
     effect(() => {
       const sub = this.cartSubtotal();
@@ -326,19 +330,23 @@ export class CartDrawer implements OnInit {
     }
   }
 
-  onStateInputBlur() {
-    const state = this.checkoutForm.get('shippingState')?.value;
-    if (state) {
-      this.calculateStateTax(state);
-      this.calculateShippingRate();
-    }
+  onStateInputChange(stateVal: string) {
+    this.calculateStateTax(stateVal);
+    this.calculateShippingRate();
   }
 
-  calculateStateTax(stateNameOrCode?: string) {
-    const state = (stateNameOrCode || this.checkoutForm.get('shippingState')?.value || '').trim().toLowerCase();
+  onStateInputBlur() {
+    const state = this.checkoutForm.get('shippingState')?.value;
+    this.calculateStateTax(state);
+    this.calculateShippingRate();
+  }
+
+  calculateStateTax(stateNameOrCode?: string | null) {
+    const rawState = stateNameOrCode !== undefined && stateNameOrCode !== null ? stateNameOrCode : (this.checkoutForm.get('shippingState')?.value || '');
+    const state = (rawState || '').trim().toLowerCase();
     if (!state) {
       this.stateTax.set(0);
-      this.checkoutForm.patchValue({ tax: 0 });
+      this.checkoutForm.patchValue({ tax: 0 }, { emitEvent: false });
       return;
     }
 
