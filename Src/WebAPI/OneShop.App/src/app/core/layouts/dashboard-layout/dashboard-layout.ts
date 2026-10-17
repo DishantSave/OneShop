@@ -43,6 +43,7 @@ export class DashboardLayout implements OnInit {
     { label: 'Inventory', screenKeys: ['Inventory'], icon: 'pi pi-database', route: '/dashboard/inventory' },
     { label: 'Masters', screenKeys: ['CompanyMaster', 'DivisionMaster', 'CustomerMaster', 'Warehouse', 'Tax', 'Discounts', 'DeliveryPartner'], icon: 'pi pi-sitemap', route: '/dashboard/masters' },
     { label: 'Users', screenKeys: ['Users'], icon: 'pi pi-users', route: '/dashboard/users' },
+    { label: 'API Connectivity', screenKeys: ['Dashboard', 'Settings'], icon: 'pi pi-code', route: '/dashboard/api-connectivity' },
     { label: 'Settings', screenKeys: ['Settings'], icon: 'pi pi-cog', route: '/dashboard/settings' }
   ];
 
@@ -68,6 +69,9 @@ export class DashboardLayout implements OnInit {
 
     return this.allNavItems
       .filter(i => {
+        if (isCustomer && i.route === '/dashboard/api-connectivity') {
+          return false;
+        }
         return this.access.hasAnyAccess(i.screenKeys);
       })
       .map(({ label, route, icon }) => {

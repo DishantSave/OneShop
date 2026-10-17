@@ -25,6 +25,7 @@ public static class QueryRegistrationExtension
         builder.AddTypeExtension<PromoCodeQuery>();
         builder.AddTypeExtension<UserAddressQuery>();
         builder.AddTypeExtension<DeliveryPartnerQuery>();
+        builder.AddTypeExtension<ApiKeyQuery>();
 
         return builder;
     }

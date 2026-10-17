@@ -7,5 +7,6 @@ public interface IJwtTokenService
         string userId,
         string userName,
         bool isCustomerAccount = false,
-        bool isSellerAccount = false);
+        bool isSellerAccount = false,
+        int? customExpiryDays = null);
 }

@@ -15,7 +15,8 @@ public sealed class JwtTokenService(IConfiguration configuration) : IJwtTokenSer
         string userId,
         string userName,
         bool isCustomerAccount = false,
-        bool isSellerAccount = false)
+        bool isSellerAccount = false,
+        int? customExpiryDays = null)
     {
         var secretKey = _configuration["Jwt:SecretKey"]
             ?? throw new InvalidOperationException(
@@ -29,8 +30,12 @@ public sealed class JwtTokenService(IConfiguration configuration) : IJwtTokenSer
             ?? throw new InvalidOperationException(
                 "JWT Audience is not configured.");
 
-        var expiryMinutes = _configuration.GetValue<int>(
-            "Jwt:ExpiryMinutes");
+        var expiryMinutes = _configuration.GetValue<int>("Jwt:ExpiryMinutes");
+        if (expiryMinutes <= 0) expiryMinutes = 1440;
+
+        var expirationDate = customExpiryDays.HasValue && customExpiryDays.Value > 0
+            ? DateTime.UtcNow.AddDays(customExpiryDays.Value)
+            : DateTime.UtcNow.AddMinutes(expiryMinutes);
 
         var claims = new[]
         {
@@ -39,7 +44,7 @@ public sealed class JwtTokenService(IConfiguration configuration) : IJwtTokenSer
             new Claim("user_name", userName),
             new Claim("is_customer", isCustomerAccount ? "true" : "false"),
             new Claim("is_seller", isSellerAccount ? "true" : "false"),
-            new Claim("token_type", "api"),
+            new Claim("token_type", customExpiryDays.HasValue ? "api_key" : "api"),
             new Claim(
                 JwtRegisteredClaimNames.Jti,
                 Guid.NewGuid().ToString())
@@ -56,7 +61,7 @@ public sealed class JwtTokenService(IConfiguration configuration) : IJwtTokenSer
             issuer: issuer,
             audience: audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(expiryMinutes),
+            expires: expirationDate,
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler()

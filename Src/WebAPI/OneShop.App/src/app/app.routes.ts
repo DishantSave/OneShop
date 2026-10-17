@@ -95,6 +95,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/notifications/notification-list/notification-list').then(m => m.NotificationList)
       },
       {
+        path: 'api-connectivity',
+        loadComponent: () => import('./features/api-connectivity/api-connectivity').then(m => m.ApiConnectivity)
+      },
+      {
         path: 'settings',
         component: Setting
       },

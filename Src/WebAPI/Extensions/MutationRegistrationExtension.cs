@@ -41,6 +41,7 @@ public static class MutationRegistrationExtension
         builder.AddTypeExtension<DeliveryPartnerMutation>();
         builder.AddTypeExtension<PromoCodeMutation>();
         builder.AddTypeExtension<UserAddressMutation>();
+        builder.AddTypeExtension<ApiKeyMutation>();
 
         return builder;
     }
