@@ -870,7 +870,7 @@ export class TutorialsPortal implements AfterViewInit, OnDestroy {
 
       // Shipper & Consignee
       ctx.font = '11px Arial, sans-serif';
-      ctx.fillText('FROM: AMTERP Central Distribution (Dock 3)', labelX + 16, labelY + 54);
+      ctx.fillText('FROM: OneShop Central Distribution (Dock 3)', labelX + 16, labelY + 54);
       ctx.fillText('TO: Apex Retail Corp, 42 Commercial Blvd, NY', labelX + 16, labelY + 70);
       ctx.fillText('WEIGHT: 12.5 KG | PKG: 1 OF 1 (WHOLESALE)', labelX + 16, labelY + 86);
 

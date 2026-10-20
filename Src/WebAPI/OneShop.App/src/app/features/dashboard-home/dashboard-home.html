@@ -11,20 +11,21 @@
     <!-- Top Executive Header & Filter Controls -->
     <div [ngStyle]="{
            background: 'var(--card-bg, #ffffff)', border: '1px solid var(--border-color, #e2e8f0)',
-           borderRadius: '16px', padding: '1.5rem 1.75rem', display: 'flex', alignItems: 'center',
-           justifyContent: 'space-between', flexWrap: 'wrap', gap: '1.25rem',
-           boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)'
+           borderRadius: '16px', padding: 'clamp(0.85rem, 2.5vw, 1.75rem)', display: 'flex', alignItems: 'center',
+           justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem',
+           boxShadow: '0 4px 20px rgba(0, 0, 0, 0.05)', maxWidth: '100%', boxSizing: 'border-box'
          }">
-      <div>
+      <div [ngStyle]="{ minWidth: '0', maxWidth: '100%' }">
         <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.65rem' }">
           <span [ngStyle]="{
                   background: 'linear-gradient(135deg, #05517e, #033654)', color: '#ffffff',
                   width: '36px', height: '36px', borderRadius: '10px',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: '0'
                 }">
             <i class="pi pi-chart-pie" [ngStyle]="{ fontSize: '1.2rem' }"></i>
           </span>
-          <h2 [ngStyle]="{ margin: '0', fontSize: '1.5rem', fontWeight: '800', color: 'var(--text-color)' }">
+          <h2
+            [ngStyle]="{ margin: '0', fontSize: 'clamp(1.1rem, 3.5vw, 1.5rem)', fontWeight: '800', color: 'var(--text-color)' }">
             Vendor Overview &amp; Stock Intelligence
           </h2>
         </div>
@@ -35,14 +36,17 @@
       </div>
 
       <!-- Filters & Action Switches -->
-      <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }">
+      <div
+        [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', maxWidth: '100%', minWidth: '0', width: '100%' }">
         <!-- Company Filter -->
-        <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.35rem' }">
+        <div
+          [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: '0', flex: '1 1 auto', maxWidth: '100%' }">
           <label
-            [ngStyle]="{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.8' }">Company:</label>
+            [ngStyle]="{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.8', whiteSpace: 'nowrap', flexShrink: '0' }">Company:</label>
           <select [ngModel]="vendorSelectedCompany()" (ngModelChange)="setVendorCompanyFilter($event)" [ngStyle]="{
                     padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)',
-                    background: 'var(--input-bg)', color: 'var(--text-color)', fontSize: '0.82rem', fontWeight: '600'
+                    background: 'var(--input-bg)', color: 'var(--text-color)', fontSize: '0.82rem', fontWeight: '600',
+                    maxWidth: '100%', minWidth: '0', flex: '1 1 auto', textOverflow: 'ellipsis'
                   }">
             <option value="ALL">All Companies</option>
             <option *ngFor="let c of companies()" [value]="c.code">{{ c.name }} ({{ c.code }})</option>
@@ -50,13 +54,16 @@
         </div>
 
         <!-- Store / Warehouse Location Filter -->
-        <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.35rem' }">
+        <div
+          [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: '0', flex: '1 1 auto', maxWidth: '100%' }">
           <label
-            [ngStyle]="{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.8' }">Store /
+            [ngStyle]="{ fontSize: '0.78rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.8', whiteSpace: 'nowrap', flexShrink: '0' }">Store
+            /
             Whs:</label>
           <select [ngModel]="vendorSelectedLocation()" (ngModelChange)="setVendorLocationFilter($event)" [ngStyle]="{
                     padding: '0.5rem 0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)',
-                    background: 'var(--input-bg)', color: 'var(--text-color)', fontSize: '0.82rem', fontWeight: '600'
+                    background: 'var(--input-bg)', color: 'var(--text-color)', fontSize: '0.82rem', fontWeight: '600',
+                    maxWidth: '100%', minWidth: '0', flex: '1 1 auto', textOverflow: 'ellipsis'
                   }">
             <option value="ALL">All Stores &amp; Warehouses</option>
             <option *ngFor="let loc of vendorAvailableLocations()" [value]="loc.code">
@@ -70,7 +77,7 @@
                   background: 'linear-gradient(135deg, #05517e, #033654)', color: '#ffffff', border: 'none',
                   padding: '0.55rem 1.15rem', borderRadius: '8px', fontSize: '0.85rem', fontWeight: '700',
                   cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.45rem',
-                  boxShadow: '0 3px 10px rgba(5, 81, 126, 0.25)'
+                  boxShadow: '0 3px 10px rgba(5, 81, 126, 0.25)', whiteSpace: 'nowrap', flexShrink: '0'
                 }">
           <i class="pi pi-th-large"></i>
           <span>Global Products Catalog</span>

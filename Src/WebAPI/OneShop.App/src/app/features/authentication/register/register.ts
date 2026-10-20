@@ -146,13 +146,13 @@ export class Register implements OnInit {
   private fetchSchemaInfo() {
     this.schemaInfo = {
       sequence: 1,
-      company: 'AMTERP Solutions',
+      company: 'OneShop Solutions.',
       product: 'OneShop',
       version: 'v1.0.0',
       isTestMode: false,
       author: 'Dishant Save',
       productLogo: 'images/logo.png',
-      copyright: '© 2026 AMTERP Solutions. All rights reserved.',
+      copyright: 'Copyright 2026 OneShop Solutions. All rights reserved.',
       dateCreated: new Date().toISOString()
     };
   }

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Capacitor } from '@capacitor/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -41,6 +42,7 @@ export class Login implements OnInit {
   username = '';
   password = '';
   rememberMe = false;
+  isNativeApp = Capacitor.isNativePlatform();
 
   schemaInfo: SchemaVersionDto | null = null;
 
@@ -52,15 +54,27 @@ export class Login implements OnInit {
     // Matches the same schema query pattern used in registration
     this.schemaInfo = {
       sequence: 1,
-      company: 'AMTERP Solutions',
+      company: 'OneShop Solutions.',
       product: 'OneShop',
       version: 'v1.0.0',
       isTestMode: false,
       author: 'Dishant Save',
       productLogo: 'images/logo.png',
-      copyright: '© 2026 AMTERP Solutions. All rights reserved.',
+      copyright: 'Copyright 2026 OneShop Solutions. All rights reserved.',
       dateCreated: new Date().toISOString()
     };
+  }
+
+  fillDemoVendor() {
+    this.username = 'Dishant';
+    this.password = 'Dishant@123';
+    this.onLogin();
+  }
+
+  fillDemoCustomer() {
+    this.username = 'Customer';
+    this.password = 'Customer@123';
+    this.onLogin();
   }
 
   onLogin() {

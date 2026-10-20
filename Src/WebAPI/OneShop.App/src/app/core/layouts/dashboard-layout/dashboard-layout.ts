@@ -1,6 +1,7 @@
-import { Component, OnInit, inject, computed, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, computed, signal, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
+import { filter, Subscription } from 'rxjs';
 import { Navbar } from '../components/navbar/navbar';
 import { Sidebar } from '../components/sidebar/sidebar';
 import { Footer } from '../components/footer/footer';
@@ -9,19 +10,22 @@ import { Access } from '../../services/access';
 import { CartDrawer } from '../../../features/orders/cart-drawer/cart-drawer';
 import { CartService } from '../../../features/orders/services/cart.service';
 import { NotificationService } from '../../../features/notifications/services/notification.service';
+import { EmbeddedDatabaseService } from '../../services/embedded-database.service';
 
 @Component({
   selector: 'app-dashboard-layout',
   standalone: true,
   imports: [CommonModule, RouterModule, Navbar, Sidebar, Footer, CartDrawer],
-  templateUrl: './dashboard-layout.html'
+  templateUrl: './dashboard-layout.html',
+  styleUrl: './dashboard-layout.scss'
 })
-export class DashboardLayout implements OnInit {
+export class DashboardLayout implements OnInit, OnDestroy {
   private router = inject(Router);
   private themeService = inject(Theme);
   private access = inject(Access);
   public notifService = inject(NotificationService);
   public cartService = inject(CartService);
+  public embeddedDb = inject(EmbeddedDatabaseService);
 
   cartCount = this.cartService.cartCount;
 
@@ -33,9 +37,13 @@ export class DashboardLayout implements OnInit {
   sidebarOpen = true;
   selectedTheme: ThemeType = 'light-theme';
 
+  // Mobile responsiveness signals
+  isMobile = signal<boolean>(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  mobileMenuOpen = signal<boolean>(false);
+  private routerSub?: Subscription;
+
   // Exact sidebar sequence for Master/Vendor login:
-  // 1. Dashboard, 2. Orders, 3. Items, 4. Inventory, 5. Masters, 6. Users, 7. Settings
-  // (Notifications & Logout remain at bottom)
+  // 1. Dashboard, 2. Orders, 3. Items, 4. Inventory, 5. Masters, 6. Users, 7. API Connectivity, 8. Settings
   private allNavItems = [
     { label: 'Dashboard', screenKeys: ['Dashboard'], icon: 'pi pi-home', route: '/dashboard' },
     { label: 'Orders', screenKeys: ['Orders'], icon: 'pi pi-shopping-cart', route: '/dashboard/orders' },
@@ -104,8 +112,6 @@ export class DashboardLayout implements OnInit {
       });
   });
 
-  // Top Menu Option: Customer has no top menu options (all options reside in Sidebar).
-  // Master/Vendor retains Global Products, Analytics, and Tutorials.
   tabItems = computed(() => {
     if (this.isCustomer()) {
       return [];
@@ -117,6 +123,17 @@ export class DashboardLayout implements OnInit {
     ];
   });
 
+  @HostListener('window:resize')
+  onResize() {
+    if (typeof window !== 'undefined') {
+      const mobile = window.innerWidth < 768;
+      this.isMobile.set(mobile);
+      if (!mobile) {
+        this.mobileMenuOpen.set(false);
+      }
+    }
+  }
+
   ngOnInit() {
     this.userDetails = this.getStoredUser();
     this.currentUser.set(this.userDetails);
@@ -126,10 +143,31 @@ export class DashboardLayout implements OnInit {
     this.themeService.theme$.subscribe(theme => {
       this.selectedTheme = theme;
     });
+
+    // Close mobile drawer upon router navigation
+    this.routerSub = this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe(() => {
+        if (this.isMobile()) {
+          this.mobileMenuOpen.set(false);
+        }
+      });
+  }
+
+  ngOnDestroy() {
+    this.routerSub?.unsubscribe();
   }
 
   toggleSidebar() {
-    this.sidebarOpen = !this.sidebarOpen;
+    if (this.isMobile()) {
+      this.mobileMenuOpen.update(v => !v);
+    } else {
+      this.sidebarOpen = !this.sidebarOpen;
+    }
+  }
+
+  closeMobileMenu() {
+    this.mobileMenuOpen.set(false);
   }
 
   logout() {

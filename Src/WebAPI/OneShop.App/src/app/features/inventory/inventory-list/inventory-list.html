@@ -1,7 +1,9 @@
-<div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '1150px', margin: '0 auto', paddingBottom: '3rem' }">
+<div
+  [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '1150px', margin: '0 auto', paddingBottom: '3rem' }">
 
   <!-- Header & Action Bar -->
-  <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }">
+  <div
+    [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }">
     <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.85rem' }">
       <div [ngStyle]="{
           width: '46px', height: '46px', borderRadius: '12px',
@@ -13,19 +15,18 @@
         <i class="pi pi-database" [ngStyle]="{ fontSize: '1.35rem' }"></i>
       </div>
       <div>
-        <h2 [ngStyle]="{ margin: '0', fontSize: '1.45rem', fontWeight: '700', color: 'var(--text-color)' }">Inventory Management</h2>
+        <h2 [ngStyle]="{ margin: '0', fontSize: '1.45rem', fontWeight: '700', color: 'var(--text-color)' }">Inventory
+          Management</h2>
         <span [ngStyle]="{ fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.65' }">
-          Segregated stock management: <strong>Warehouses for B2B Wholesale</strong> &bull; <strong>Stores for B2C Retail</strong>
+          Segregated stock management: <strong>Warehouses for B2B Wholesale</strong> &bull; <strong>Stores for B2C
+            Retail</strong>
         </span>
       </div>
     </div>
 
     <!-- Actions -->
     <div [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }">
-      <button *ngIf="permissions().canCreate"
-              (click)="openCreateStockModal()"
-              type="button"
-              [ngStyle]="{
+      <button *ngIf="permissions().canCreate" (click)="openCreateStockModal()" type="button" [ngStyle]="{
                 background: 'var(--sidebar-link-active-bg, #05517e)', color: '#fff',
                 border: 'none', borderRadius: '8px', padding: '0.55rem 1.1rem',
                 fontSize: '0.88rem', fontWeight: '600', display: 'flex', alignItems: 'center',
@@ -39,42 +40,56 @@
 
   <!-- KPI Cards -->
   <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }">
-    <div [ngStyle]="{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.85rem' }">
-      <div [ngStyle]="{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(5, 81, 126, 0.1)', color: 'var(--sidebar-link-active-bg, #05517e)', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
+    <div
+      [ngStyle]="{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.85rem' }">
+      <div
+        [ngStyle]="{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(5, 81, 126, 0.1)', color: 'var(--sidebar-link-active-bg, #05517e)', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
         <i class="pi pi-tags" [ngStyle]="{ fontSize: '1.1rem' }"></i>
       </div>
       <div>
-        <div [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.65', fontWeight: '600' }">Tracked SKUs</div>
+        <div [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.65', fontWeight: '600' }">Tracked
+          SKUs</div>
         <div [ngStyle]="{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-color)' }">{{ stats().skus }}</div>
       </div>
     </div>
 
-    <div [ngStyle]="{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.85rem' }">
-      <div [ngStyle]="{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
+    <div
+      [ngStyle]="{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.85rem' }">
+      <div
+        [ngStyle]="{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
         <i class="pi pi-check-circle" [ngStyle]="{ fontSize: '1.1rem' }"></i>
       </div>
       <div>
-        <div [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.65', fontWeight: '600' }">Available Units</div>
-        <div [ngStyle]="{ fontSize: '1.25rem', fontWeight: '800', color: '#10b981' }">{{ stats().availQty | number }}</div>
+        <div [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.65', fontWeight: '600' }">
+          Available Units</div>
+        <div [ngStyle]="{ fontSize: '1.25rem', fontWeight: '800', color: '#10b981' }">{{ stats().availQty | number }}
+        </div>
       </div>
     </div>
 
-    <div [ngStyle]="{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.85rem' }">
-      <div [ngStyle]="{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
+    <div
+      [ngStyle]="{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.85rem' }">
+      <div
+        [ngStyle]="{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
         <i class="pi pi-box" [ngStyle]="{ fontSize: '1.1rem' }"></i>
       </div>
       <div>
-        <div [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.65', fontWeight: '600' }">Total On Hand</div>
-        <div [ngStyle]="{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-color)' }">{{ stats().totalQty | number }}</div>
+        <div [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.65', fontWeight: '600' }">Total
+          On Hand</div>
+        <div [ngStyle]="{ fontSize: '1.25rem', fontWeight: '800', color: 'var(--text-color)' }">{{ stats().totalQty |
+          number }}</div>
       </div>
     </div>
 
-    <div [ngStyle]="{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.85rem' }">
-      <div [ngStyle]="{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
+    <div
+      [ngStyle]="{ background: 'var(--card-bg)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.85rem' }">
+      <div
+        [ngStyle]="{ width: '40px', height: '40px', borderRadius: '8px', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }">
         <i class="pi pi-exclamation-triangle" [ngStyle]="{ fontSize: '1.1rem' }"></i>
       </div>
       <div>
-        <div [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.65', fontWeight: '600' }">Low Stock SKUs</div>
+        <div [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.65', fontWeight: '600' }">Low
+          Stock SKUs</div>
         <div [ngStyle]="{ fontSize: '1.25rem', fontWeight: '800', color: '#ef4444' }">{{ stats().lowStock }}</div>
       </div>
     </div>
@@ -87,14 +102,15 @@
     }">
 
     <!-- Filter 1: Company -->
-    <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }">
-      <label [ngStyle]="{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.7' }">Company</label>
+    <div
+      [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: '0', maxWidth: '100%', flex: '1 1 auto' }">
+      <label
+        [ngStyle]="{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.7' }">Company</label>
       <select [ngModel]="selectedCompanyCode()"
-              (ngModelChange)="selectedCompanyCode.set($event); selectedLocationCode.set('ALL'); refresh();"
-              [ngStyle]="{
+        (ngModelChange)="selectedCompanyCode.set($event); selectedLocationCode.set('ALL'); refresh();" [ngStyle]="{
                 background: 'var(--input-bg)', border: '1px solid var(--border-color)',
                 color: 'var(--input-text)', borderRadius: '8px', padding: '0.45rem 0.75rem',
-                fontSize: '0.85rem', outline: 'none', cursor: 'pointer'
+                fontSize: '0.85rem', outline: 'none', cursor: 'pointer', maxWidth: '100%', minWidth: '0', textOverflow: 'ellipsis'
               }">
         <option value="ALL">All Companies</option>
         <option *ngFor="let c of companies()" [value]="c.code">{{ c.code }} — {{ c.name }}</option>
@@ -102,14 +118,15 @@
     </div>
 
     <!-- Filter 2: Location Type (B2B Warehouse vs B2C Store) -->
-    <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }">
-      <label [ngStyle]="{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.7' }">Location Channel</label>
+    <div
+      [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: '0', maxWidth: '100%', flex: '1 1 auto' }">
+      <label [ngStyle]="{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.7' }">Location
+        Channel</label>
       <select [ngModel]="selectedLocationType()"
-              (ngModelChange)="selectedLocationType.set($event); selectedLocationCode.set('ALL'); refresh();"
-              [ngStyle]="{
+        (ngModelChange)="selectedLocationType.set($event); selectedLocationCode.set('ALL'); refresh();" [ngStyle]="{
                 background: 'var(--input-bg)', border: '1px solid var(--border-color)',
                 color: 'var(--input-text)', borderRadius: '8px', padding: '0.45rem 0.75rem',
-                fontSize: '0.85rem', outline: 'none', cursor: 'pointer'
+                fontSize: '0.85rem', outline: 'none', cursor: 'pointer', maxWidth: '100%', minWidth: '0', textOverflow: 'ellipsis'
               }">
         <option value="ALL">All Channels</option>
         <option value="Warehouse">Warehouses (B2B Wholesale)</option>
@@ -118,14 +135,15 @@
     </div>
 
     <!-- Filter 3: Specific Location -->
-    <div *ngIf="selectedLocationType() !== 'ALL'" [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }">
-      <label [ngStyle]="{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.7' }">Specific Depot / Store</label>
-      <select [ngModel]="selectedLocationCode()"
-              (ngModelChange)="selectedLocationCode.set($event); refresh();"
-              [ngStyle]="{
+    <div *ngIf="selectedLocationType() !== 'ALL'"
+      [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: '0', maxWidth: '100%', flex: '1 1 auto' }">
+      <label [ngStyle]="{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.7' }">Specific
+        Depot / Store</label>
+      <select [ngModel]="selectedLocationCode()" (ngModelChange)="selectedLocationCode.set($event); refresh();"
+        [ngStyle]="{
                 background: 'var(--input-bg)', border: '1px solid var(--border-color)',
                 color: 'var(--input-text)', borderRadius: '8px', padding: '0.45rem 0.75rem',
-                fontSize: '0.85rem', outline: 'none', cursor: 'pointer'
+                fontSize: '0.85rem', outline: 'none', cursor: 'pointer', maxWidth: '100%', minWidth: '0', textOverflow: 'ellipsis'
               }">
         <option value="ALL">All {{ selectedLocationType() === 'Warehouse' ? 'Warehouses' : 'Stores' }}</option>
         <option *ngFor="let loc of availableFilterLocations()" [value]="loc.code">{{ loc.name }}</option>
@@ -134,24 +152,24 @@
 
     <!-- Search Box -->
     <div [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: '1', minWidth: '200px' }">
-      <label [ngStyle]="{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.7' }">Search</label>
+      <label
+        [ngStyle]="{ fontSize: '0.75rem', fontWeight: '700', color: 'var(--text-color)', opacity: '0.7' }">Search</label>
       <div [ngStyle]="{
           display: 'flex', alignItems: 'center', gap: '0.4rem',
           background: 'var(--input-bg)', border: '1px solid var(--border-color)',
           borderRadius: '8px', padding: '0.45rem 0.75rem'
         }">
         <i class="pi pi-search" [ngStyle]="{ color: 'var(--text-color)', opacity: '0.5', fontSize: '0.8rem' }"></i>
-        <input type="text"
-               placeholder="Search by SKU, style, color, store…"
-               [value]="searchTerm()"
-               (input)="searchTerm.set($any($event.target).value)"
-               [ngStyle]="{ border: 'none', outline: 'none', background: 'transparent', color: 'var(--input-text)', fontSize: '0.85rem', width: '100%' }" />
+        <input type="text" placeholder="Search by SKU, style, color, store…" [value]="searchTerm()"
+          (input)="searchTerm.set($any($event.target).value)"
+          [ngStyle]="{ border: 'none', outline: 'none', background: 'transparent', color: 'var(--input-text)', fontSize: '0.85rem', width: '100%' }" />
       </div>
     </div>
   </div>
 
   <!-- Loading State -->
-  <div *ngIf="loading()" [ngStyle]="{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-color)', opacity: '0.7' }">
+  <div *ngIf="loading()"
+    [ngStyle]="{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-color)', opacity: '0.7' }">
     <i class="pi pi-spin pi-spinner" [ngStyle]="{ fontSize: '1.5rem', marginBottom: '0.5rem', display: 'block' }"></i>
     Loading inventory records...
   </div>
@@ -161,10 +179,12 @@
       textAlign: 'center', padding: '3.5rem 1rem', background: 'var(--card-bg)',
       border: '1px dashed var(--border-color)', borderRadius: '12px'
     }">
-    <i class="pi pi-database" [ngStyle]="{ fontSize: '2.5rem', color: 'var(--text-color)', opacity: '0.3', marginBottom: '0.75rem', display: 'block' }"></i>
+    <i class="pi pi-database"
+      [ngStyle]="{ fontSize: '2.5rem', color: 'var(--text-color)', opacity: '0.3', marginBottom: '0.75rem', display: 'block' }"></i>
     <h3 [ngStyle]="{ margin: '0 0 0.5rem', fontSize: '1.15rem', color: 'var(--text-color)' }">No inventory records</h3>
     <p [ngStyle]="{ margin: '0 0 1.25rem', fontSize: '0.88rem', color: 'var(--text-color)', opacity: '0.6' }">
-      {{ searchTerm() ? 'No inventory records match your criteria.' : 'Create stock entries to allocate inventory into Warehouses (B2B) or Stores (B2C).' }}
+      {{ searchTerm() ? 'No inventory records match your criteria.' : 'Create stock entries to allocate inventory into
+      Warehouses (B2B) or Stores (B2C).' }}
     </p>
     <button *ngIf="permissions().canCreate" (click)="openCreateStockModal()" type="button" [ngStyle]="{
         background: 'var(--sidebar-link-active-bg, #05517e)', color: '#fff', border: 'none',
@@ -182,7 +202,8 @@
     <div [ngStyle]="{ overflowX: 'auto' }">
       <table [ngStyle]="{ width: '100%', borderCollapse: 'collapse', fontSize: '0.88rem' }">
         <thead>
-          <tr [ngStyle]="{ background: 'var(--input-bg)', borderBottom: '1px solid var(--border-color)', textAlign: 'left', opacity: '0.85' }">
+          <tr
+            [ngStyle]="{ background: 'var(--input-bg)', borderBottom: '1px solid var(--border-color)', textAlign: 'left', opacity: '0.85' }">
             <th [ngStyle]="{ padding: '0.85rem 1rem' }">Product & Variant</th>
             <th [ngStyle]="{ padding: '0.85rem 1rem' }">Location & Channel</th>
             <th [ngStyle]="{ padding: '0.85rem 1rem', textAlign: 'right' }">On Hand</th>
@@ -209,8 +230,10 @@
                 </span>
 
                 <!-- Colour chip with swatch dot -->
-                <span [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.8' }">
-                  <span [ngStyle]="{ width: '10px', height: '10px', borderRadius: '50%', background: inv.colourHex || '#888', border: '1px solid var(--border-color)' }"></span>
+                <span
+                  [ngStyle]="{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.78rem', color: 'var(--text-color)', opacity: '0.8' }">
+                  <span
+                    [ngStyle]="{ width: '10px', height: '10px', borderRadius: '50%', background: inv.colourHex || '#888', border: '1px solid var(--border-color)' }"></span>
                   {{ inv.colourCode }}
                 </span>
 
@@ -243,13 +266,15 @@
                 </span>
               </div>
 
-              <div [ngStyle]="{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)', marginTop: '0.25rem' }">
+              <div
+                [ngStyle]="{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)', marginTop: '0.25rem' }">
                 {{ inv.locationName }} ({{ inv.locationCode }})
               </div>
             </td>
 
             <!-- On Hand -->
-            <td [ngStyle]="{ padding: '0.85rem 1rem', textAlign: 'right', fontWeight: '600', color: 'var(--text-color)' }">
+            <td
+              [ngStyle]="{ padding: '0.85rem 1rem', textAlign: 'right', fontWeight: '600', color: 'var(--text-color)' }">
               {{ inv.quantityOnHand | number }}
             </td>
 
@@ -294,7 +319,8 @@
             <!-- Actions -->
             <td [ngStyle]="{ padding: '0.85rem 1rem', textAlign: 'center' }">
               <div [ngStyle]="{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.35rem' }">
-                <button *ngIf="permissions().canEdit" (click)="openAdjustModal(inv)" title="Quick Stock Adjustment" type="button" [ngStyle]="{
+                <button *ngIf="permissions().canEdit" (click)="openAdjustModal(inv)" title="Quick Stock Adjustment"
+                  type="button" [ngStyle]="{
                     background: 'var(--input-bg)', border: '1px solid var(--border-color)', borderRadius: '6px',
                     padding: '0.3rem 0.6rem', fontSize: '0.78rem', fontWeight: '600', color: 'var(--sidebar-link-active-bg, #05517e)',
                     cursor: 'pointer'
@@ -332,21 +358,23 @@
         <h3 [ngStyle]="{ margin: '0', fontSize: '1.25rem', color: 'var(--text-color)', fontWeight: '700' }">
           Create / Update Stock Level
         </h3>
-        <button (click)="closeStockModal()" type="button" [ngStyle]="{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-color)', opacity: '0.6' }">
+        <button (click)="closeStockModal()" type="button"
+          [ngStyle]="{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-color)', opacity: '0.6' }">
           <i class="pi pi-times"></i>
         </button>
       </div>
 
-      <form [formGroup]="stockForm" (ngSubmit)="saveStock()" [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }">
+      <form [formGroup]="stockForm" (ngSubmit)="saveStock()"
+        [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1.15rem' }">
 
         <!-- Company Dropdown -->
         <div>
-          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+          <label
+            [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
             Company <span [ngStyle]="{ color: '#ef4444' }">*</span>
           </label>
-          <select formControlName="companyCode"
-                  (change)="onStockFormCompanyChange($any($event.target).value)"
-                  [ngStyle]="{
+          <select formControlName="companyCode" (change)="onStockFormCompanyChange($any($event.target).value)"
+            [ngStyle]="{
                     width: '100%', background: 'var(--input-bg)', border: '1px solid var(--border-color)',
                     color: 'var(--input-text)', padding: '0.6rem 0.85rem', borderRadius: '8px', fontSize: '0.9rem', outline: 'none'
                   }">
@@ -358,12 +386,12 @@
         <!-- Location Type Dropdown (B2B Warehouse vs B2C Store) -->
         <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }">
           <div>
-            <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+            <label
+              [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
               Location Type <span [ngStyle]="{ color: '#ef4444' }">*</span>
             </label>
-            <select formControlName="locationType"
-                    (change)="onStockFormLocationTypeChange($any($event.target).value)"
-                    [ngStyle]="{
+            <select formControlName="locationType" (change)="onStockFormLocationTypeChange($any($event.target).value)"
+              [ngStyle]="{
                       width: '100%', background: 'var(--input-bg)', border: '1px solid var(--border-color)',
                       color: 'var(--input-text)', padding: '0.6rem 0.85rem', borderRadius: '8px', fontSize: '0.9rem', outline: 'none'
                     }">
@@ -374,8 +402,10 @@
 
           <!-- Specific Location Dropdown (Warehouses or Stores of that company) -->
           <div>
-            <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
-              Select {{ stockForm.get('locationType')?.value === 'Warehouse' ? 'Warehouse' : 'Store' }} <span [ngStyle]="{ color: '#ef4444' }">*</span>
+            <label
+              [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+              Select {{ stockForm.get('locationType')?.value === 'Warehouse' ? 'Warehouse' : 'Store' }} <span
+                [ngStyle]="{ color: '#ef4444' }">*</span>
             </label>
             <select formControlName="locationCode" [ngStyle]="{
                 width: '100%', background: 'var(--input-bg)', border: '1px solid var(--border-color)',
@@ -389,12 +419,11 @@
 
         <!-- Product Item Dropdown -->
         <div>
-          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+          <label
+            [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
             Product Item <span [ngStyle]="{ color: '#ef4444' }">*</span>
           </label>
-          <select formControlName="itemNumber"
-                  (change)="onStockFormItemChange($any($event.target).value)"
-                  [ngStyle]="{
+          <select formControlName="itemNumber" (change)="onStockFormItemChange($any($event.target).value)" [ngStyle]="{
                     width: '100%', background: 'var(--input-bg)', border: '1px solid var(--border-color)',
                     color: 'var(--input-text)', padding: '0.6rem 0.85rem', borderRadius: '8px', fontSize: '0.9rem', outline: 'none'
                   }">
@@ -408,7 +437,8 @@
         <!-- Variant Selection (Colour & Size) -->
         <div [ngStyle]="{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }">
           <div>
-            <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+            <label
+              [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
               Colour Variant <span [ngStyle]="{ color: '#ef4444' }">*</span>
             </label>
             <select formControlName="colourCode" [ngStyle]="{
@@ -416,12 +446,14 @@
                 color: 'var(--input-text)', padding: '0.6rem 0.85rem', borderRadius: '8px', fontSize: '0.9rem', outline: 'none'
               }">
               <option value="" disabled>Select Colour</option>
-              <option *ngFor="let v of formVariants()" [value]="v.colourCode">{{ v.colourCode }} <span *ngIf="v.colourName">({{ v.colourName }})</span></option>
+              <option *ngFor="let v of formVariants()" [value]="v.colourCode">{{ v.colourCode }} <span
+                  *ngIf="v.colourName">({{ v.colourName }})</span></option>
             </select>
           </div>
 
           <div>
-            <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+            <label
+              [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
               Size Variant <span [ngStyle]="{ color: '#ef4444' }">*</span>
             </label>
             <select formControlName="sizeCode" [ngStyle]="{
@@ -429,7 +461,8 @@
                 color: 'var(--input-text)', padding: '0.6rem 0.85rem', borderRadius: '8px', fontSize: '0.9rem', outline: 'none'
               }">
               <option value="" disabled>Select Size</option>
-              <option *ngFor="let v of formVariants()" [value]="v.sizeCode">{{ v.sizeCode }} <span *ngIf="v.sizeName">({{ v.sizeName }})</span></option>
+              <option *ngFor="let v of formVariants()" [value]="v.sizeCode">{{ v.sizeCode }} <span
+                  *ngIf="v.sizeName">({{ v.sizeName }})</span></option>
             </select>
           </div>
         </div>
@@ -437,7 +470,8 @@
         <!-- Quantities: On Hand, Allocated, Reorder Level -->
         <div [ngStyle]="{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem' }">
           <div>
-            <label [ngStyle]="{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+            <label
+              [ngStyle]="{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
               On Hand Qty <span [ngStyle]="{ color: '#ef4444' }">*</span>
             </label>
             <input type="number" min="0" formControlName="quantityOnHand" [ngStyle]="{
@@ -447,7 +481,8 @@
           </div>
 
           <div>
-            <label [ngStyle]="{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+            <label
+              [ngStyle]="{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
               Allocated Qty
             </label>
             <input type="number" min="0" formControlName="allocatedQuantity" [ngStyle]="{
@@ -457,7 +492,8 @@
           </div>
 
           <div>
-            <label [ngStyle]="{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+            <label
+              [ngStyle]="{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
               Reorder Level
             </label>
             <input type="number" min="0" formControlName="reorderLevel" [ngStyle]="{
@@ -468,10 +504,12 @@
         </div>
 
         <div>
-          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+          <label
+            [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
             Adjustment Reason
           </label>
-          <input type="text" formControlName="reason" placeholder="e.g. Initial inventory intake, purchase order #902" [ngStyle]="{
+          <input type="text" formControlName="reason" placeholder="e.g. Initial inventory intake, purchase order #902"
+            [ngStyle]="{
               width: '100%', background: 'var(--input-bg)', border: '1px solid var(--border-color)',
               color: 'var(--input-text)', padding: '0.6rem 0.85rem', borderRadius: '8px', fontSize: '0.9rem', outline: 'none'
             }" />
@@ -509,19 +547,25 @@
         <h3 [ngStyle]="{ margin: '0', fontSize: '1.2rem', color: 'var(--text-color)', fontWeight: '700' }">
           Adjust Stock Quantity
         </h3>
-        <button (click)="closeAdjustModal()" type="button" [ngStyle]="{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-color)', opacity: '0.6' }">
+        <button (click)="closeAdjustModal()" type="button"
+          [ngStyle]="{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-color)', opacity: '0.6' }">
           <i class="pi pi-times"></i>
         </button>
       </div>
 
-      <div [ngStyle]="{ fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.8', background: 'var(--input-bg)', padding: '0.75rem', borderRadius: '8px' }">
-        <div><strong>Item:</strong> {{ adjustForm.get('itemNumber')?.value }} ({{ adjustForm.get('colourCode')?.value }} / {{ adjustForm.get('sizeCode')?.value }})</div>
-        <div [ngStyle]="{ marginTop: '0.2rem' }"><strong>Location:</strong> {{ adjustForm.get('locationType')?.value }} [{{ adjustForm.get('locationCode')?.value }}]</div>
+      <div
+        [ngStyle]="{ fontSize: '0.85rem', color: 'var(--text-color)', opacity: '0.8', background: 'var(--input-bg)', padding: '0.75rem', borderRadius: '8px' }">
+        <div><strong>Item:</strong> {{ adjustForm.get('itemNumber')?.value }} ({{ adjustForm.get('colourCode')?.value }}
+          / {{ adjustForm.get('sizeCode')?.value }})</div>
+        <div [ngStyle]="{ marginTop: '0.2rem' }"><strong>Location:</strong> {{ adjustForm.get('locationType')?.value }}
+          [{{ adjustForm.get('locationCode')?.value }}]</div>
       </div>
 
-      <form [formGroup]="adjustForm" (ngSubmit)="saveAdjustment()" [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1rem' }">
+      <form [formGroup]="adjustForm" (ngSubmit)="saveAdjustment()"
+        [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '1rem' }">
         <div>
-          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+          <label
+            [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
             Adjustment Quantity (Positive to add, Negative to deduct) <span [ngStyle]="{ color: '#ef4444' }">*</span>
           </label>
           <input type="number" formControlName="adjustment" placeholder="+50 or -10" [ngStyle]="{
@@ -531,7 +575,8 @@
         </div>
 
         <div>
-          <label [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
+          <label
+            [ngStyle]="{ display: 'block', fontSize: '0.82rem', fontWeight: '600', marginBottom: '0.35rem', color: 'var(--text-color)' }">
             Reason for Adjustment <span [ngStyle]="{ color: '#ef4444' }">*</span>
           </label>
           <input type="text" formControlName="reason" placeholder="Cycle count, damaged stock, return..." [ngStyle]="{
@@ -578,21 +623,25 @@
             {{ selectedRecordForAudit()?.itemName }} ({{ selectedRecordForAudit()?.itemNumber }})
           </span>
         </div>
-        <button (click)="closeAuditModal()" type="button" [ngStyle]="{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-color)', opacity: '0.6' }">
+        <button (click)="closeAuditModal()" type="button"
+          [ngStyle]="{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-color)', opacity: '0.6' }">
           <i class="pi pi-times"></i>
         </button>
       </div>
 
-      <div *ngIf="!selectedRecordForAudit()?.audit || selectedRecordForAudit()?.audit?.length === 0" [ngStyle]="{ fontSize: '0.88rem', color: 'var(--text-color)', opacity: '0.6' }">
+      <div *ngIf="!selectedRecordForAudit()?.audit || selectedRecordForAudit()?.audit?.length === 0"
+        [ngStyle]="{ fontSize: '0.88rem', color: 'var(--text-color)', opacity: '0.6' }">
         No modifications recorded for this stock record.
       </div>
 
-      <div *ngIf="selectedRecordForAudit()?.audit && selectedRecordForAudit()!.audit!.length > 0" [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }">
+      <div *ngIf="selectedRecordForAudit()?.audit && selectedRecordForAudit()!.audit!.length > 0"
+        [ngStyle]="{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }">
         <div *ngFor="let a of selectedRecordForAudit()?.audit" [ngStyle]="{
             background: 'var(--input-bg)', border: '1px solid var(--border-color)', borderRadius: '8px',
             padding: '0.75rem 1rem'
           }">
-          <div [ngStyle]="{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)' }">{{ a.description }}</div>
+          <div [ngStyle]="{ fontSize: '0.85rem', fontWeight: '600', color: 'var(--text-color)' }">{{ a.description }}
+          </div>
           <div [ngStyle]="{ fontSize: '0.75rem', color: 'var(--text-color)', opacity: '0.6', marginTop: '0.25rem' }">
             By: <strong>{{ a.modifiedBy }}</strong> &bull; {{ a.dateModified | date:'medium' }}
           </div>

@@ -728,7 +728,8 @@
         <!-- Company Filter -->
         <select [ngModel]="selectedCompanyFilter()" (ngModelChange)="selectedCompanyFilter.set($event)" [ngStyle]="{
                 background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--input-text)',
-                borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.85rem', outline: 'none', cursor: 'pointer'
+                borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.85rem', outline: 'none', cursor: 'pointer',
+                maxWidth: '100%', minWidth: '0', textOverflow: 'ellipsis'
               }">
           <option value="ALL">All Companies</option>
           <option *ngFor="let c of companies()" [value]="c.code">{{ c.code }} — {{ c.name }}</option>
@@ -737,7 +738,8 @@
         <!-- Status Filter -->
         <select [ngModel]="selectedStatusFilter()" (ngModelChange)="selectedStatusFilter.set($event)" [ngStyle]="{
                 background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--input-text)',
-                borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.85rem', outline: 'none', cursor: 'pointer'
+                borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.85rem', outline: 'none', cursor: 'pointer',
+                maxWidth: '100%', minWidth: '0', textOverflow: 'ellipsis'
               }">
           <option value="ALL">All Statuses</option>
           <option value="Pending">Pending</option>
@@ -751,7 +753,8 @@
         <!-- Channel Filter -->
         <select [ngModel]="selectedChannelFilter()" (ngModelChange)="selectedChannelFilter.set($event)" [ngStyle]="{
                 background: 'var(--input-bg)', border: '1px solid var(--border-color)', color: 'var(--input-text)',
-                borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.85rem', outline: 'none', cursor: 'pointer'
+                borderRadius: '8px', padding: '0.5rem 0.75rem', fontSize: '0.85rem', outline: 'none', cursor: 'pointer',
+                maxWidth: '100%', minWidth: '0', textOverflow: 'ellipsis'
               }">
           <option value="ALL">All Channels</option>
           <option value="B2B">B2B Wholesale</option>

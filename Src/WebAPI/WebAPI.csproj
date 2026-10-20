@@ -4,7 +4,14 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <DefaultItemExcludes>$(DefaultItemExcludes);OneShop.App\node_modules\**;OneShop.App\android\**;OneShop.App\.angular\**;OneShop.App\dist\**</DefaultItemExcludes>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="OneShop.App\**" />
+    <Compile Remove="OneShop.App\**" />
+    <None Remove="OneShop.App\node_modules\**;OneShop.App\android\**;OneShop.App\.angular\**;OneShop.App\dist\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="HotChocolate.AspNetCore" Version="16.5.0" />

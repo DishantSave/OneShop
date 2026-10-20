@@ -1,42 +1,121 @@
 <div
-  [ngStyle]="{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden', background: 'var(--bg-color)' }">
+  [ngStyle]="{ display: 'flex', flexDirection: 'column', height: '100dvh', overflow: 'hidden', background: 'var(--bg-color)' }">
+
+  <!-- Top Navbar -->
   <app-navbar [tabItems]="tabItems()" [logoUrl]="userDetails?.productLogo"
     (toggleSidebar)="toggleSidebar()"></app-navbar>
 
-  <div [ngStyle]="{ display: 'flex', flex: '1 1 auto', overflow: 'hidden' }">
-    <app-sidebar [collapsed]="!sidebarOpen" [menuItems]="sidebarItems()" [userAvatar]="userDetails?.profilePicture"
+  <!-- Mobile Off-Canvas Backdrop -->
+  <div *ngIf="isMobile() && mobileMenuOpen()" class="mobile-sidebar-backdrop" (click)="closeMobileMenu()"></div>
+
+  <!-- Mobile Off-Canvas Drawer -->
+  <div *ngIf="isMobile()" class="mobile-sidebar-drawer" [class.open]="mobileMenuOpen()">
+    <button type="button" class="mobile-sidebar-close-btn" (click)="closeMobileMenu()" title="Close navigation menu">
+      <i class="pi pi-times"></i>
+    </button>
+    <app-sidebar [collapsed]="false" [menuItems]="sidebarItems()" [userAvatar]="userDetails?.profilePicture"
       [userName]="userDetails?.userName" [company]="userDetails?.company"
       [tier]="userDetails?.subscriptionType || 'Basic'" (logout)="logout()"></app-sidebar>
-
-    <div
-      [ngStyle]="{ flex: '1 1 auto', display: 'flex', flexDirection: 'column', overflowY: 'auto', padding: '1.5rem', background: 'var(--bg-color)', color: 'var(--text-color)' }">
-      <router-outlet></router-outlet>
-    </div>
   </div>
 
-  <app-footer></app-footer>
+  <!-- Body Content Area -->
+  <div [ngStyle]="{ display: 'flex', flex: '1 1 auto', overflow: 'hidden', position: 'relative' }">
+
+    <!-- Desktop Sidebar (Only rendered on desktop) -->
+    <div *ngIf="!isMobile()" class="desktop-sidebar-container">
+      <app-sidebar [collapsed]="!sidebarOpen" [menuItems]="sidebarItems()" [userAvatar]="userDetails?.profilePicture"
+        [userName]="userDetails?.userName" [company]="userDetails?.company"
+        [tier]="userDetails?.subscriptionType || 'Basic'" (logout)="logout()"></app-sidebar>
+    </div>
+
+    <!-- Routed Page View -->
+    <main class="main-content-area" [class.desktop-padding]="!isMobile()" [class.mobile-padding]="isMobile()">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+
+  <!-- Footer (Visible on desktop) -->
+  <app-footer *ngIf="!isMobile()"></app-footer>
+
+  <!-- Cart Drawer -->
   <app-cart-drawer></app-cart-drawer>
 
-  <!-- Floating Round Cart Button on Bottom Right Corner -->
-  <button (click)="openCart()" type="button" title="Open Shopping Cart" [ngStyle]="{
-            position: 'fixed',
-            bottom: '2rem',
-            right: '2rem',
-            width: '60px',
-            height: '60px',
-            borderRadius: '50%',
-            background: 'linear-gradient(135deg, #05517e, #033654)',
-            color: '#ffffff',
-            border: 'none',
-            boxShadow: '0 8px 24px rgba(5, 81, 126, 0.45)',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: '999',
-            transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-          }">
-    <i class="pi pi-shopping-bag" [ngStyle]="{ fontSize: '1.4rem' }"></i>
+  <!-- Mobile Bottom Navigation Bar (Visible only on mobile) -->
+  <nav *ngIf="isMobile()" class="mobile-bottom-nav">
+    <ng-container *ngIf="isCustomer(); else vendorBottomNav">
+      <!-- 1. Catalog & Shop -->
+      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+        class="mobile-nav-item">
+        <i class="pi pi-th-large"></i>
+        <span class="label">Shop</span>
+      </a>
+
+      <!-- 2. Customer Orders -->
+      <a routerLink="/dashboard/orders" routerLinkActive="active" class="mobile-nav-item">
+        <i class="pi pi-shopping-bag"></i>
+        <span class="label">Orders</span>
+        <span *ngIf="notifService.unreadCount() > 0" class="nav-badge">{{ notifService.unreadCount() }}</span>
+      </a>
+
+      <!-- 3. Cart Quick Drawer -->
+      <button type="button" class="mobile-nav-item" (click)="openCart()">
+        <i class="pi pi-shopping-cart"></i>
+        <span class="label">Cart</span>
+        <span *ngIf="cartCount() > 0" class="nav-badge">{{ cartCount() }}</span>
+      </button>
+
+      <!-- 4. Profile / Addresses -->
+      <a routerLink="/dashboard/settings" routerLinkActive="active" class="mobile-nav-item">
+        <i class="pi pi-user"></i>
+        <span class="label">Profile</span>
+      </a>
+
+      <!-- 5. Off-canvas Menu Toggle -->
+      <button type="button" class="mobile-nav-item" (click)="toggleSidebar()">
+        <i class="pi pi-bars"></i>
+        <span class="label">Menu</span>
+      </button>
+    </ng-container>
+
+    <ng-template #vendorBottomNav>
+      <!-- 1. Home / Dashboard -->
+      <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+        class="mobile-nav-item">
+        <i class="pi pi-home"></i>
+        <span class="label">Home</span>
+      </a>
+
+      <!-- 2. Orders -->
+      <a routerLink="/dashboard/orders" routerLinkActive="active" class="mobile-nav-item">
+        <i class="pi pi-shopping-cart"></i>
+        <span class="label">Orders</span>
+        <span *ngIf="notifService.unreadCount() > 0" class="nav-badge">{{ notifService.unreadCount() }}</span>
+      </a>
+
+      <!-- 3. Items & Catalog -->
+      <a routerLink="/dashboard/items" routerLinkActive="active" class="mobile-nav-item">
+        <i class="pi pi-box"></i>
+        <span class="label">Items</span>
+      </a>
+
+      <!-- 4. API Connectivity Console -->
+      <a routerLink="/dashboard/api-connectivity" routerLinkActive="active" class="mobile-nav-item">
+        <i class="pi pi-code"></i>
+        <span class="label">API</span>
+      </a>
+
+      <!-- 5. All Masters & Menu -->
+      <button type="button" class="mobile-nav-item" (click)="toggleSidebar()">
+        <i class="pi pi-bars"></i>
+        <span class="label">Menu</span>
+      </button>
+    </ng-template>
+  </nav>
+
+  <!-- Floating Quick Cart Action Button -->
+  <button (click)="openCart()" type="button" title="Open Shopping Cart" class="floating-cart-btn"
+    [class.desktop-cart-pos]="!isMobile()" [class.mobile-cart-pos]="isMobile()">
+    <i class="pi pi-shopping-bag" [ngStyle]="{ fontSize: isMobile() ? '1.2rem' : '1.4rem' }"></i>
     <span *ngIf="cartCount() > 0" [ngStyle]="{
             position: 'absolute',
             top: '-2px',

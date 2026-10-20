@@ -9,6 +9,6 @@ import { CommonModule } from '@angular/common';
 })
 export class Footer {
   @Input() version = '1.0.0';
-  @Input() companyName = 'AMTERP Solutions India Ltd.';
+  @Input() companyName = 'OneShop Solutions.';
   year = new Date().getFullYear();
 }
