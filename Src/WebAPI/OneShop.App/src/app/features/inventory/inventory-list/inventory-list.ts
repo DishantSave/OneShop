@@ -214,10 +214,19 @@ export class InventoryList implements OnInit {
 
   openCreateStockModal() {
     const comp = this.selectedCompanyCode() !== 'ALL' ? this.selectedCompanyCode() : (this.companies()[0]?.code ?? '');
+    const whs = this.warehouses().filter(w => w.companyCode.toUpperCase() === comp.toUpperCase() && w.isActive);
+    const stores = this.stores().filter(s => s.companyCode.toUpperCase() === comp.toUpperCase() && s.isActive);
+
+    // If company has no warehouses but has stores, default to Store; otherwise Warehouse
+    const defaultLocationType: 'Warehouse' | 'Store' = (whs.length === 0 && stores.length > 0) ? 'Store' : 'Warehouse';
+    const initialLoc = defaultLocationType === 'Warehouse'
+      ? (whs.length > 0 ? whs[0].code : '')
+      : (stores.length > 0 ? stores[0].code : '');
+
     this.stockForm.reset({
       companyCode: comp,
-      locationType: 'Warehouse', // default to Warehouse for B2B
-      locationCode: '',
+      locationType: defaultLocationType,
+      locationCode: initialLoc,
       itemNumber: '',
       colourCode: '',
       sizeCode: '',
@@ -226,12 +235,6 @@ export class InventoryList implements OnInit {
       reorderLevel: 20,
       reason: 'Initial stock intake'
     });
-
-    // Auto select first location if available
-    const whs = this.warehouses().filter(w => w.companyCode.toUpperCase() === comp.toUpperCase());
-    if (whs.length > 0) {
-      this.stockForm.patchValue({ locationCode: whs[0].code });
-    }
 
     const itms = this.items().filter(i => i.companyCode.toUpperCase() === comp.toUpperCase());
     if (itms.length > 0) {
@@ -252,11 +255,30 @@ export class InventoryList implements OnInit {
   }
 
   onStockFormCompanyChange(compCode: string) {
-    this.stockForm.patchValue({ companyCode: compCode, locationCode: '', itemNumber: '', colourCode: '', sizeCode: '' });
+    const comp = compCode.toUpperCase();
+    const type = this.stockForm.get('locationType')?.value;
+    let initialLoc = '';
+    if (type === 'Warehouse') {
+      const whs = this.warehouses().filter(w => w.companyCode.toUpperCase() === comp && w.isActive);
+      if (whs.length > 0) initialLoc = whs[0].code;
+    } else {
+      const sts = this.stores().filter(s => s.companyCode.toUpperCase() === comp && s.isActive);
+      if (sts.length > 0) initialLoc = sts[0].code;
+    }
+    this.stockForm.patchValue({ companyCode: compCode, locationCode: initialLoc, itemNumber: '', colourCode: '', sizeCode: '' });
   }
 
   onStockFormLocationTypeChange(type: string) {
-    this.stockForm.patchValue({ locationType: type, locationCode: '' });
+    const comp = this.stockForm.get('companyCode')?.value?.toUpperCase() ?? '';
+    let initialLoc = '';
+    if (type === 'Warehouse') {
+      const whs = this.warehouses().filter(w => w.companyCode.toUpperCase() === comp && w.isActive);
+      if (whs.length > 0) initialLoc = whs[0].code;
+    } else {
+      const sts = this.stores().filter(s => s.companyCode.toUpperCase() === comp && s.isActive);
+      if (sts.length > 0) initialLoc = sts[0].code;
+    }
+    this.stockForm.patchValue({ locationType: type, locationCode: initialLoc });
   }
 
   onStockFormItemChange(itemNum: string) {

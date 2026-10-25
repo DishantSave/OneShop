@@ -88,6 +88,27 @@
     <None Include="1.0.0.0\TableScripts\13.CreateTable_CompanyAuditTrail.sql" />
     <None Include="1.0.0.0\TableScripts\14.CreateTable_Store.sql" />
     <None Include="1.0.0.0\TableScripts\15.CreateTable_StoreAuditTrail.sql" />
+    <None Include="1.0.0.0\TableScripts\16.CreateTable_Warehouse.sql" />
+    <None Include="1.0.0.0\TableScripts\17.CreateTable_WarehouseAuditTrail.sql" />
+    <None Include="1.0.0.0\TableScripts\18.CreateTable_Colour.sql" />
+    <None Include="1.0.0.0\TableScripts\19.CreateTable_ColourAuditTrail.sql" />
+    <None Include="1.0.0.0\TableScripts\20.CreateTable_Size.sql" />
+    <None Include="1.0.0.0\TableScripts\21.CreateTable_SizeAuditTrail.sql" />
+    <None Include="1.0.0.0\TableScripts\22.CreateTable_Item.sql" />
+    <None Include="1.0.0.0\TableScripts\23.CreateTable_ItemVariant.sql" />
+    <None Include="1.0.0.0\TableScripts\24.CreateTable_ItemAuditTrail.sql" />
+    <None Include="1.0.0.0\TableScripts\25.CreateTable_Collection.sql" />
+    <None Include="1.0.0.0\TableScripts\26.CreateTable_CollectionItem.sql" />
+    <None Include="1.0.0.0\TableScripts\27.CreateTable_Inventory.sql" />
+    <None Include="1.0.0.0\TableScripts\28.CreateTable_InventoryAuditTrail.sql" />
+    <None Include="1.0.0.0\TableScripts\29.CreateTable_Orders.sql" />
+    <None Include="1.0.0.0\TableScripts\30.CreateTable_OrderItem.sql" />
+    <None Include="1.0.0.0\TableScripts\31.CreateTable_StateTax.sql" />
+    <None Include="1.0.0.0\TableScripts\32.CreateTable_PromoCode.sql" />
+    <None Include="1.0.0.0\TableScripts\33.CreateTable_UserAddress.sql" />
+    <None Include="1.0.0.0\TableScripts\34.AlterTable_Orders_Logistics_Discounts.sql" />
+    <None Include="1.0.0.0\TableScripts\35.CreateTable_OrderAuditTrail.sql" />
+    <None Include="1.0.0.0\TableScripts\36.AlterTable_AccountCredential_VendorType.sql" />
     <None Include="1.0.0.0\Triggers&amp;Functions\01.Trigger_Company_CascadeStatus.sql" />
   </ItemGroup>
 </Project>

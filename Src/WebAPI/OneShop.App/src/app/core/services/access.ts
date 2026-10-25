@@ -26,7 +26,12 @@ export class Access {
   }
 
   hasAccess(screenKey: string): boolean {
-    const target = this.normalize(screenKey);
+    const rawTarget = this.normalize(screenKey);
+    // Both Store and Warehouse correspond to DivisionMaster in the screen security model
+    const target = (rawTarget === 'warehouse' || rawTarget === 'warehousemaster' || rawTarget === 'store' || rawTarget === 'storemaster')
+      ? 'divisionmaster'
+      : rawTarget;
+
     const userStr = localStorage.getItem('userDetails');
     if (userStr) {
       try {
@@ -35,13 +40,6 @@ export class Access {
         // CUSTOMER PERSONA: Customers have access to Catalog/Dashboard, Items (view-only), Orders, Notifications, Settings
         if (u.isCustomerAccount && !u.isSellerAccount) {
           return target === 'dashboard' || target === 'items' || target === 'itemmaster' || target === 'orders' || target === 'notifications' || target === 'settings';
-        }
-
-        // VENDOR B2C PERSONA: B2C vendors do NOT have access to Warehouse screens
-        if (u.isSellerAccount && (u.vendorType === 'B2C' || u.vendorType === 'b2c')) {
-          if (target === 'warehouse' || target === 'warehousemaster') {
-            return false;
-          }
         }
 
         if (u.isMainAccount) return true;

@@ -413,6 +413,10 @@
               }">
               <option value="" disabled>Select Destination Location</option>
               <option *ngFor="let loc of formLocations()" [value]="loc.code">{{ loc.name }}</option>
+              <option *ngIf="formLocations().length === 0" value="" disabled>
+                No active {{ stockForm.get('locationType')?.value === 'Warehouse' ? 'Warehouses' : 'Stores' }} found for
+                this company
+              </option>
             </select>
           </div>
         </div>

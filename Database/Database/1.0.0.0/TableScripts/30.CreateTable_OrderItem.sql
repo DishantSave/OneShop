@@ -15,6 +15,9 @@ CREATE TABLE [dbo].[OrderItem]
 	[Quantity] [INT] NOT NULL,
 	[UnitPrice] [DECIMAL](18, 2) NOT NULL,
 	[TotalPrice] [DECIMAL](18, 2) NOT NULL,
+	[Tax] [DECIMAL](18, 2) NOT NULL,
+	[ShippingCost] [DECIMAL](18, 2) NOT NULL,
+	[Discount] [DECIMAL](18, 2) NOT NULL,
 	[DateAdded] [DATETIME] NOT NULL,
 
 CONSTRAINT [PK_OrderItem] PRIMARY KEY CLUSTERED
@@ -59,6 +62,21 @@ GO
 ALTER TABLE [dbo].[OrderItem]
 ADD CONSTRAINT [DF_OrderItem_TotalPrice]
 DEFAULT ((0.00)) FOR [TotalPrice];
+GO
+
+ALTER TABLE [dbo].[OrderItem]
+ADD CONSTRAINT [DF_OrderItem_Tax]
+DEFAULT ((0.00)) FOR [Tax];
+GO
+
+ALTER TABLE [dbo].[OrderItem]
+ADD CONSTRAINT [DF_OrderItem_ShippingCost]
+DEFAULT ((0.00)) FOR [ShippingCost];
+GO
+
+ALTER TABLE [dbo].[OrderItem]
+ADD CONSTRAINT [DF_OrderItem_Discount]
+DEFAULT ((0.00)) FOR [Discount];
 GO
 
 ALTER TABLE [dbo].[OrderItem]

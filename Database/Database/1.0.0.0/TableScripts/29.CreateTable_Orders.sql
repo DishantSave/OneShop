@@ -20,8 +20,10 @@ CREATE TABLE [dbo].[Orders]
 	[TotalItems] [INT] NOT NULL,
 	[SubTotal] [DECIMAL](18, 2) NOT NULL,
 	[Tax] [DECIMAL](18, 2) NOT NULL,
+	[OtherTax] [DECIMAL](18, 2) NOT NULL,
 	[ShippingCost] [DECIMAL](18, 2) NOT NULL,
 	[Discount] [DECIMAL](18, 2) NOT NULL,
+	[PlatformFee] [DECIMAL](18, 2) NOT NULL,
 	[TotalAmount] [DECIMAL](18, 2) NOT NULL,
 	[Notes] [VARCHAR](1000) NULL,
 	[OrderDate] [DATETIME] NOT NULL,
@@ -82,6 +84,11 @@ DEFAULT ((0.00)) FOR [Tax];
 GO
 
 ALTER TABLE [dbo].[Orders]
+ADD CONSTRAINT [DF_Orders_OtherTax]
+DEFAULT ((0.00)) FOR [OtherTax];
+GO
+
+ALTER TABLE [dbo].[Orders]
 ADD CONSTRAINT [DF_Orders_ShippingCost]
 DEFAULT ((0.00)) FOR [ShippingCost];
 GO
@@ -89,6 +96,11 @@ GO
 ALTER TABLE [dbo].[Orders]
 ADD CONSTRAINT [DF_Orders_Discount]
 DEFAULT ((0.00)) FOR [Discount];
+GO
+
+ALTER TABLE [dbo].[Orders]
+ADD CONSTRAINT [DF_Orders_PlatformFee]
+DEFAULT ((0.50)) FOR [PlatformFee];
 GO
 
 ALTER TABLE [dbo].[Orders]
